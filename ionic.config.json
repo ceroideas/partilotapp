@@ -1,0 +1,7 @@
+{
+  "name": "sipart",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
