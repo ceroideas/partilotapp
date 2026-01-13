@@ -1,0 +1,83 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="movimientos-content">
+  <div class="movimientos-container">
+    <!-- Resumen -->
+    <div class="resumen-card figma-card">
+      <h2>Resumen de movimientos</h2>
+      <div class="resumen-items">
+        <div class="resumen-item">
+          <span class="label">Total ingresos</span>
+          <span class="valor positivo">€{{ totalIngresos | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Total gastos</span>
+          <span class="valor negativo">€{{ totalGastos | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item total">
+          <span class="label">Balance</span>
+          <span class="valor" [class.positivo]="balance >= 0" [class.negativo]="balance < 0">
+            €{{ balance | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+      <ion-segment [(ngModel)]="filtroTipo" (ionChange)="filtrarMovimientos()">
+        <ion-segment-button value="todos">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ingresos">
+          <ion-label>Ingresos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="gastos">
+          <ion-label>Gastos</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Lista de movimientos -->
+    <div class="movimientos-list">
+      <div class="movimiento-card figma-card" *ngFor="let movimiento of movimientosFiltrados">
+        <div class="movimiento-header">
+          <div class="movimiento-info">
+            <h3>{{ movimiento.concepto }}</h3>
+            <p>{{ movimiento.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+          <span class="movimiento-monto" 
+                [class.positivo]="movimiento.tipo === 'ingreso'"
+                [class.negativo]="movimiento.tipo === 'gasto'">
+            {{ movimiento.tipo === 'ingreso' ? '+' : '-' }}€{{ movimiento.monto | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="movimiento-detalle" *ngIf="movimiento.detalle">
+          <p>{{ movimiento.detalle }}</p>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="movimientosFiltrados.length === 0">
+        <ion-icon name="receipt-outline" size="large"></ion-icon>
+        <p>No hay movimientos para mostrar</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,118 @@
+.regalar-content {
+  --background: #F5F6F7;
+}
+
+.regalar-container {
+  padding: 16px;
+}
+
+.info-card {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.seleccion-section {
+  margin-bottom: 24px;
+  
+  h3 {
+    color: #212529;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+  
+  ion-list {
+    background: transparent;
+    padding: 0;
+    
+    ion-item {
+      --background: #F5F6F7;
+      --border-radius: 12px;
+      margin-bottom: 12px;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      
+      ion-label {
+        h3 {
+          font-size: 16px;
+          font-weight: bold;
+          margin: 0 0 4px 0;
+        }
+        
+        p {
+          font-size: 14px;
+          color: #6c757d;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+.destinatario-section {
+  margin-bottom: 24px;
+  
+  h3 {
+    color: #212529;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+}
+
+.figma-input-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(33, 37, 41, 0.1);
+}
+
+.preview-section {
+  margin-bottom: 24px;
+  
+  h3 {
+    color: #212529;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+}
+
+.preview-card {
+  background: #F5F6F7;
+  border-radius: 12px;
+  padding: 16px;
+  
+  p {
+    margin: 8px 0;
+    color: #212529;
+    font-size: 14px;
+    
+    strong {
+      color: #212529;
+    }
+  }
+}
+
+.actions-section {
+  margin-top: 24px;
+  
+  ion-button {
+    height: 56px;
+  }
+}
+

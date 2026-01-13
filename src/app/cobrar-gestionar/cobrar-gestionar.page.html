@@ -1,0 +1,320 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cobrar-gestionar-content">
+  
+  <div class="main-container">
+    <!-- Título y subtítulo -->
+    <div class="header-section">
+      <h1 class="page-title">
+        <ion-icon name="cash-outline" class="title-icon"></ion-icon>
+        Cobrar / Gestionar
+      </h1>
+      <p class="page-subtitle">Gestiona tus participaciones</p>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="actions-section" *ngIf="!modoCobro && !modoDonacion">
+      <ion-button 
+        class="action-button cobrar-button" 
+        expand="block"
+        (click)="iniciarCobro()">
+        <ion-icon name="hand-left-outline" slot="start"></ion-icon>
+        Cobrar + Participación/es
+      </ion-button>
+      
+      <ion-button 
+        class="action-button donar-button" 
+        expand="block"
+        (click)="iniciarDonacion()">
+        <ion-icon name="gift-outline" slot="start"></ion-icon>
+        Donar / Generar código recarga
+      </ion-button>
+    </div>
+
+    <!-- Lista de participaciones -->
+    <div class="participaciones-list" *ngIf="modoCobro || modoDonacion">
+      <div 
+        class="participacion-item" 
+        [class.selected]="estaSeleccionada(participacion.id)"
+        *ngFor="let participacion of participaciones"
+        (click)="toggleSeleccion(participacion.id)">
+        
+        <div class="participacion-image">
+          <img 
+            *ngIf="obtenerImagenSegura(participacion.imagen)"
+            [src]="obtenerImagenSegura(participacion.imagen)" 
+            [alt]="participacion.entidad"
+            (error)="manejarErrorImagen($event)">
+          <div 
+            class="image-placeholder"
+            *ngIf="!obtenerImagenSegura(participacion.imagen)">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+        </div>
+        
+        <div class="participacion-info">
+          <div class="participacion-header">
+            <span class="entidad">{{ participacion.entidad }}</span>
+            <span class="numero">{{ participacion.numero }}</span>
+          </div>
+          <div class="participacion-details">
+            <span class="fecha">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ participacion.fechaSorteo }}
+            </span>
+            <span class="importe">€{{ participacion.importeTotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <div class="participacion-actions">
+          <ion-icon name="information-circle-outline" class="info-icon"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer con total y botón de acción -->
+    <div class="footer-actions" *ngIf="(modoCobro || modoDonacion) && participacionesSeleccionadas.size > 0">
+      <div class="total-section">
+        <span class="total-label">Importe total</span>
+        <span class="total-amount">€{{ importeTotal | number:'1.2-2' }}</span>
+      </div>
+      <ion-button 
+        class="action-footer-button" 
+        expand="block"
+        (click)="modoCobro ? continuarCobro() : continuarDonacion()">
+        {{ modoCobro ? 'Cobrar' : 'Donar / Generar' }}
+      </ion-button>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- Modal: Datos Necesarios -->
+<div class="modal-overlay" *ngIf="mostrarModalDatos" (click)="cerrarModalDatos()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Datos Necesarios</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalDatos()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <p class="modal-subtitle">Rellena tus datos para el cobro</p>
+    
+    <div class="modal-content">
+      <ion-item class="modal-input-item">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Nombre</ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.nombre" 
+          placeholder="Nombre"
+          type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item class="modal-input-item">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Apellidos</ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.apellidos" 
+          placeholder="Apellidos"
+          type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item class="modal-input-item">
+        <ion-icon name="id-card-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Nif / Nie</ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.nif" 
+          placeholder="NIF / NIE"
+          type="text"></ion-input>
+      </ion-item>
+
+      <div class="modal-info-text" *ngIf="modoDonacion">
+        <p class="info-title">Importante:</p>
+        <p>Para recibir tu certificado de donación (válido para beneficios fiscales), completa todos los datos requeridos. Si no los rellenas, la donación será anónima y no se emitirá certificado.</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button 
+        *ngIf="modoDonacion"
+        class="omitir-button" 
+        fill="outline"
+        (click)="omitirDatos()">
+        Omitir
+      </ion-button>
+      <ion-button 
+        class="guardar-button" 
+        (click)="modoCobro ? guardarDatos() : enviarDatos()">
+        {{ modoCobro ? 'Guardar' : 'Enviar' }}
+      </ion-button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Número de Cuenta -->
+<div class="modal-overlay" *ngIf="mostrarModalCuenta" (click)="cerrarModalCuenta()">
+  <div class="modal-container cuenta-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Número de Cuenta</h2>
+    </div>
+    <p class="modal-subtitle">Introduce el número de cuenta Bancaria</p>
+    
+    <div class="modal-content">
+      <ion-item class="modal-input-item">
+        <ion-input 
+          [(ngModel)]="numeroCuenta" 
+          placeholder="ES 12 1234 1234 12 1234567890"
+          type="text"></ion-input>
+      </ion-item>
+      
+      <div class="security-message">
+        <p>Por motivos de seguridad, no almacenamos tu número de cuenta en nuestros servidores. Cada vez que desees cobrar un premio, deberás introducirlo nuevamente.</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button 
+        class="cobrar-button-modal" 
+        expand="block"
+        (click)="procesarCobro()">
+        Cobrar
+      </ion-button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Configuración Donación -->
+<div class="modal-overlay" *ngIf="mostrarModalConfigDonacion" (click)="cerrarModalConfigDonacion()">
+  <div class="modal-container config-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Donar / Generar código</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalConfigDonacion()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <p class="modal-subtitle">Gestiona tus participaciones</p>
+    
+    <div class="modal-content">
+      <div class="importe-total-display">
+        <span class="importe-label">Importe total</span>
+        <span class="importe-value">€{{ importeTotal | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="slider-container">
+        <ion-range
+          [(ngModel)]="porcentajeDonacion"
+          min="0"
+          max="100"
+          step="5"
+          (ionChange)="actualizarPorcentajes($event)"
+          color="primary">
+        </ion-range>
+        <div class="slider-labels">
+          <span>€{{ importeDonacion | number:'1.2-2' }}</span>
+          <span>€{{ importeCodigo | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="distribucion-boxes">
+        <div class="distribucion-box donacion-box">
+          <div class="box-icon">
+            <ion-icon name="heart-outline"></ion-icon>
+          </div>
+          <div class="box-content">
+            <p class="box-label">Donación a una entidad</p>
+            <p class="box-percentage">{{ porcentajeDonacion }}%</p>
+            <p class="box-amount">€{{ importeDonacion | number:'1.2-2' }}</p>
+          </div>
+        </div>
+
+        <div class="distribucion-box codigo-box">
+          <div class="box-icon">
+            <ion-icon name="qr-code-outline"></ion-icon>
+          </div>
+          <div class="box-content">
+            <p class="box-label">Generación código</p>
+            <p class="box-percentage">{{ 100 - porcentajeDonacion }}%</p>
+            <p class="box-amount">€{{ importeCodigo | number:'1.2-2' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button 
+        class="donar-generar-button" 
+        expand="block"
+        (click)="procesarDonacion()">
+        Donar y Generar
+      </ion-button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Mensaje de Éxito -->
+<div class="modal-overlay" *ngIf="mostrarMensajeExito" (click)="cerrarMensajeExito()">
+  <div class="modal-container success-modal" (click)="$event.stopPropagation()">
+    <div class="success-icon">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+    </div>
+    
+    <h2 class="modal-title success-title">
+      <span *ngIf="tipoMensaje === 'cobro'">Pago Registrado con éxito</span>
+      <span *ngIf="tipoMensaje === 'donacion'">Donación Registrada con éxito</span>
+      <span *ngIf="tipoMensaje === 'codigo'">Código recarga generado con éxito</span>
+    </h2>
+    
+    <div class="modal-content success-content">
+      <p *ngIf="tipoMensaje === 'cobro'">
+        La entidad o entidades que emitieron tu participación se encargarán de realizar el pago. Normalmente lo recibirás en tu cuenta en un plazo de 2 a 3 días hábiles.
+      </p>
+      <p *ngIf="tipoMensaje === 'cobro'" class="success-note">
+        Ten en cuenta que, en algunos casos, puede haber pequeñas demoras por festivos o tiempos de procesamiento bancario.
+      </p>
+
+      <p *ngIf="tipoMensaje === 'donacion'">
+        Tu donación ha sido registrada correctamente y enviada a la entidad emisora de las participaciones.
+      </p>
+      <p *ngIf="tipoMensaje === 'donacion'" class="success-note">
+        ¡Gracias por tu gesto solidario!
+      </p>
+
+      <div *ngIf="tipoMensaje === 'codigo'" class="codigo-section">
+        <p>Tu código de recarga es:</p>
+        <div class="codigo-display">{{ codigoRecarga }}</div>
+        <p class="codigo-info">
+          Podrás canjearlo en la web de la Administración El Búho Lotero: <strong>web.elbuholotero.es</strong>
+        </p>
+        <p class="codigo-info">
+          También puedes consultar el código en la sección "Movimientos" de la app. Además, te lo hemos enviado por email para que lo tengas siempre a mano.
+        </p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <ion-button 
+        class="aceptar-button" 
+        expand="block"
+        (click)="cerrarMensajeExito()">
+        Aceptar
+      </ion-button>
+    </div>
+  </div>
+</div>

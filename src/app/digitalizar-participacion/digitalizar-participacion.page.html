@@ -1,0 +1,101 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="digitalizar-content">
+  <div class="digitalizar-container">
+    <!-- Instrucciones -->
+    <div class="info-card figma-card">
+      <h2>Digitaliza tu participación</h2>
+      <p>Toma una foto de tu boleto de lotería para agregarlo a tu cartera digital</p>
+    </div>
+
+    <!-- Vista previa de imagen -->
+    <div class="preview-section" *ngIf="imagenCapturada">
+      <div class="preview-card figma-card">
+        <img [src]="imagenCapturada" alt="Participación digitalizada" class="preview-image">
+        <div class="preview-actions">
+          <ion-button fill="outline" (click)="eliminarImagen()">
+            <ion-icon name="trash" slot="start"></ion-icon>
+            Eliminar
+          </ion-button>
+          <ion-button fill="outline" (click)="capturarOtra()">
+            <ion-icon name="camera" slot="start"></ion-icon>
+            Otra foto
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de captura -->
+    <div class="capture-section" *ngIf="!imagenCapturada">
+      <div class="camera-area figma-card">
+        <div class="camera-placeholder">
+          <ion-icon name="camera" size="large"></ion-icon>
+          <p>Prepara tu boleto para la foto</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario de información -->
+    <div class="form-section figma-card" *ngIf="imagenCapturada">
+      <h3>Información de la participación</h3>
+      <ion-item class="figma-input-item">
+        <ion-label position="stacked">Número de participación</ion-label>
+        <ion-input [(ngModel)]="numeroParticipacion" placeholder="Ingresa el número"></ion-input>
+      </ion-item>
+      <ion-item class="figma-input-item">
+        <ion-label position="stacked">Fecha del sorteo</ion-label>
+        <ion-datetime [(ngModel)]="fechaSorteo" displayFormat="DD/MM/YYYY" placeholder="Selecciona la fecha"></ion-datetime>
+      </ion-item>
+      <ion-item class="figma-input-item">
+        <ion-label position="stacked">Números jugados</ion-label>
+        <ion-input [(ngModel)]="numerosJugados" placeholder="Ej: 1, 5, 12, 23, 34"></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="actions-section">
+      <ion-button 
+        *ngIf="!imagenCapturada"
+        class="figma-button" 
+        expand="block" 
+        (click)="abrirCamara()">
+        <ion-icon name="camera" slot="start"></ion-icon>
+        Tomar foto
+      </ion-button>
+      <ion-button 
+        *ngIf="!imagenCapturada"
+        class="figma-button-accent" 
+        expand="block" 
+        (click)="abrirGaleria()">
+        <ion-icon name="images" slot="start"></ion-icon>
+        Seleccionar de galería
+      </ion-button>
+      <ion-button 
+        *ngIf="imagenCapturada"
+        class="figma-button" 
+        expand="block" 
+        [disabled]="!puedeGuardar()"
+        (click)="guardarParticipacion()">
+        <ion-icon name="save" slot="start"></ion-icon>
+        Guardar participación
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

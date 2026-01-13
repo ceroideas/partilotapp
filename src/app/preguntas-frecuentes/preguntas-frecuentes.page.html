@@ -1,0 +1,52 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="preguntas-content">
+  <div class="preguntas-container">
+    <!-- Buscador -->
+    <div class="search-section">
+      <ion-searchbar 
+        [(ngModel)]="terminoBusqueda" 
+        (ionInput)="buscar()"
+        placeholder="Buscar pregunta...">
+      </ion-searchbar>
+    </div>
+
+    <!-- Lista de preguntas -->
+    <div class="preguntas-list">
+      <ion-accordion-group *ngFor="let pregunta of preguntasFiltradas; let i = index">
+        <ion-accordion [value]="'pregunta-' + i">
+          <ion-item slot="header">
+            <ion-label>
+              <h3>{{ pregunta.pregunta }}</h3>
+            </ion-label>
+          </ion-item>
+          <div class="respuesta-content" slot="content">
+            <p>{{ pregunta.respuesta }}</p>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+      
+      <div class="empty-state" *ngIf="preguntasFiltradas.length === 0">
+        <ion-icon name="help-circle-outline" size="large"></ion-icon>
+        <p>No se encontraron preguntas</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

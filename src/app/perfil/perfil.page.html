@@ -1,0 +1,109 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="perfil-content">
+  <div class="perfil-container">
+    <!-- Información del usuario -->
+    <div class="user-info-card figma-card">
+      <div class="avatar-container">
+        <ion-avatar class="user-avatar">
+          <ion-icon name="person" size="large"></ion-icon>
+        </ion-avatar>
+      </div>
+      <h2 class="user-name">{{ usuario.nombre || 'Usuario' }}</h2>
+      <p class="user-email">{{ usuario.correo || '' }}</p>
+    </div>
+
+    <!-- Menú de opciones Vendedor -->
+    <div class="menu-section" *ngIf="esVendedor">
+      <h3 class="section-title">Panel de Vendedor</h3>
+      <ion-item button class="menu-item" (click)="goToVendedor()">
+        <ion-icon name="storefront" slot="start"></ion-icon>
+        <ion-label>Inicio Vendedor</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToVenta()">
+        <ion-icon name="cart" slot="start"></ion-icon>
+        <ion-label>Vender</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToGestorParticipaciones()">
+        <ion-icon name="list" slot="start"></ion-icon>
+        <ion-label>Gestionar Participaciones</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToCuentaCobro()">
+        <ion-icon name="wallet" slot="start"></ion-icon>
+        <ion-label>Cuenta de Cobro</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToConfigVenta()">
+        <ion-icon name="settings" slot="start"></ion-icon>
+        <ion-label>Configuración de Ventas</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- Menú de opciones Usuario -->
+    <div class="menu-section" *ngIf="!esVendedor">
+      <ion-item button class="menu-item" (click)="goToDigitalizarParticipacion()">
+        <ion-icon name="camera" slot="start"></ion-icon>
+        <ion-label>Digitalizar Participación</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToRegalarParticipacion()">
+        <ion-icon name="gift" slot="start"></ion-icon>
+        <ion-label>Regalar Participación</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToMovimientos()">
+        <ion-icon name="receipt" slot="start"></ion-icon>
+        <ion-label>Movimientos</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToNotificaciones()">
+        <ion-icon name="notifications" slot="start"></ion-icon>
+        <ion-label>Notificaciones</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+
+    <!-- Sección de Ayuda (solo para usuarios normales) -->
+    <div class="menu-section" *ngIf="!esVendedor">
+      <ion-item button class="menu-item" (click)="goToPreguntasFrecuentes()">
+        <ion-icon name="help-circle" slot="start"></ion-icon>
+        <ion-label>Preguntas Frecuentes</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+
+      <ion-item button class="menu-item" (click)="goToCondicionesLegales()">
+        <ion-icon name="document-text" slot="start"></ion-icon>
+        <ion-label>Condiciones Legales</ion-label>
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-item>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,488 @@
+.venta-manual-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.venta-manual-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+.vender-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .vender-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    
+    .vender-title-section {
+      flex: 1;
+      
+      .vender-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+      
+      .vender-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+    
+    .vender-logo {
+      flex-shrink: 0;
+      margin-left: 16px;
+      
+      .logo-palacios {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        
+        .logo-p {
+          width: 40px;
+          height: 40px;
+          background: #DC3545;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 24px;
+          margin-bottom: 4px;
+        }
+        
+        .logo-text-palacios {
+          font-size: 10px;
+          font-weight: 600;
+          color: #DC3545;
+        }
+      }
+    }
+  }
+  
+  .tipo-participacion-selector {
+    margin-bottom: 24px;
+    
+    ion-segment {
+      --background: #F5F6F7;
+      border-radius: 12px;
+      padding: 4px;
+      
+      ion-segment-button {
+        --indicator-color: transparent;
+        --color: #6c757d;
+        --color-checked: #212529;
+        --background-checked: #212529;
+        --color-checked: #ffffff;
+        min-height: 44px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: none;
+        
+        ion-icon {
+          font-size: 20px;
+          margin-bottom: 4px;
+        }
+      }
+    }
+  }
+  
+  .escaner-section {
+    margin-bottom: 24px;
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 8px 0;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 16px 0;
+    }
+    
+    .escanear-qr-button {
+      --background: #F49200;
+      --color: #ffffff;
+      --border-radius: 12px;
+      height: 48px;
+      font-weight: 500;
+      text-transform: none;
+    }
+  }
+  
+  .manual-section {
+    margin-bottom: 24px;
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 8px 0;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+  
+  .participaciones-fisicas {
+    .sorteo-info {
+      margin-bottom: 20px;
+      
+      .sorteo-text {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+      }
+    }
+    
+    .participacion-unidad,
+    .participaciones-rango {
+      margin-bottom: 20px;
+      
+      .input-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #212529;
+        display: block;
+        margin-bottom: 8px;
+      }
+      
+      .input-item {
+        --background: white;
+        --border-radius: 12px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+        --inner-padding-end: 0;
+        border: 1px solid #E9ECEF;
+        margin-bottom: 12px;
+        
+        ion-input {
+          font-size: 16px;
+        }
+      }
+    }
+    
+    .rango-inputs {
+      display: flex;
+      gap: 12px;
+      
+      .input-item {
+        flex: 1;
+      }
+    }
+  }
+  
+  .participaciones-digitales {
+    .numero-participaciones-section {
+      .counter-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+      
+      .counter-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-bottom: 16px;
+        
+        .counter-button {
+          --color: #212529;
+          width: 48px;
+          height: 48px;
+          --border-radius: 50%;
+          --background: #F5F6F7;
+          
+          ion-icon {
+            font-size: 24px;
+          }
+          
+          &[disabled] {
+            --color: #6c757d;
+            opacity: 0.5;
+          }
+        }
+        
+        .counter-value {
+          font-size: 32px;
+          font-weight: bold;
+          color: #212529;
+          min-width: 60px;
+          text-align: center;
+        }
+      }
+      
+      .disponibilidad {
+        text-align: center;
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+  }
+  
+  .vender-button {
+    --background: #212529;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 56px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 18px;
+    margin-top: 24px;
+    
+    &[disabled] {
+      --background: #E9ECEF;
+      --color: #6c757d;
+      opacity: 0.6;
+    }
+  }
+}
+
+// Modales
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.resumen-modal {
+  .modal-header {
+    position: relative;
+    margin-bottom: 24px;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+    
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      --color: #6c757d;
+      --padding-start: 0;
+      --padding-end: 0;
+    }
+  }
+  
+  .modal-content {
+    .resumen-info {
+      background: #F5F6F7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      
+      .resumen-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 16px;
+        color: #212529;
+        
+        &.total {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 2px solid #212529;
+          font-weight: bold;
+          font-size: 18px;
+          
+          .importe-total {
+            color: #28a745;
+            font-weight: bold;
+          }
+        }
+        
+        &:last-child:not(.total) {
+          margin-bottom: 0;
+        }
+      }
+    }
+    
+    .forma-pago-section {
+      .forma-pago-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+      
+      .forma-pago-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0 0 16px 0;
+      }
+      
+      .opciones-pago {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        .pago-option {
+          --background: #F5F6F7;
+          --color: #212529;
+          --border-radius: 12px;
+          height: 56px;
+          font-weight: 500;
+          text-transform: none;
+          justify-content: flex-start;
+          --padding-start: 16px;
+          
+          ion-icon {
+            margin-right: 12px;
+            font-size: 24px;
+          }
+          
+          &.selected {
+            --background: #212529;
+            --color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+  
+  .registrar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+}
+
+.exito-modal {
+  .modal-title-exito {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 16px 0;
+    text-align: center;
+  }
+  
+  .modal-content-exito {
+    margin-bottom: 24px;
+    
+    p {
+      font-size: 16px;
+      color: #212529;
+      line-height: 1.6;
+      margin: 0;
+      text-align: center;
+    }
+  }
+  
+  .aceptar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+  }
+}
+

@@ -5,6 +5,110 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
+  },
+  {
+    path: 'digitalizar-participacion',
+    loadChildren: () => import('./digitalizar-participacion/digitalizar-participacion.module').then( m => m.DigitalizarParticipacionPageModule)
+  },
+  {
+    path: 'regalar-participacion',
+    loadChildren: () => import('./regalar-participacion/regalar-participacion.module').then( m => m.RegalarParticipacionPageModule)
+  },
+  {
+    path: 'movimientos',
+    loadChildren: () => import('./movimientos/movimientos.module').then( m => m.MovimientosPageModule)
+  },
+  {
+    path: 'notificaciones',
+    loadChildren: () => import('./notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule)
+  },
+  {
+    path: 'notificacion-detalle',
+    loadChildren: () => import('./notificacion-detalle/notificacion-detalle.module').then( m => m.NotificacionDetallePageModule)
+  },
+  {
+    path: 'preguntas-frecuentes',
+    loadChildren: () => import('./preguntas-frecuentes/preguntas-frecuentes.module').then( m => m.PreguntasFrecuentesPageModule)
+  },
+  {
+    path: 'condiciones-legales',
+    loadChildren: () => import('./condiciones-legales/condiciones-legales.module').then( m => m.CondicionesLegalesPageModule)
+  },
+  {
+    path: 'vendedor',
+    loadChildren: () => import('./vendedor/vendedor.module').then( m => m.VendedorPageModule)
+  },
+  {
+    path: 'venta',
+    loadChildren: () => import('./venta/venta.module').then( m => m.VentaPageModule)
+  },
+  {
+    path: 'venta-qr',
+    loadChildren: () => import('./venta-qr/venta-qr.module').then( m => m.VentaQrPageModule)
+  },
+  {
+    path: 'venta-manual',
+    loadChildren: () => import('./venta-manual/venta-manual.module').then( m => m.VentaManualPageModule)
+  },
+      {
+        path: 'gestor-participaciones',
+        loadChildren: () => import('./gestor-participaciones/gestor-participaciones.module').then( m => m.GestorParticipacionesPageModule)
+      },
+      {
+        path: 'gestor-home',
+        loadChildren: () => import('./gestor-home/gestor-home.module').then( m => m.GestorHomePageModule)
+      },
+      {
+        path: 'gestor-vendedores',
+        loadChildren: () => import('./gestor-vendedores/gestor-vendedores.module').then( m => m.GestorVendedoresPageModule)
+      },
+      {
+        path: 'gestor-devolucion',
+        loadChildren: () => import('./gestor-devolucion/gestor-devolucion.module').then( m => m.GestorDevolucionPageModule)
+      },
+      {
+        path: 'gestor-pago',
+        loadChildren: () => import('./gestor-pago/gestor-pago.module').then( m => m.GestorPagoPageModule)
+      },
+  {
+    path: 'config-venta',
+    loadChildren: () => import('./config-venta/config-venta.module').then( m => m.ConfigVentaPageModule)
+  },
+  {
+    path: 'cuenta-cobro',
+    loadChildren: () => import('./cuenta-cobro/cuenta-cobro.module').then( m => m.CuentaCobroPageModule)
+  },
+  {
+    path: 'perfil',
+    loadChildren: () => import('./perfil/perfil.module').then( m => m.PerfilPageModule)
+  },
+  {
+    path: 'cartera',
+    loadChildren: () => import('./cartera/cartera.module').then( m => m.CarteraPageModule)
+  },
+  {
+    path: 'escaner',
+    loadChildren: () => import('./escaner/escaner.module').then( m => m.EscanerPageModule)
+  },
+  {
+    path: 'resultados',
+    loadChildren: () => import('./resultados/resultados.module').then( m => m.ResultadosPageModule)
+  },
+  {
+    path: 'loteria-social',
+    loadChildren: () => import('./loteria-social/loteria-social.module').then( m => m.LoteriaSocialPageModule)
+  },
+  {
+    path: 'entidad-detalle',
+    loadChildren: () => import('./entidad-detalle/entidad-detalle.module').then( m => m.EntidadDetallePageModule)
+  },
+  {
+    path: 'historial',
+    loadChildren: () => import('./historial/historial.module').then( m => m.HistorialPageModule)
+  },
+  {
+    path: 'cobrar-gestionar',
+    loadChildren: () => import('./cobrar-gestionar/cobrar-gestionar.module').then( m => m.CobrarGestionarPageModule)
   }
 ];
 @NgModule({

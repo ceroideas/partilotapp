@@ -1,0 +1,144 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cartera-content">
+  <div class="cartera-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Título y subtítulo -->
+    <div class="header-section">
+      <h1 class="page-title">
+        <ion-icon name="wallet-outline" class="title-icon"></ion-icon>
+        Mi Cartera
+      </h1>
+      <p class="page-subtitle">Gestiona tus participaciones</p>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="actions-section">
+      <ion-button 
+        class="action-button digitalizar-button" 
+        fill="outline"
+        (click)="agregarParticipacion()">
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        Digitalizar + Participación
+      </ion-button>
+      
+      <ion-button 
+        class="action-button gestionar-button" 
+        fill="outline"
+        (click)="irACobrarGestionar()">
+        <ion-icon name="cash-outline" slot="start"></ion-icon>
+        Cobrar / Gestionar
+      </ion-button>
+    </div>
+
+    <!-- Lista de participaciones -->
+    <div class="participaciones-list">
+      <div 
+        class="participacion-item" 
+        *ngFor="let participacion of participaciones"
+        (click)="verDetalle(participacion)">
+        
+        <div class="participacion-image">
+          <img 
+            *ngIf="obtenerImagenSegura(participacion.imagen)"
+            [src]="obtenerImagenSegura(participacion.imagen)" 
+            [alt]="participacion.entidad || 'Participación'"
+            (error)="manejarErrorImagen($event)">
+          <div 
+            class="image-placeholder"
+            *ngIf="!obtenerImagenSegura(participacion.imagen)">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+        </div>
+        
+        <div class="participacion-info">
+          <div class="participacion-header">
+            <span class="entidad">{{ participacion.entidad || 'Entidad' }}</span>
+            <span class="numero">{{ participacion.numero || participacion.id }}</span>
+          </div>
+          <div class="participacion-details">
+            <span class="fecha">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ participacion.fechaSorteo || participacion.fecha || 'N/A' }}
+            </span>
+            <span 
+              class="importe"
+              [class.cobrada]="participacion.estado === 'cobrada'"
+              [class.activa]="participacion.estado === 'activa'"
+              [class.caducada]="participacion.estado === 'caducada'">
+              €{{ (participacion.importeTotal || participacion.importe || 0) | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="participacion-status">
+          <span 
+            class="status-badge"
+            *ngIf="participacion.estado === 'cobrada' || participacion.estado === 'donada' || participacion.estado === 'caducada'"
+            [class.cobrada]="participacion.estado === 'cobrada'"
+            [class.donada]="participacion.estado === 'donada'"
+            [class.caducada]="participacion.estado === 'caducada'">
+            {{ getEstadoTexto(participacion.estado) }}
+          </span>
+          <ion-icon name="chevron-forward-outline" class="chevron-icon"></ion-icon>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="participaciones.length === 0">
+        <ion-icon name="wallet-outline"></ion-icon>
+        <p>No tienes participaciones aún</p>
+        <ion-button fill="outline" (click)="agregarParticipacion()">
+          Digitalizar primera participación
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

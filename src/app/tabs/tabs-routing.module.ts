@@ -7,28 +7,79 @@ const routes: Routes = [
     path: 'tabs',
     component: TabsPage,
     children: [
+      // Tabs para Usuario
       {
         path: 'tab1',
-        loadChildren: () => import('../tab1/tab1.module').then(m => m.Tab1PageModule)
+        loadChildren: () => import('../cartera/cartera.module').then(m => m.CarteraPageModule)
       },
       {
         path: 'tab2',
-        loadChildren: () => import('../tab2/tab2.module').then(m => m.Tab2PageModule)
+        loadChildren: () => import('../historial/historial.module').then(m => m.HistorialPageModule)
       },
       {
         path: 'tab3',
         loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
       },
       {
+        path: 'tab4',
+        loadChildren: () => import('../resultados/resultados.module').then(m => m.ResultadosPageModule)
+      },
+      {
+        path: 'tab5',
+        loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule)
+      },
+      // Tabs para Vendedor
+      {
+        path: 'vendedor-tab1',
+        loadChildren: () => import('../venta/venta.module').then(m => m.VentaPageModule)
+      },
+      {
+        path: 'vendedor-tab2',
+        loadChildren: () => import('../historial/historial.module').then(m => m.HistorialPageModule)
+      },
+      {
+        path: 'vendedor-tab3',
+        loadChildren: () => import('../vendedor/vendedor.module').then(m => m.VendedorPageModule)
+      },
+      {
+        path: 'vendedor-tab4',
+        loadChildren: () => import('../gestor-participaciones/gestor-participaciones.module').then(m => m.GestorParticipacionesPageModule)
+      },
+      {
+        path: 'vendedor-tab5',
+        loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule)
+      },
+      // Tabs para Gestor
+      {
+        path: 'gestor-tab1',
+        loadChildren: () => import('../gestor-participaciones/gestor-participaciones.module').then(m => m.GestorParticipacionesPageModule)
+      },
+      {
+        path: 'gestor-tab2',
+        loadChildren: () => import('../gestor-vendedores/gestor-vendedores.module').then(m => m.GestorVendedoresPageModule)
+      },
+      {
+        path: 'gestor-tab3',
+        loadChildren: () => import('../gestor-home/gestor-home.module').then(m => m.GestorHomePageModule)
+      },
+      {
+        path: 'gestor-tab4',
+        loadChildren: () => import('../gestor-devolucion/gestor-devolucion.module').then(m => m.GestorDevolucionPageModule)
+      },
+      {
+        path: 'gestor-tab5',
+        loadChildren: () => import('../gestor-pago/gestor-pago.module').then(m => m.GestorPagoPageModule)
+      },
+      {
         path: '',
-        redirectTo: '/tabs/tab1',
+        redirectTo: '/tabs/tab3',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/tabs/tab1',
+    redirectTo: '/tabs/tab3',
     pathMatch: 'full'
   }
 ];

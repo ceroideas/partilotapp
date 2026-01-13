@@ -1,0 +1,285 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="historial-content">
+  <div class="historial-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Título y subtítulo -->
+    <div class="header-section">
+      <h1 class="page-title">
+        <ion-icon name="time-outline" class="title-icon"></ion-icon>
+        Historial
+      </h1>
+      <p class="page-subtitle">Aquí puedes ver el historial</p>
+    </div>
+
+    <!-- Lista de historial con acordeones -->
+    <ion-accordion-group *ngIf="historial.length > 0" class="historial-accordion-group">
+      <ion-accordion 
+        *ngFor="let item of historial; let i = index"
+        [value]="'item-' + i"
+        class="historial-accordion">
+        
+        <ion-item slot="header" class="historial-header-item">
+          <div class="historial-item-content">
+            <div class="item-icon" [style.background-color]="getColorTipo(item.tipo) + '20'">
+              <ion-icon 
+                [name]="getIconoTipo(item.tipo)" 
+                [style.color]="getColorTipo(item.tipo)">
+              </ion-icon>
+            </div>
+            <div class="item-info">
+              <span class="item-titulo">{{ getTituloTipo(item.tipo) }}</span>
+              <span class="item-fecha">{{ formatearFecha(item.fecha) }}</span>
+            </div>
+            <div class="item-right" *ngIf="item.importeTotal || item.importeDonacion || item.importeCodigo">
+              <span class="item-importe">
+                €{{ (item.importeTotal || item.importeDonacion || item.importeCodigo) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+        </ion-item>
+
+        <div slot="content" class="accordion-detail-content">
+          
+          <!-- Detalle de Digitalización -->
+          <div *ngIf="item.tipo === 'digitalizacion' && item.participacion" class="detalle-container">
+            <div class="ticket-image-container" *ngIf="item.participacion.imagen">
+              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+            </div>
+            
+            <div class="detalle-info">
+              <div class="detalle-row">
+                <span class="label">Entidad:</span>
+                <span class="value">{{ item.participacion.entidad }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Numero:</span>
+                <span class="value">{{ item.participacion.numero }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Fecha Sorteo:</span>
+                <span class="value">{{ item.participacion.fechaSorteo }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Importe Jugado:</span>
+                <span class="value">€{{ item.participacion.importeJugado || item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion.donativo">
+                <span class="label">Donativo:</span>
+                <span class="value">€{{ item.participacion.donativo | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Importe total:</span>
+                <span class="value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion.numeroParticipacion">
+                <span class="label">N°:</span>
+                <span class="value">{{ item.participacion.numeroParticipacion }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de Envío de Regalo -->
+          <div *ngIf="item.tipo === 'regalo' && item.participacion" class="detalle-container">
+            <div class="ticket-image-container" *ngIf="item.participacion.imagen">
+              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+            </div>
+            
+            <div class="detalle-info">
+              <div class="detalle-row">
+                <span class="label">Entidad:</span>
+                <span class="value">{{ item.participacion.entidad }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Numero:</span>
+                <span class="value">{{ item.participacion.numero }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Fecha Sorteo:</span>
+                <span class="value">{{ item.participacion.fechaSorteo }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Importe Jugado:</span>
+                <span class="value">€{{ item.participacion.importeJugado || item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion.donativo">
+                <span class="label">Donativo:</span>
+                <span class="value">€{{ item.participacion.donativo | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Importe total:</span>
+                <span class="value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.destinatario || item.emailDestinatario">
+                <span class="label">Envíado a:</span>
+                <span class="value">{{ item.emailDestinatario || item.destinatario }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de Recibido Regalo -->
+          <div *ngIf="item.tipo === 'recibido-regalo' && item.participacion" class="detalle-container">
+            <div class="ticket-image-container" *ngIf="item.participacion.imagen">
+              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+            </div>
+            
+            <div class="detalle-info">
+              <div class="detalle-row">
+                <span class="label">Entidad:</span>
+                <span class="value">{{ item.participacion.entidad }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Numero:</span>
+                <span class="value">{{ item.participacion.numero }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Fecha Sorteo:</span>
+                <span class="value">{{ item.participacion.fechaSorteo }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Enviado por:</span>
+                <span class="value">{{ item.remitente || item.emailRemitente }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de Cobro -->
+          <div *ngIf="item.tipo === 'cobro'" class="detalle-container">
+            <div class="detalle-info">
+              <div class="detalle-row">
+                <span class="label">Número de participaciones:</span>
+                <span class="value">{{ item.participaciones?.length || 1 }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Importe total:</span>
+                <span class="value destacado">€{{ item.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Fecha de cobro:</span>
+                <span class="value">{{ formatearFecha(item.fecha) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de Donación -->
+          <div *ngIf="item.tipo === 'donacion'" class="detalle-container">
+            <div class="detalle-info">
+              <div class="detalle-row">
+                <span class="label">Importe donado:</span>
+                <span class="value destacado">€{{ item.importeDonacion | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Fecha de donación:</span>
+                <span class="value">{{ formatearFecha(item.fecha) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detalle de Código de Recarga -->
+          <div *ngIf="item.tipo === 'codigo-recarga'" class="detalle-container">
+            <div class="ticket-image-container" *ngIf="item.participacion?.imagen">
+              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+            </div>
+            
+            <div class="detalle-info">
+              <div class="detalle-row" *ngIf="item.participacion">
+                <span class="label">Entidad:</span>
+                <span class="value">{{ item.participacion.entidad }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion">
+                <span class="label">Numero:</span>
+                <span class="value">{{ item.participacion.numero }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion">
+                <span class="label">Fecha Sorteo:</span>
+                <span class="value">{{ item.participacion.fechaSorteo }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion">
+                <span class="label">Importe Jugado:</span>
+                <span class="value">€{{ item.participacion.importeJugado || item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion?.donativo">
+                <span class="label">Donativo:</span>
+                <span class="value">€{{ item.participacion.donativo | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row" *ngIf="item.participacion">
+                <span class="label">Importe total:</span>
+                <span class="value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="detalle-row codigo-row">
+                <span class="label">Código de Recarga:</span>
+                <span class="value codigo">{{ item.codigoRecarga }}</span>
+              </div>
+              <div class="detalle-row">
+                <span class="label">Web:</span>
+                <span class="value url">web.elbuholotero.es</span>
+              </div>
+            </div>
+
+            <div class="accion-container" *ngIf="item.codigoRecarga">
+              <ion-button class="recargar-button" fill="outline">
+                <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                Recargar
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="historial.length === 0">
+      <ion-icon name="time-outline"></ion-icon>
+      <p>No hay historial disponible</p>
+      <p class="empty-subtitle">Tus acciones aparecerán aquí</p>
+    </div>
+  </div>
+</ion-content>

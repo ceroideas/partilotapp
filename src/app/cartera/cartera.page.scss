@@ -1,0 +1,274 @@
+.cartera-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.cartera-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+.header-section {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 8px 0;
+  
+  .title-icon {
+    font-size: 28px;
+    color: #212529;
+  }
+}
+
+.page-subtitle {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.actions-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.action-button {
+  flex: 1;
+  height: 49px;
+  border-radius: 24px;
+  font-weight: 500;
+  text-transform: none;
+  --background: #F5F6F7;
+  --color: #212529;
+  --border-color: #E9ECEF;
+  --border-width: 1px;
+  --border-style: solid;
+  
+  &.digitalizar-button,
+  &.gestionar-button {
+    --background: white;
+    --border-color: #E9ECEF;
+    
+    ion-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+  }
+}
+
+.participaciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.participacion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:active {
+    transform: scale(0.98);
+    background: #F5F6F7;
+  }
+}
+
+.participacion-image {
+  width: 60px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #E9ECEF;
+  position: relative;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  &.image-error {
+    img {
+      display: none;
+    }
+  }
+  
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #E9ECEF;
+    
+    ion-icon {
+      font-size: 32px;
+      color: #6c757d;
+    }
+  }
+}
+
+.participacion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participacion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .entidad {
+    font-size: 14px;
+    font-weight: 500;
+    color: #212529;
+  }
+  
+  .numero {
+    font-size: 16px;
+    font-weight: bold;
+    color: #212529;
+  }
+}
+
+.participacion-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .fecha {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #6c757d;
+    
+    ion-icon {
+      font-size: 14px;
+    }
+  }
+  
+  .importe {
+    font-size: 14px;
+    font-weight: 600;
+    
+    &.activa {
+      color: #28a745;
+    }
+    
+    &.cobrada {
+      color: #F49200;
+    }
+    
+    &.caducada {
+      color: #6c757d;
+    }
+  }
+}
+
+.participacion-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    
+    &.cobrada {
+      background-color: #FFF3CD;
+      color: #F49200;
+    }
+    
+    &.donada {
+      background-color: #FFF3CD;
+      color: #F49200;
+    }
+    
+    &.caducada {
+      background-color: #F8D7DA;
+      color: #721C24;
+    }
+  }
+  
+  .chevron-icon {
+    font-size: 20px;
+    color: #6c757d;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+}

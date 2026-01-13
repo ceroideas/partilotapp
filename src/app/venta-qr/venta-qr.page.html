@@ -1,0 +1,197 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button *ngIf="!mostrandoScanner"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end" *ngIf="!mostrandoScanner"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="venta-qr-content">
+  
+  <!-- Vista de Escáner -->
+  <div *ngIf="mostrandoScanner" class="scanner-fullscreen">
+    <div class="scanner-overlay">
+      <div class="scanner-frame-overlay">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+      </div>
+      <div class="scanner-text">Escanear código</div>
+      <ion-button fill="clear" class="cancel-scanner" (click)="cancelarScanner()">
+        <ion-icon name="close-circle"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Vista Principal de Venta QR -->
+  <div *ngIf="!mostrandoScanner" class="venta-qr-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('usuario')">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button active" 
+        fill="clear"
+        [disabled]="true">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('gestor')">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Card Venta QR -->
+    <div class="venta-qr-card figma-card">
+      <div class="card-header">
+        <div class="header-text">
+          <h2 class="card-title">Venta QR</h2>
+          <p class="card-subtitle">Gestiona la venta de participaciones</p>
+        </div>
+        <ion-button fill="clear" class="close-button" (click)="cerrarVenta()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Botón Nueva Digitalización -->
+      <ion-button 
+        class="nueva-digitalizacion-button" 
+        expand="block"
+        (click)="iniciarScanner()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Nueva Digitalización
+      </ion-button>
+
+      <!-- Lista de Participaciones -->
+      <div class="participaciones-list" *ngIf="participaciones.length > 0">
+        <div 
+          class="participacion-item" 
+          *ngFor="let participacion of participaciones">
+          <div class="participacion-info">
+            <span class="participacion-numero">Participación {{ participacion.numero }}</span>
+            <span class="participacion-entidad">{{ participacion.entidad }}</span>
+          </div>
+          <span class="participacion-precio">€{{ participacion.precio | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Importe Total -->
+      <div class="importe-total-section" *ngIf="participaciones.length > 0">
+        <span class="importe-label">Importe total</span>
+        <span class="importe-valor">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Botón Vender -->
+      <ion-button 
+        class="vender-button" 
+        expand="block"
+        *ngIf="participaciones.length > 0"
+        (click)="mostrarResumen()">
+        Vender
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- Modal de Resumen (igual que en venta manual) -->
+<div class="modal-overlay" *ngIf="mostrarModalResumen" (click)="cerrarModalResumen()">
+  <div class="modal-container resumen-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Resumen</h2>
+      <p class="modal-subtitle">Comprueba los datos</p>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalResumen()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="modal-content">
+      <div class="resumen-info">
+        <div class="resumen-item">
+          <span>Participaciones:</span>
+          <span>{{ participaciones.length }}</span>
+        </div>
+        <div class="resumen-item total">
+          <span>Importe total:</span>
+          <span class="importe-total">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="forma-pago-section">
+        <h3 class="forma-pago-title">Forma de Pago</h3>
+        <p class="forma-pago-subtitle">Registra una forma de pago</p>
+        
+        <div class="opciones-pago">
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'efectivo'"
+            (click)="seleccionarFormaPago('efectivo')">
+            <ion-icon name="cash-outline"></ion-icon>
+            <ion-label>Pago En Efectivo</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'bizum'"
+            (click)="seleccionarFormaPago('bizum')">
+            <ion-icon name="percent-outline"></ion-icon>
+            <ion-label>Pago Por Bizum</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'omitir'"
+            (click)="seleccionarFormaPago('omitir')">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <ion-label>Omitir Forma de pago</ion-label>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+    
+    <ion-button 
+      class="registrar-button" 
+      expand="block"
+      (click)="registrarVenta()">
+      Registrar
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div class="modal-overlay" *ngIf="mostrarModalExito" (click)="cerrarModalExito()">
+  <div class="modal-container exito-modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title-exito">Venta registrada con éxito</h2>
+    <div class="modal-content-exito">
+      <p>Puedes consultar el detalle en el historial de ventas o continuar con una nueva venta.</p>
+    </div>
+    <ion-button 
+      class="aceptar-button" 
+      expand="block"
+      (click)="cerrarModalExito()">
+      Aceptar
+    </ion-button>
+  </div>
+</div>

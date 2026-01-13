@@ -1,0 +1,99 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="config-venta-content">
+  <div class="config-venta-container">
+    <!-- Configuración de precios -->
+    <div class="config-section figma-card">
+      <h2>Precios</h2>
+      
+      <ion-item class="figma-input-item">
+        <ion-label position="stacked">Precio por participación por defecto</ion-label>
+        <ion-input [(ngModel)]="precioPorDefecto" type="number" min="0" step="0.01"></ion-input>
+      </ion-item>
+
+      <ion-item class="figma-input-item">
+        <ion-label position="stacked">Descuento por cantidad (%)</ion-label>
+        <ion-input [(ngModel)]="descuentoCantidad" type="number" min="0" max="100"></ion-input>
+      </ion-item>
+    </div>
+
+    <!-- Configuración de método de pago -->
+    <div class="config-section figma-card">
+      <h2>Métodos de Pago Aceptados</h2>
+      
+      <ion-list>
+        <ion-item>
+          <ion-checkbox [(ngModel)]="aceptaEfectivo" slot="start"></ion-checkbox>
+          <ion-label>
+            <h3>Efectivo</h3>
+            <p>Aceptar pagos en efectivo</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-checkbox [(ngModel)]="aceptaTarjeta" slot="start"></ion-checkbox>
+          <ion-label>
+            <h3>Tarjeta</h3>
+            <p>Aceptar pagos con tarjeta</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-checkbox [(ngModel)]="aceptaTransferencia" slot="start"></ion-checkbox>
+          <ion-label>
+            <h3>Transferencia</h3>
+            <p>Aceptar transferencias bancarias</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Configuración de notificaciones -->
+    <div class="config-section figma-card">
+      <h2>Notificaciones</h2>
+      
+      <ion-list>
+        <ion-item>
+          <ion-toggle [(ngModel)]="notificarVentas" slot="end"></ion-toggle>
+          <ion-label>
+            <h3>Notificar nuevas ventas</h3>
+            <p>Recibir notificaciones cuando realices una venta</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-toggle [(ngModel)]="notificarCobros" slot="end"></ion-toggle>
+          <ion-label>
+            <h3>Notificar cobros</h3>
+            <p>Recibir notificaciones de cobros pendientes</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Botón guardar -->
+    <div class="actions-section">
+      <ion-button class="figma-button" expand="block" (click)="guardarConfiguracion()">
+        <ion-icon name="save" slot="start"></ion-icon>
+        Guardar configuración
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

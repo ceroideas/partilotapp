@@ -1,0 +1,102 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cuenta-cobro-content">
+  <div class="cuenta-cobro-container">
+    <!-- Resumen de cuenta -->
+    <div class="resumen-card figma-card">
+      <h2>Resumen de Cuenta</h2>
+      <div class="resumen-items">
+        <div class="resumen-item">
+          <span class="label">Total vendido</span>
+          <span class="valor">€{{ totalVendido | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Cobrado</span>
+          <span class="valor positivo">€{{ totalCobrado | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="label">Pendiente</span>
+          <span class="valor pendiente">€{{ totalPendiente | number:'1.2-2' }}</span>
+        </div>
+        <div class="resumen-item total">
+          <span class="label">Balance disponible</span>
+          <span class="valor disponible">€{{ balanceDisponible | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+      <ion-segment [(ngModel)]="filtroEstado" (ionChange)="filtrarCobros()">
+        <ion-segment-button value="todos">
+          <ion-label>Todos</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="cobrados">
+          <ion-label>Cobrados</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="pendientes">
+          <ion-label>Pendientes</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Lista de cobros -->
+    <div class="cobros-list">
+      <div class="cobro-card figma-card" *ngFor="let cobro of cobrosFiltrados">
+        <div class="cobro-header">
+          <div class="cobro-info">
+            <h3>Venta #{{ cobro.ventaId }}</h3>
+            <p>{{ cobro.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p class="cliente">{{ cobro.cliente }}</p>
+          </div>
+          <span class="estado-badge" 
+                [class.cobrado]="cobro.estado === 'cobrado'"
+                [class.pendiente]="cobro.estado === 'pendiente'">
+            {{ cobro.estado }}
+          </span>
+        </div>
+        <div class="cobro-details">
+          <div class="detail-item">
+            <span class="label">Monto:</span>
+            <span class="value">€{{ cobro.monto | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="cobro.metodoPago">
+            <span class="label">Método:</span>
+            <span class="value">{{ cobro.metodoPago }}</span>
+          </div>
+          <div class="detail-item" *ngIf="cobro.fechaCobro">
+            <span class="label">Fecha de cobro:</span>
+            <span class="value">{{ cobro.fechaCobro | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+        <div class="cobro-actions" *ngIf="cobro.estado === 'pendiente'">
+          <ion-button fill="outline" size="small" (click)="marcarComoCobrado(cobro)">
+            Marcar como cobrado
+          </ion-button>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="cobrosFiltrados.length === 0">
+        <ion-icon name="wallet-outline" size="large"></ion-icon>
+        <p>No hay cobros para mostrar</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

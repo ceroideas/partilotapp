@@ -1,0 +1,111 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="loteria-social-content">
+  <div class="loteria-social-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Card de Lotería Social -->
+    <div class="info-card figma-card">
+      <h2>Lotería Social</h2>
+      <p>Selecciona con que entidad quieres colaborar</p>
+    </div>
+
+    <!-- Input de código de entidad -->
+    <div class="codigo-entidad-section">
+      <ion-item class="codigo-input-item">
+        <ion-label position="stacked">Introduce el código de tu Entidad</ion-label>
+        <ion-input 
+          [(ngModel)]="codigoEntidad" 
+          placeholder=""
+          type="text">
+        </ion-input>
+      </ion-item>
+      <ion-button 
+        class="entrar-button" 
+        expand="block" 
+        (click)="entrarConCodigo()"
+        [disabled]="!codigoEntidad || codigoEntidad.trim() === ''">
+        Entrar
+      </ion-button>
+    </div>
+
+    <!-- Sección de búsqueda de entidades -->
+    <div class="entidades-section">
+      <h3 class="entidades-title">Entidades</h3>
+      <ion-searchbar 
+        [(ngModel)]="busquedaEntidad"
+        placeholder="Buscar Entidad"
+        (ionInput)="buscarEntidades()"
+        class="entidades-searchbar">
+      </ion-searchbar>
+      
+      <!-- Grid de entidades -->
+      <div class="entidades-grid">
+        <div 
+          class="entidad-item" 
+          *ngFor="let entidad of entidadesFiltradas"
+          (click)="irAEntidad(entidad)">
+          <div class="entidad-placeholder">
+            <ion-icon name="business-outline" *ngIf="!entidad.imagen"></ion-icon>
+            <img *ngIf="entidad.imagen" [src]="entidad.imagen" [alt]="entidad.nombre">
+          </div>
+          <p class="entidad-nombre">{{ entidad.nombre }}</p>
+        </div>
+        
+        <!-- Placeholders vacíos para completar el grid -->
+        <div 
+          class="entidad-item entidad-placeholder-empty" 
+          *ngFor="let i of getPlaceholders()">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

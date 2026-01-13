@@ -1,0 +1,314 @@
+.escaner-content {
+  --background: #212529;
+}
+
+.scanner-view {
+  height: 100%;
+}
+
+.escaner-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+}
+
+.scanner-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #000;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.scanner-frame {
+  width: 280px;
+  height: 280px;
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+}
+
+.corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #F49200;
+}
+
+.top-left {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 16px;
+}
+
+.top-right {
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
+  border-top-right-radius: 16px;
+}
+
+.bottom-left {
+  bottom: -3px;
+  left: -3px;
+  border-right: none;
+  border-top: none;
+  border-bottom-left-radius: 16px;
+}
+
+.bottom-right {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 16px;
+}
+
+.scanner-instructions {
+  margin-top: 24px;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+}
+
+.actions-container {
+  padding: 20px 0;
+}
+
+/* Vista de comprobación */
+.comprobacion-view {
+  height: 100%;
+  background: #F5F6F7;
+}
+
+.comprobacion-container {
+  padding: 16px;
+  background: white;
+  min-height: 100%;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.comprobacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E9ECEF;
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.header-title-icon {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  
+  .icon-qr {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 32px;
+    color: #212529;
+  }
+  
+  .icon-plus {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    font-size: 20px;
+    color: #F49200;
+    background: white;
+    border-radius: 50%;
+  }
+}
+
+.header-title-text {
+  flex: 1;
+}
+
+.comprobacion-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.comprobacion-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.close-button {
+  --color: #6c757d;
+  margin: 0;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.entidad-badge {
+  display: inline-block;
+  background: #E9ECEF;
+  color: #212529;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.ticket-image-container {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.ticket-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-number {
+  text-align: center;
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 32px;
+    font-weight: bold;
+    margin: 0;
+  }
+}
+
+.ticket-details-card {
+  background: white;
+  border: 1px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  .label {
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 0 0 auto;
+  }
+  
+  .value {
+    color: #212529;
+    font-size: 14px;
+    text-align: right;
+    flex: 1;
+    margin-left: 16px;
+    
+    &.destacado {
+      font-weight: bold;
+      color: #212529;
+    }
+  }
+  
+  .value-group-premio {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex: 1;
+    margin-left: 16px;
+  }
+}
+
+.premio-badge {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  
+  &.con-premio {
+    background-color: #D4EDDA;
+    color: #155724;
+  }
+  
+  &.sin-premio {
+    background-color: #E9ECEF;
+    color: #6c757d;
+  }
+}
+
+.recordatorio-card {
+  background: #FFF3CD;
+  border-left: 4px solid #FFC107;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  
+  .recordatorio-title {
+    color: #212529;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+  }
+  
+  .recordatorio-text {
+    color: #856404;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.actions-section {
+  padding: 0;
+  
+  ion-button {
+    height: 56px;
+    margin-bottom: 12px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

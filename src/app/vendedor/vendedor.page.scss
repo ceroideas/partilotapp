@@ -1,0 +1,242 @@
+.vendedor-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.vendedor-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+.tutorial-card {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  .tutorial-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .tutorial-icon {
+      font-size: 48px;
+      color: #F49200;
+      flex-shrink: 0;
+    }
+    
+    .tutorial-text {
+      flex: 1;
+      
+      .tutorial-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #212529;
+        margin: 0 0 8px 0;
+      }
+      
+      .tutorial-subtitle {
+        font-size: 14px;
+        color: #212529;
+        margin: 0;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+.acciones-principales {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.accion-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 8px 0;
+    }
+    
+    .card-description {
+      font-size: 12px;
+      color: #6c757d;
+      margin: 0 0 16px 0;
+      line-height: 1.4;
+    }
+    
+    .card-illustration {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  &.participaciones-card {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    
+    .card-title {
+      color: #2E7D32;
+    }
+    
+    .ticket-illustration {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      
+      .ticket-header {
+        font-size: 10px;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      
+      .ticket-number {
+        font-size: 20px;
+        font-weight: bold;
+        color: #212529;
+        text-align: center;
+      }
+    }
+  }
+  
+  &.escaner-card {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    
+    .card-title {
+      color: #C62828;
+    }
+    
+    .scanner-illustration {
+      position: relative;
+      
+      .scanner-icon {
+        font-size: 48px;
+        color: #F44336;
+      }
+      
+      .scanner-lines {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 2px solid #F44336;
+        border-radius: 4px;
+      }
+    }
+  }
+  
+  &.venta-card {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    margin-bottom: 0;
+    
+    .card-title {
+      color: #1565C0;
+    }
+    
+    .venta-card-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .venta-text {
+        flex: 1;
+      }
+      
+      .venta-illustration {
+        flex-shrink: 0;
+        margin-left: 16px;
+        
+        .cash-register {
+          background: white;
+          border-radius: 8px;
+          padding: 12px 16px;
+          box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+          
+          .register-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1565C0;
+            font-family: 'Courier New', monospace;
+          }
+        }
+      }
+    }
+  }
+}
+

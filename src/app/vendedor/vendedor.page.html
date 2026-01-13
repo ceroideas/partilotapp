@@ -1,0 +1,103 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="vendedor-content">
+  <div class="vendedor-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('usuario')">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button active" 
+        fill="clear"
+        [disabled]="true">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('gestor')">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Card de Tutorial -->
+    <div class="tutorial-card figma-card" (click)="verTutoriales()">
+      <div class="tutorial-content">
+        <ion-icon name="play-circle-outline" class="tutorial-icon"></ion-icon>
+        <div class="tutorial-text">
+          <h3 class="tutorial-title">¿PARTILOT te guia?</h3>
+          <p class="tutorial-subtitle">Mira nuestros tutoriales y descubre lo puedes hacer en PARTILOT</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de Acciones (dos columnas) -->
+    <div class="acciones-principales">
+      <div class="accion-card participaciones-card" (click)="irAParticipaciones()">
+        <div class="card-content">
+          <h3 class="card-title">Participaciones</h3>
+          <p class="card-description">El control total del estado de tus participaciones</p>
+          <div class="card-illustration">
+            <div class="ticket-illustration">
+              <div class="ticket-header">PARTICIPACIÓN DE LOTERÍA</div>
+              <div class="ticket-number">12345</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accion-card escaner-card" (click)="irAEscaner()">
+        <div class="card-content">
+          <h3 class="card-title">Escaner</h3>
+          <p class="card-description">Vende las participaciones físicas en un solo toque</p>
+          <div class="card-illustration">
+            <div class="scanner-illustration">
+              <ion-icon name="qr-code-outline" class="scanner-icon"></ion-icon>
+              <div class="scanner-lines"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Venta (ancho completo) -->
+    <div class="accion-card venta-card" (click)="irAVenta()">
+      <div class="card-content">
+        <div class="venta-card-content">
+          <div class="venta-text">
+            <h3 class="card-title">Venta</h3>
+            <p class="card-description">Gestiona la venta de tus participaciones asignadas.</p>
+          </div>
+          <div class="venta-illustration">
+            <div class="cash-register">
+              <div class="register-display">123.45</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

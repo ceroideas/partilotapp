@@ -1,0 +1,138 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button *ngIf="!modoEscaneo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="escaner-content">
+  
+  <!-- Vista de escáner -->
+  <div class="scanner-view" *ngIf="modoEscaneo">
+    <div class="escaner-container">
+      <div class="scanner-area">
+        <div class="scanner-frame">
+          <div class="corner top-left"></div>
+          <div class="corner top-right"></div>
+          <div class="corner bottom-left"></div>
+          <div class="corner bottom-right"></div>
+        </div>
+        <p class="scanner-instructions">Apunta la cámara al código QR</p>
+      </div>
+      
+      <div class="actions-container">
+        <ion-button class="figma-button" expand="block" (click)="scanQR()">
+          <ion-icon name="qr-code" slot="start"></ion-icon>
+          Escanear QR
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista de comprobación/detalle después del escaneo -->
+  <div class="comprobacion-view" *ngIf="!modoEscaneo && ticketEscaneado">
+    <div class="comprobacion-container">
+      <!-- Header de comprobación -->
+      <div class="comprobacion-header">
+        <div class="header-title-group">
+          <div class="header-title-icon">
+            <ion-icon name="qr-code-outline" class="icon-qr"></ion-icon>
+            <ion-icon name="add-circle-outline" class="icon-plus"></ion-icon>
+          </div>
+          <div class="header-title-text">
+            <h2 class="comprobacion-title">Comprobación</h2>
+            <p class="comprobacion-subtitle">Comprueba tus participaciones y tus décimos</p>
+          </div>
+        </div>
+        <ion-button fill="clear" class="close-button" (click)="volverAEscanear()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Entidad -->
+      <div class="entidad-badge" *ngIf="ticketEscaneado.entidad">
+        {{ ticketEscaneado.entidad }}
+      </div>
+
+      <!-- Imagen del ticket -->
+      <div class="ticket-image-container" *ngIf="imagenTicket">
+        <img [src]="imagenTicket" alt="Ticket" class="ticket-image">
+      </div>
+
+      <!-- Número del ticket -->
+      <div class="ticket-number">
+        <h2>{{ ticketEscaneado.numero }}</h2>
+      </div>
+
+      <!-- Detalles del ticket -->
+      <div class="ticket-details-card">
+        <div class="detail-row">
+          <span class="label">Fecha Sorteo:</span>
+          <span class="value destacado">{{ ticketEscaneado.fechaSorteo }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Importe Jugado:</span>
+          <div class="value-group-premio">
+            <span class="value">€{{ ticketEscaneado.importeJugado | number:'1.2-2' }}</span>
+            <span class="premio-badge" 
+                  [class.con-premio]="ticketEscaneado.premio > 0"
+                  [class.sin-premio]="ticketEscaneado.premio === 0">
+              Premio €{{ ticketEscaneado.premio | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+        <div class="detail-row" *ngIf="ticketEscaneado.donativo">
+          <span class="label">Donativo:</span>
+          <span class="value">€{{ ticketEscaneado.donativo | number:'1.2-2' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Importe total:</span>
+          <span class="value">€{{ ticketEscaneado.importeTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="detail-row" *ngIf="ticketEscaneado.numeroParticipacion">
+          <span class="label">N°:</span>
+          <span class="value">{{ ticketEscaneado.numeroParticipacion }} - N° Referencia: {{ ticketEscaneado.numeroReferencia || '0000000000000000000' }}</span>
+        </div>
+      </div>
+
+      <!-- Recordatorio para Lotería Nacional -->
+      <div class="recordatorio-card" *ngIf="ticketEscaneado.tipo === 'nacional' && ticketEscaneado.premio > 0">
+        <p class="recordatorio-title">Recuerda:</p>
+        <p class="recordatorio-text">
+          Los décimos premiados de los sorteos de Lotería Nacional pueden cobrarse en cualquier punto de venta autorizado del ámbito nacional. Dispones de un plazo de 3 meses desde la fecha del sorteo para realizar el cobro.
+        </p>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="actions-section">
+        <ion-button 
+          *ngIf="!ticketEscaneado.premio || ticketEscaneado.premio === 0"
+          class="figma-button digitalizar-button" 
+          expand="block"
+          (click)="digitalizar()">
+          Digitalizar
+        </ion-button>
+        <ion-button 
+          *ngIf="ticketEscaneado.premio && ticketEscaneado.premio > 0"
+          class="figma-button-accent gestionar-button" 
+          expand="block"
+          (click)="gestionarPremio()">
+          Gestionar Premio
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

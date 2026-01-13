@@ -1,0 +1,134 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="resultados-content">
+  <div class="resultados-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Título y subtítulo con logo -->
+    <div class="header-section">
+      <div class="header-title-row">
+        <div class="title-group">
+          <h1 class="page-title">
+            <ion-icon name="list-outline" class="title-icon"></ion-icon>
+            Resultados
+          </h1>
+          <p class="page-subtitle">Todos los sorteos en un vistazo</p>
+        </div>
+        <div class="loteria-logo">
+          <span class="logo-text-small">Lotería Nacional</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de resultados -->
+    <div class="resultados-list">
+      <div 
+        class="resultado-card" 
+        *ngFor="let resultado of resultados; let i = index">
+        
+        <div class="card-content">
+          <div class="resultado-icon">
+            <div class="icon-circle">
+              <div class="partilot-icon"></div>
+            </div>
+          </div>
+          
+          <div class="resultado-info">
+            <div class="resultado-header">
+              <span class="sorteo-text">Sorteo: {{ resultado.numero }}/{{ resultado.total }}</span>
+            </div>
+            
+            <div class="resultado-fecha">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ resultado.fecha }}</span>
+            </div>
+            
+            <div class="resultado-numeros">
+              <span class="numero-ganador">
+                <span class="premio">1° {{ resultado.primerPremio || '--.--' }}</span>
+                <span class="separador">-</span>
+                <span class="premio">2° {{ resultado.segundoPremio || '--.--' }}</span>
+                <span class="extracciones">
+                  <span class="r-label">R:</span>
+                  <span class="r-numeros">{{ (resultado.extracciones || []).join(' - ') || '--' }}</span>
+                </span>
+              </span>
+            </div>
+          </div>
+          
+          <div class="resultado-arrow">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Botones Escrutinio y Manual (solo para algunos sorteos) -->
+        <div class="resultado-actions" *ngIf="resultado.mostrarAcciones">
+          <ion-button 
+            class="action-button escrutinio-button" 
+            fill="outline">
+            <ion-icon name="search-outline" slot="start"></ion-icon>
+            Escrutinio
+          </ion-button>
+          <ion-button 
+            class="action-button manual-button" 
+            fill="outline">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Manual
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="resultados.length === 0">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <p>No hay resultados disponibles</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

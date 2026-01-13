@@ -1,0 +1,64 @@
+.config-venta-content {
+  --background: #F5F6F7;
+}
+
+.config-venta-container {
+  padding: 16px;
+}
+
+.config-section {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+}
+
+.figma-input-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(33, 37, 41, 0.1);
+}
+
+ion-list {
+  background: transparent;
+  padding: 0;
+  
+  ion-item {
+    --background: #F5F6F7;
+    --border-radius: 12px;
+    margin-bottom: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    
+    ion-label {
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: #212529;
+      }
+      
+      p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+  }
+}
+
+.actions-section {
+  margin-top: 24px;
+  
+  ion-button {
+    height: 56px;
+  }
+}
+

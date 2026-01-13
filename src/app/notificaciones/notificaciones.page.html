@@ -1,0 +1,83 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="notificaciones-content">
+  <div class="notificaciones-container">
+    <!-- Resumen -->
+    <div class="resumen-card figma-card" *ngIf="notificacionesNoLeidas > 0">
+      <div class="resumen-header">
+        <ion-icon name="notifications" size="large"></ion-icon>
+        <div>
+          <h2>{{ notificacionesNoLeidas }}</h2>
+          <p>Notificaciones no leídas</p>
+        </div>
+      </div>
+      <ion-button fill="clear" size="small" (click)="marcarTodasComoLeidas()">
+        Marcar todas como leídas
+      </ion-button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+      <ion-segment [(ngModel)]="filtroEstado" (ionChange)="filtrarNotificaciones()">
+        <ion-segment-button value="todas">
+          <ion-label>Todas</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="no-leidas">
+          <ion-label>No leídas</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="leidas">
+          <ion-label>Leídas</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Lista de notificaciones -->
+    <div class="notificaciones-list">
+      <div 
+        class="notificacion-card figma-card" 
+        *ngFor="let notificacion of notificacionesFiltradas"
+        [class.no-leida]="!notificacion.leida"
+        (click)="verDetalle(notificacion)">
+        <div class="notificacion-header">
+          <div class="notificacion-icon" [ngSwitch]="notificacion.tipo">
+            <ion-icon *ngSwitchCase="'ganador'" name="trophy" color="warning"></ion-icon>
+            <ion-icon *ngSwitchCase="'cobro'" name="cash" color="success"></ion-icon>
+            <ion-icon *ngSwitchCase="'sorteo'" name="calendar" color="primary"></ion-icon>
+            <ion-icon *ngSwitchCase="'regalo'" name="gift" color="tertiary"></ion-icon>
+            <ion-icon *ngSwitchDefault name="notifications"></ion-icon>
+          </div>
+          <div class="notificacion-info">
+            <h3>{{ notificacion.titulo }}</h3>
+            <p>{{ notificacion.mensaje }}</p>
+            <span class="notificacion-fecha">{{ notificacion.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="notificacion-badge" *ngIf="!notificacion.leida">
+            <ion-icon name="ellipse" color="primary"></ion-icon>
+          </div>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="notificacionesFiltradas.length === 0">
+        <ion-icon name="notifications-outline" size="large"></ion-icon>
+        <p>No hay notificaciones para mostrar</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

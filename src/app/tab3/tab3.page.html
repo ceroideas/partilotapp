@@ -1,17 +1,90 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="home-content">
+  <div class="home-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button active" 
+        fill="clear"
+        [disabled]="true">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarAVendedor()">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarAGestor()">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+    <!-- Bloque: ¿Primera vez aquí? -->
+    <div class="home-block tutorial-block" (click)="verTutoriales()">
+      <div class="block-content">
+        <ion-icon name="play-circle-outline" class="block-icon-large"></ion-icon>
+        <p class="block-text">¿Primera vez aqui? Mira nuestros tutoriales y descubre lo que tiene PARTILOT para ti</p>
+      </div>
+    </div>
+
+    <!-- Bloque: Cartera y Escaner (dos columnas) -->
+    <div class="home-blocks-row">
+      <div class="home-block cartera-block" (click)="irACartera()">
+        <div class="block-content">
+          <h3 class="block-title">Cartera</h3>
+          <p class="block-description">Gestiona tus participaciones</p>
+          <div class="block-illustration">
+            <ion-icon name="wallet-outline" class="illustration-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-block escaner-block" (click)="irAEscaner()">
+        <div class="block-content">
+          <h3 class="block-title">Escaner</h3>
+          <p class="block-description">Comprueba si hay premio en tus participaciones</p>
+          <div class="block-illustration">
+            <ion-icon name="qr-code-outline" class="illustration-icon"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloque: Loteria Social -->
+    <div class="home-block loteria-social-block" (click)="irALoteriaSocial()">
+      <div class="block-content">
+        <div class="block-text-content">
+          <h3 class="block-title">Loteria Social</h3>
+          <p class="block-description">Adquiere participaciones de nuestras entidades colaboradoras de toda España.</p>
+        </div>
+        <div class="block-illustration-right">
+          <ion-icon name="people-outline" class="illustration-icon-large"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </ion-content>

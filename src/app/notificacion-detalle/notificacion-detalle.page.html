@@ -1,0 +1,87 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="detalle-content">
+  <div class="detalle-container" *ngIf="notificacion">
+    <!-- Header con icono -->
+    <div class="header-card figma-card">
+      <div class="notificacion-icon-large" [ngSwitch]="notificacion.tipo">
+        <ion-icon *ngSwitchCase="'ganador'" name="trophy" color="warning"></ion-icon>
+        <ion-icon *ngSwitchCase="'cobro'" name="cash" color="success"></ion-icon>
+        <ion-icon *ngSwitchCase="'sorteo'" name="calendar" color="primary"></ion-icon>
+        <ion-icon *ngSwitchCase="'regalo'" name="gift" color="tertiary"></ion-icon>
+        <ion-icon *ngSwitchDefault name="notifications"></ion-icon>
+      </div>
+      <h1>{{ notificacion.titulo }}</h1>
+      <p class="fecha">{{ notificacion.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="contenido-card figma-card">
+      <h3>Mensaje</h3>
+      <p class="mensaje">{{ notificacion.mensaje }}</p>
+      
+      <div class="detalle-info" *ngIf="notificacion.detalle">
+        <h3>Detalles</h3>
+        <p>{{ notificacion.detalle }}</p>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="acciones-section" *ngIf="mostrarAcciones()">
+      <ion-button 
+        *ngIf="notificacion.tipo === 'cobro'"
+        class="figma-button" 
+        expand="block"
+        (click)="irACobros()">
+        <ion-icon name="cash" slot="start"></ion-icon>
+        Ir a cobros
+      </ion-button>
+      <ion-button 
+        *ngIf="notificacion.tipo === 'ganador'"
+        class="figma-button-accent" 
+        expand="block"
+        (click)="irAResultados()">
+        <ion-icon name="trophy" slot="start"></ion-icon>
+        Ver resultados
+      </ion-button>
+      <ion-button 
+        *ngIf="notificacion.tipo === 'regalo'"
+        class="figma-button" 
+        expand="block"
+        (click)="irACartera()">
+        <ion-icon name="wallet" slot="start"></ion-icon>
+        Ver cartera
+      </ion-button>
+      <ion-button 
+        *ngIf="notificacion.tipo === 'sorteo'"
+        class="figma-button-accent" 
+        expand="block"
+        (click)="irASorteo()">
+        <ion-icon name="calendar" slot="start"></ion-icon>
+        Participar
+      </ion-button>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="!notificacion">
+    <ion-spinner></ion-spinner>
+    <p>Cargando notificación...</p>
+  </div>
+</ion-content>

@@ -1,0 +1,291 @@
+.historial-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.historial-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+.header-section {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 8px 0;
+  
+  .title-icon {
+    font-size: 28px;
+    color: #212529;
+  }
+}
+
+.page-subtitle {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.historial-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historial-accordion {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.historial-header-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: white;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.historial-item-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+}
+
+.item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .item-titulo {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+  }
+  
+  .item-fecha {
+    font-size: 12px;
+    color: #6c757d;
+  }
+}
+
+.item-right {
+  .item-importe {
+    font-size: 16px;
+    font-weight: 600;
+    color: #28a745;
+  }
+}
+
+.accordion-detail-content {
+  padding: 16px;
+  background: #F5F6F7;
+}
+
+.detalle-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ticket-image-container {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.ticket-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 200px;
+  border-radius: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detalle-info {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  .label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+    flex: 0 0 auto;
+    margin-right: 16px;
+  }
+  
+  .value {
+    font-size: 14px;
+    color: #212529;
+    text-align: right;
+    flex: 1;
+    
+    &.destacado {
+      font-weight: bold;
+      font-size: 16px;
+      color: #28a745;
+    }
+    
+    &.codigo {
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: #F49200;
+      letter-spacing: 1px;
+    }
+    
+    &.url {
+      color: #0D6EFD;
+      font-weight: 500;
+    }
+  }
+}
+
+.codigo-row {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #E9ECEF;
+}
+
+.participaciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.participacion-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #F5F6F7;
+  border-radius: 8px;
+  
+  .participacion-numero {
+    font-size: 14px;
+    color: #212529;
+  }
+  
+  .participacion-importe {
+    font-size: 14px;
+    font-weight: 600;
+    color: #28a745;
+  }
+}
+
+.accion-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.recargar-button {
+  --border-color: #F49200;
+  --color: #F49200;
+  --border-radius: 24px;
+  height: 40px;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+  }
+  
+  .empty-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+}

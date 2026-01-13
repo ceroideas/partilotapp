@@ -1,0 +1,106 @@
+.digitalizar-content {
+  --background: #F5F6F7;
+}
+
+.digitalizar-container {
+  padding: 16px;
+}
+
+.info-card {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.preview-section {
+  margin-bottom: 24px;
+}
+
+.preview-card {
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 12px;
+  
+  ion-button {
+    flex: 1;
+  }
+}
+
+.capture-section {
+  margin-bottom: 24px;
+}
+
+.camera-area {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-placeholder {
+  text-align: center;
+  
+  ion-icon {
+    font-size: 64px;
+    color: #6c757d;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.form-section {
+  margin-bottom: 24px;
+  
+  h3 {
+    color: #212529;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+}
+
+.figma-input-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(33, 37, 41, 0.1);
+}
+
+.actions-section {
+  margin-top: 24px;
+  
+  ion-button {
+    margin-bottom: 12px;
+    height: 56px;
+  }
+}
+

@@ -1,0 +1,110 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="gestor-home-content">
+  <div class="gestor-home-container">
+    
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('usuario')">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('vendedor')">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button active" 
+        fill="clear"
+        [disabled]="true">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Card de Tutorial -->
+    <div class="tutorial-card figma-card" (click)="verTutoriales()">
+      <div class="tutorial-content">
+        <ion-icon name="play-circle-outline" class="tutorial-icon"></ion-icon>
+        <div class="tutorial-text">
+          <h3 class="tutorial-title">¿PARTILOT te guia?</h3>
+          <p class="tutorial-subtitle">Mira nuestros tutoriales y descubre lo puedes hacer en PARTILOT</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de Acciones (dos columnas) -->
+    <div class="acciones-principales">
+      <div class="accion-card participaciones-card" (click)="irAParticipaciones()">
+        <div class="card-content">
+          <h3 class="card-title">Participaciones</h3>
+          <p class="card-description">El control total del estado de tus participaciones</p>
+          <div class="card-illustration">
+            <div class="ticket-illustration">
+              <div class="ticket-header">PARTICIPACIÓN DE LOTERÍA</div>
+              <div class="ticket-number">12345</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accion-card vendedores-card" (click)="irAVendedores()">
+        <div class="card-content">
+          <h3 class="card-title">Vendedores</h3>
+          <p class="card-description">Gestiona y administra tus vendedores</p>
+          <div class="card-illustration">
+            <div class="people-illustration">
+              <ion-icon name="people-outline" class="people-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accion-card devolucion-card" (click)="irADevolucion()">
+        <div class="card-content">
+          <h3 class="card-title">Devolución</h3>
+          <p class="card-description">Gestiona las devoluciones de tus vendedores</p>
+          <div class="card-illustration">
+            <div class="return-illustration">
+              <ion-icon name="return-down-back-outline" class="return-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accion-card pago-card" (click)="irAPago()">
+        <div class="card-content">
+          <h3 class="card-title">Pago</h3>
+          <p class="card-description">Controla los pagos de participaciones físicas</p>
+          <div class="card-illustration">
+            <div class="payment-illustration">
+              <ion-icon name="cash-outline" class="payment-icon"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+

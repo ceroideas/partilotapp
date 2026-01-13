@@ -1,0 +1,145 @@
+.notificaciones-content {
+  --background: #F5F6F7;
+}
+
+.notificaciones-container {
+  padding: 16px;
+}
+
+.resumen-card {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resumen-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  
+  ion-icon {
+    color: #F49200;
+    font-size: 32px;
+  }
+  
+  h2 {
+    color: #212529;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.filtros-section {
+  margin-bottom: 24px;
+  
+  ion-segment {
+    --background: white;
+    border-radius: 12px;
+    padding: 4px;
+    
+    ion-segment-button {
+      --indicator-color: #212529;
+      --color: #6c757d;
+      --color-checked: white;
+      min-height: 40px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.notificaciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notificacion-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &.no-leida {
+    border-left: 4px solid #3880ff;
+    background: #F0F7FF;
+  }
+}
+
+.notificacion-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.notificacion-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F5F6F7;
+  border-radius: 50%;
+  
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.notificacion-info {
+  flex: 1;
+  
+  h3 {
+    color: #212529;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+  }
+  
+  .notificacion-fecha {
+    color: #6c757d;
+    font-size: 12px;
+  }
+}
+
+.notificacion-badge {
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 12px;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 16px;
+  }
+}
+

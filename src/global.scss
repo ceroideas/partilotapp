@@ -34,4 +34,109 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+// @import "@ionic/angular/css/palettes/dark.system.css";
+
+.tab-box {
+	--background: #333;
+	border-radius: 50px;
+	width: 90%;
+	margin-left: 5%;
+	margin-bottom: 28px;
+	height: 75px;
+}
+
+ion-tab-button {
+	font-weight: 500;
+	font-size: 10px;
+	max-width: 65px;
+	max-height: 65px;
+	margin: 0 6px;
+	color: #fff;
+	ion-icon {
+		padding: 6px 0;
+	}
+}
+
+.visible_selected {
+	display: none;
+}
+
+.tab-selected {
+	background-color: #fff;
+	border-radius: 50px;
+	color: #212529;
+	--border: none !important;
+	max-width: 65px;
+	max-height: 65px;
+	width: 65px;
+	height: 65px;
+	.hidden_selected {
+		display: none;
+	}
+	.visible_selected {
+		display: inline-block;
+	}
+}
+
+/* Estilos globales basados en diseño Figma */
+body {
+  --ion-background-color: #F5F6F7;
+  --ion-text-color: #212529;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Cards según diseño Figma */
+.figma-card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones según diseño Figma */
+.figma-button {
+  --background: #212529;
+  --color: #ffffff;
+  --border-radius: 28px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+  font-weight: 500;
+  text-transform: none;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.figma-button-accent {
+  --background: #F49200;
+  --color: #ffffff;
+  --border-radius: 28px;
+  font-weight: 500;
+  text-transform: none;
+}
+
+/* Inputs según diseño Figma */
+.figma-input {
+  --background: white;
+  --color: #212529;
+  --border-radius: 26px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  border: 1px solid rgba(33, 37, 41, 0.1);
+}
+
+/* Botón del menú - asegurar visibilidad */
+ion-menu-button {
+  --color: #212529 !important;
+  display: inline-flex !important;
+  min-width: 44px;
+  min-height: 44px;
+  
+  &::part(native) {
+    padding: 8px;
+  }
+}
+

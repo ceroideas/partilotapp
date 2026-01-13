@@ -1,0 +1,209 @@
+.loteria-social-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.loteria-social-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+    
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+.info-card {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  
+  h2 {
+    color: #212529;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.codigo-entidad-section {
+  margin-bottom: 24px;
+  
+  .codigo-input-item {
+    --background: white;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 0;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    
+    ion-label {
+      font-size: 14px;
+      color: #6c757d;
+      font-weight: 500;
+    }
+    
+    ion-input {
+      font-size: 16px;
+      color: #212529;
+    }
+  }
+  
+  .entrar-button {
+    --background: #212529;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 500;
+    text-transform: none;
+    font-size: 16px;
+    
+    &[disabled] {
+      --background: #E9ECEF;
+      --color: #6c757d;
+      opacity: 0.6;
+    }
+  }
+}
+
+.entidades-section {
+  margin-top: 24px;
+  
+  .entidades-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0 0 16px 0;
+  }
+  
+  .entidades-searchbar {
+    --background: white;
+    --border-radius: 12px;
+    --box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    --placeholder-color: #6c757d;
+    --icon-color: #6c757d;
+    padding: 0;
+    margin-bottom: 16px;
+    
+    ::ng-deep {
+      .searchbar-input {
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .entidades-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    
+    .entidad-item {
+      aspect-ratio: 1;
+      background: #E9ECEF;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 8px;
+      min-height: 100px;
+      
+      &:active {
+        transform: scale(0.95);
+        background: #DEE2E6;
+      }
+      
+      .entidad-placeholder {
+        width: 100%;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #E9ECEF;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        
+        ion-icon {
+          font-size: 32px;
+          color: #6c757d;
+        }
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+      }
+      
+      .entidad-nombre {
+        font-size: 12px;
+        color: #212529;
+        text-align: center;
+        margin: 0;
+        font-weight: 500;
+        line-height: 1.2;
+        padding: 0 4px;
+      }
+      
+      &.entidad-placeholder-empty {
+        background: #F5F6F7;
+        cursor: default;
+        
+        &:active {
+          transform: none;
+        }
+      }
+    }
+  }
+}
+

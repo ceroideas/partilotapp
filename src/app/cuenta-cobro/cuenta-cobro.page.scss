@@ -1,0 +1,191 @@
+.cuenta-cobro-content {
+  --background: #F5F6F7;
+}
+
+.cuenta-cobro-container {
+  padding: 16px;
+}
+
+.resumen-card {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+  }
+}
+
+.resumen-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #E9ECEF;
+  
+  &.total {
+    border-top: 2px solid #212529;
+    border-bottom: none;
+    padding-top: 16px;
+    margin-top: 4px;
+    
+    .label {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .valor {
+      font-weight: bold;
+      font-size: 20px;
+      
+      &.disponible {
+        color: #28a745;
+      }
+    }
+  }
+  
+  &:last-child:not(.total) {
+    border-bottom: none;
+  }
+  
+  .label {
+    color: #6c757d;
+    font-size: 14px;
+  }
+  
+  .valor {
+    font-size: 16px;
+    font-weight: 600;
+    
+    &.positivo {
+      color: #28a745;
+    }
+    
+    &.pendiente {
+      color: #ffc107;
+    }
+  }
+}
+
+.filtros-section {
+  margin-bottom: 24px;
+  
+  ion-segment {
+    --background: white;
+    border-radius: 12px;
+    padding: 4px;
+    
+    ion-segment-button {
+      --indicator-color: #212529;
+      --color: #6c757d;
+      --color-checked: white;
+      min-height: 40px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.cobros-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cobro-card {
+  .cobro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  
+  .cobro-info {
+    flex: 1;
+    
+    h3 {
+      color: #212529;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 4px 0;
+    }
+    
+    p {
+      color: #6c757d;
+      font-size: 12px;
+      margin: 2px 0;
+      
+      &.cliente {
+        font-weight: 500;
+        color: #212529;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  .estado-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    
+    &.cobrado {
+      background-color: #D4EDDA;
+      color: #155724;
+    }
+    
+    &.pendiente {
+      background-color: #FFF3CD;
+      color: #856404;
+    }
+  }
+  
+  .cobro-details {
+    margin-bottom: 12px;
+  }
+  
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    
+    .label {
+      color: #6c757d;
+    }
+    
+    .value {
+      color: #212529;
+      font-weight: 500;
+    }
+  }
+  
+  .cobro-actions {
+    padding-top: 12px;
+    border-top: 1px solid #E9ECEF;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 16px;
+  }
+}
+

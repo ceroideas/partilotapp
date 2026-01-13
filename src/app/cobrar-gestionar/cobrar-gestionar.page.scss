@@ -1,0 +1,532 @@
+.cobrar-gestionar-content {
+  --background: #F5F6F7;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-weight: bold;
+  font-size: 18px;
+  color: #F49200;
+  letter-spacing: 0.5px;
+}
+
+.main-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.header-section {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 8px 0;
+  
+  .title-icon {
+    font-size: 28px;
+    color: #212529;
+  }
+}
+
+.page-subtitle {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.action-button {
+  height: 56px;
+  border-radius: 12px;
+  font-weight: 500;
+  text-transform: none;
+  
+  &.cobrar-button {
+    --background: #212529;
+    --color: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  }
+  
+  &.donar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+  }
+  
+  ion-icon {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+}
+
+.participaciones-list {
+  margin-bottom: 24px;
+}
+
+.participacion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  
+  &.selected {
+    background: #E9ECEF;
+    border-color: #F49200;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.participacion-image {
+  width: 60px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #E9ECEF;
+  position: relative;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  &.image-error {
+    img {
+      display: none;
+    }
+  }
+  
+  .image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #E9ECEF;
+    
+    ion-icon {
+      font-size: 32px;
+      color: #6c757d;
+    }
+  }
+}
+
+.participacion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participacion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .entidad {
+    font-size: 14px;
+    font-weight: 500;
+    color: #212529;
+  }
+  
+  .numero {
+    font-size: 16px;
+    font-weight: bold;
+    color: #212529;
+  }
+}
+
+.participacion-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .fecha {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #6c757d;
+    
+    ion-icon {
+      font-size: 14px;
+    }
+  }
+  
+  .importe {
+    font-size: 14px;
+    font-weight: 600;
+    color: #28a745;
+  }
+}
+
+.participacion-actions {
+  .info-icon {
+    font-size: 24px;
+    color: #6c757d;
+  }
+}
+
+.footer-actions {
+  position: fixed;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 16px;
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.total-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .total-label {
+    font-size: 12px;
+    color: #6c757d;
+  }
+  
+  .total-amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+  }
+}
+
+.action-footer-button {
+  --background: #F49200;
+  --color: #ffffff;
+  height: 56px;
+  border-radius: 28px;
+  font-weight: 500;
+  text-transform: none;
+  min-width: 120px;
+}
+
+// Modales
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 8px 20px;
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+  }
+  
+  .close-button {
+    --color: #6c757d;
+    margin: 0;
+  }
+}
+
+.modal-subtitle {
+  padding: 0 20px;
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 20px 0;
+}
+
+.modal-content {
+  padding: 0 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.modal-input-item {
+  --background: #F5F6F7;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 20px;
+  }
+}
+
+.modal-info-text {
+  background: #FFF3CD;
+  border-left: 4px solid #FFC107;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  
+  .info-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    font-size: 12px;
+    color: #856404;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.security-message {
+  background: #D1ECF1;
+  border-left: 4px solid #0D6EFD;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  
+  p {
+    font-size: 12px;
+    color: #0C5460;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.modal-footer {
+  padding: 20px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid #E9ECEF;
+  
+  .omitir-button {
+    --border-color: #212529;
+    --color: #212529;
+    flex: 1;
+    height: 48px;
+    border-radius: 24px;
+    text-transform: none;
+  }
+  
+  .guardar-button,
+  .cobrar-button-modal,
+  .donar-generar-button,
+  .aceptar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    flex: 1;
+    height: 48px;
+    border-radius: 24px;
+    font-weight: 500;
+    text-transform: none;
+  }
+}
+
+// Modal de configuración de donación
+.config-modal {
+  .importe-total-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F5F6F7;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    
+    .importe-label {
+      font-size: 14px;
+      color: #6c757d;
+    }
+    
+    .importe-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+    }
+  }
+
+  .slider-container {
+    margin-bottom: 24px;
+    
+    ion-range {
+      padding: 0;
+      --bar-height: 6px;
+      --bar-background: #E9ECEF;
+      --bar-background-active: #F49200;
+      --knob-size: 24px;
+      --knob-background: #F49200;
+    }
+    
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 14px;
+      color: #6c757d;
+    }
+  }
+
+  .distribucion-boxes {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .distribucion-box {
+    flex: 1;
+    background: #F5F6F7;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    
+    .box-icon {
+      font-size: 32px;
+      color: #F49200;
+      margin-bottom: 12px;
+    }
+    
+    .box-label {
+      font-size: 12px;
+      color: #6c757d;
+      margin: 0 0 8px 0;
+    }
+    
+    .box-percentage {
+      font-size: 18px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+    
+    .box-amount {
+      font-size: 16px;
+      font-weight: 600;
+      color: #F49200;
+      margin: 0;
+    }
+  }
+}
+
+// Modal de éxito
+.success-modal {
+  text-align: center;
+  
+  .success-icon {
+    font-size: 64px;
+    margin: 20px 0;
+    color: #28a745;
+  }
+  
+  .success-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 20px 0;
+  }
+  
+  .success-content {
+    text-align: left;
+    
+    p {
+      font-size: 14px;
+      color: #212529;
+      line-height: 1.6;
+      margin: 0 0 12px 0;
+    }
+    
+    .success-note {
+      font-size: 12px;
+      color: #6c757d;
+    }
+  }
+
+  .codigo-section {
+    text-align: center;
+    
+    .codigo-display {
+      background: #F5F6F7;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #F49200;
+      letter-spacing: 2px;
+      margin: 16px 0;
+      font-family: monospace;
+    }
+    
+    .codigo-info {
+      font-size: 12px;
+      color: #6c757d;
+      line-height: 1.6;
+      margin: 12px 0;
+      text-align: left;
+      
+      strong {
+        color: #212529;
+      }
+    }
+  }
+}
+

@@ -1,0 +1,74 @@
+.condiciones-content {
+  --background: #F5F6F7;
+}
+
+.condiciones-container {
+  padding: 16px;
+}
+
+.seccion-card, .contacto-card {
+  margin-bottom: 24px;
+  
+  h2 {
+    color: #212529;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+  }
+  
+  .fecha-actualizacion {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0 0 24px 0;
+    font-style: italic;
+  }
+}
+
+.contenido-seccion {
+  h3 {
+    color: #212529;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 24px 0 12px 0;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    text-align: justify;
+  }
+  
+  ul {
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 0 0 16px 0;
+    padding-left: 24px;
+    
+    li {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.contacto-info {
+  margin-top: 16px;
+  
+  p {
+    color: #212529;
+    font-size: 14px;
+    margin: 8px 0;
+    
+    strong {
+      color: #212529;
+      font-weight: 600;
+    }
+  }
+}
+
