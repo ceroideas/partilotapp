@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MenuController } from '@ionic/angular';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -12,10 +13,13 @@ import { filter } from 'rxjs/operators';
 export class AppComponent implements OnInit {
   currentRoute: string = '';
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
+  userName: string = '';
+  userEmail: string = '';
 
   constructor(
     private menuController: MenuController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     // Detectar cambios de ruta
     this.router.events.pipe(
@@ -23,11 +27,27 @@ export class AppComponent implements OnInit {
     ).subscribe((event: any) => {
       this.currentRoute = event.url;
       this.detectarRol();
+      this.actualizarUsuario();
     });
   }
 
   ngOnInit() {
     this.detectarRol();
+    this.actualizarUsuario();
+  }
+
+  actualizarUsuario() {
+    const user = this.authService.getUser();
+    if (user) {
+      this.userName = user.name || '';
+      this.userEmail = user.email || '';
+    }
+  }
+
+  logout(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.authService.logout().subscribe(() => {});
   }
 
   detectarRol() {

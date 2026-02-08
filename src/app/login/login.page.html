@@ -1,0 +1,52 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      <div class="header-content">
+        <span class="logo-text">PARTILOT</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-container">
+    
+    <div class="login-card figma-card">
+      <h2 class="login-title">Acceso Vendedor</h2>
+      <p class="login-subtitle">Inicia sesión para gestionar tus ventas</p>
+
+      <form (ngSubmit)="onSubmit()">
+        <ion-item class="input-item">
+          <ion-label position="floating">Email</ion-label>
+          <ion-input 
+            type="email" 
+            [(ngModel)]="email" 
+            name="email"
+            placeholder="tu@email.com"
+            inputmode="email"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item class="input-item">
+          <ion-label position="floating">Contraseña</ion-label>
+          <ion-input 
+            type="password" 
+            [(ngModel)]="password" 
+            name="password"
+            placeholder="••••••••"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-button 
+          type="submit" 
+          class="login-button" 
+          expand="block">
+          Iniciar sesión
+        </ion-button>
+      </form>
+    </div>
+
+  </div>
+</ion-content>

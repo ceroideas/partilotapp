@@ -91,8 +91,23 @@
 
       <!-- Participaciones Físicas -->
       <div class="participaciones-fisicas" *ngIf="tipoParticipacion === 'fisicas'">
-        <div class="sorteo-info">
-          <span class="sorteo-text">Sorteo: {{ numeroSorteo }}</span>
+        <!-- Selector de Reserva/Set -->
+        <div class="selector-section" *ngIf="reserves.length > 0">
+          <ion-item *ngIf="reserves.length > 1" class="input-item">
+            <ion-label position="stacked">Sorteo / Reserva</ion-label>
+            <ion-select [(ngModel)]="reserveSeleccionado" (ionChange)="onReserveChange()" name="reserve" placeholder="Selecciona">
+              <ion-select-option *ngFor="let r of reserves" [value]="r">{{ r.lottery?.name || 'Reserva' }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item *ngIf="sets.length > 0" class="input-item">
+            <ion-label position="stacked">Set</ion-label>
+            <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="set" placeholder="Selecciona set">
+              <ion-select-option *ngFor="let s of sets" [value]="s">{{ s.set_name || 'Set' }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+        <div class="sorteo-info" *ngIf="reserveSeleccionado">
+          <span class="sorteo-text">Sorteo: {{ numeroSorteo || 'Selecciona' }}</span>
         </div>
 
         <div class="participacion-unidad">
@@ -209,6 +224,14 @@
             (click)="seleccionarFormaPago('bizum')">
             <ion-icon name="percent-outline"></ion-icon>
             <ion-label>Pago Por Bizum</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'transferencia'"
+            (click)="seleccionarFormaPago('transferencia')">
+            <ion-icon name="card-outline"></ion-icon>
+            <ion-label>Transferencia</ion-label>
           </ion-button>
           
           <ion-button 

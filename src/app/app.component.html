@@ -152,17 +152,17 @@
   
   <!-- Información del usuario fuera del content -->
   <div class="user-info">
-    <ion-item button>
+    <ion-item button [routerLink]="['/perfil']" routerDirection="root" (click)="cerrarMenu()">
       <ion-avatar slot="start">
         <div class="avatar-placeholder">
           <ion-icon name="person-outline"></ion-icon>
         </div>
       </ion-avatar>
       <ion-label>
-        <h2>Usuario</h2>
-        <p>jorge&#64;example.com</p>
+        <h2>{{ userName || 'Usuario' }}</h2>
+        <p>{{ userEmail || '' }}</p>
       </ion-label>
-      <ion-icon name="log-out-outline" slot="end"></ion-icon>
+      <ion-icon name="log-out-outline" slot="end" (click)="logout($event)"></ion-icon>
     </ion-item>
   </div>
 </ion-menu>

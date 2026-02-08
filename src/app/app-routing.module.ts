@@ -1,7 +1,12 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 const routes: Routes = [
+  {
+    path: 'login',
+    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule)
+  },
   {
     path: '',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
@@ -36,19 +41,23 @@ const routes: Routes = [
   },
   {
     path: 'vendedor',
-    loadChildren: () => import('./vendedor/vendedor.module').then( m => m.VendedorPageModule)
+    loadChildren: () => import('./vendedor/vendedor.module').then( m => m.VendedorPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'venta',
-    loadChildren: () => import('./venta/venta.module').then( m => m.VentaPageModule)
+    loadChildren: () => import('./venta/venta.module').then( m => m.VentaPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'venta-qr',
-    loadChildren: () => import('./venta-qr/venta-qr.module').then( m => m.VentaQrPageModule)
+    loadChildren: () => import('./venta-qr/venta-qr.module').then( m => m.VentaQrPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'venta-manual',
-    loadChildren: () => import('./venta-manual/venta-manual.module').then( m => m.VentaManualPageModule)
+    loadChildren: () => import('./venta-manual/venta-manual.module').then( m => m.VentaManualPageModule),
+    canActivate: [authGuard]
   },
       {
         path: 'gestor-participaciones',

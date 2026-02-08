@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { authGuard } from '../core/guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -28,26 +29,31 @@ const routes: Routes = [
         path: 'tab5',
         loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule)
       },
-      // Tabs para Vendedor
+      // Tabs para Vendedor (requieren login)
       {
         path: 'vendedor-tab1',
-        loadChildren: () => import('../venta/venta.module').then(m => m.VentaPageModule)
+        loadChildren: () => import('../venta/venta.module').then(m => m.VentaPageModule),
+        canActivate: [authGuard]
       },
       {
         path: 'vendedor-tab2',
-        loadChildren: () => import('../historial/historial.module').then(m => m.HistorialPageModule)
+        loadChildren: () => import('../historial/historial.module').then(m => m.HistorialPageModule),
+        canActivate: [authGuard]
       },
       {
         path: 'vendedor-tab3',
-        loadChildren: () => import('../vendedor/vendedor.module').then(m => m.VendedorPageModule)
+        loadChildren: () => import('../vendedor/vendedor.module').then(m => m.VendedorPageModule),
+        canActivate: [authGuard]
       },
       {
         path: 'vendedor-tab4',
-        loadChildren: () => import('../gestor-participaciones/gestor-participaciones.module').then(m => m.GestorParticipacionesPageModule)
+        loadChildren: () => import('../gestor-participaciones/gestor-participaciones.module').then(m => m.GestorParticipacionesPageModule),
+        canActivate: [authGuard]
       },
       {
         path: 'vendedor-tab5',
-        loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule)
+        loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule),
+        canActivate: [authGuard]
       },
       // Tabs para Gestor
       {

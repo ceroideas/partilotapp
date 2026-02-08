@@ -75,41 +75,33 @@
         </ion-button>
       </div>
 
-      <!-- Botón Nueva Digitalización -->
+      <!-- Botón Escanear QR -->
       <ion-button 
         class="nueva-digitalizacion-button" 
         expand="block"
         (click)="iniciarScanner()">
-        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-        Nueva Digitalización
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        Escanear QR
       </ion-button>
 
-      <!-- Lista de Participaciones -->
+      <!-- Lista de Participaciones vendidas -->
       <div class="participaciones-list" *ngIf="participaciones.length > 0">
         <div 
           class="participacion-item" 
           *ngFor="let participacion of participaciones">
           <div class="participacion-info">
             <span class="participacion-numero">Participación {{ participacion.numero }}</span>
-            <span class="participacion-entidad">{{ participacion.entidad }}</span>
           </div>
-          <span class="participacion-precio">€{{ participacion.precio | number:'1.2-2' }}</span>
         </div>
       </div>
 
-      <!-- Importe Total -->
-      <div class="importe-total-section" *ngIf="participaciones.length > 0">
-        <span class="importe-label">Importe total</span>
-        <span class="importe-valor">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
-      </div>
-
-      <!-- Botón Vender -->
+      <!-- Botón Volver -->
       <ion-button 
         class="vender-button" 
         expand="block"
         *ngIf="participaciones.length > 0"
-        (click)="mostrarResumen()">
-        Vender
+        (click)="cerrarVenta()">
+        Volver
       </ion-button>
     </div>
 
@@ -158,6 +150,14 @@
             (click)="seleccionarFormaPago('bizum')">
             <ion-icon name="percent-outline"></ion-icon>
             <ion-label>Pago Por Bizum</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'transferencia'"
+            (click)="seleccionarFormaPago('transferencia')">
+            <ion-icon name="card-outline"></ion-icon>
+            <ion-label>Transferencia</ion-label>
           </ion-button>
           
           <ion-button 

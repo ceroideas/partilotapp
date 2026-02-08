@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-perfil',
@@ -12,19 +13,28 @@ export class PerfilPage implements OnInit {
   usuario: any = {};
   esVendedor: boolean = false;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   ngOnInit() {
-    const usuarioStr = localStorage.getItem('usuario');
-    if (usuarioStr) {
-      this.usuario = JSON.parse(usuarioStr);
+    const user = this.authService.getUser();
+    if (user) {
+      this.usuario = {
+        nombre: user.name || user.nombre || 'Usuario',
+        correo: user.email || user.correo || ''
+      };
+    } else {
+      const usuarioStr = localStorage.getItem('usuario');
+      if (usuarioStr) {
+        this.usuario = JSON.parse(usuarioStr);
+      }
     }
     
-    // Verificar si es vendedor
-    const esVendedorStr = localStorage.getItem('esVendedor');
-    this.esVendedor = esVendedorStr === 'true' || 
-                      this.usuario.tipo === 'vendedor' || 
-                      this.usuario.rol === 'vendedor';
+    this.esVendedor = this.authService.isSeller() || 
+                      this.usuario?.tipo === 'vendedor' || 
+                      this.usuario?.rol === 'vendedor';
   }
 
   goToDigitalizarParticipacion() {

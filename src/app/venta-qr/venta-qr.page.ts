@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { VentasService } from '../core/services/ventas.service';
 
 @Component({
   selector: 'app-venta-qr',
@@ -12,10 +13,11 @@ export class VentaQRPage implements OnInit {
 
   mostrandoScanner: boolean = false;
   participaciones: any[] = [];
+  referenciaEscaneada: string | null = null;
   
   // Modal de resumen
   mostrarModalResumen: boolean = false;
-  formaPago: 'efectivo' | 'bizum' | 'omitir' | null = null;
+  formaPago: 'efectivo' | 'bizum' | 'transferencia' | 'omitir' | null = null;
   
   // Modal de éxito
   mostrarModalExito: boolean = false;
@@ -23,11 +25,11 @@ export class VentaQRPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private ventasService: VentasService
   ) { }
 
   ngOnInit() {
-    this.cargarParticipaciones();
   }
 
   cambiarRol(rol: string) {
@@ -44,39 +46,50 @@ export class VentaQRPage implements OnInit {
     }
   }
 
-  cargarParticipaciones() {
-    // Cargar participaciones desde localStorage o inicializar vacío
-    const participacionesGuardadas = localStorage.getItem('participacionesVentaQR');
-    if (participacionesGuardadas) {
-      this.participaciones = JSON.parse(participacionesGuardadas);
+  async iniciarScanner() {
+    this.mostrandoScanner = true;
+    try {
+      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+        scanText: 'Escanea el código QR de la participación'
+      });
+      const referencia = result?.ScanResult?.trim() || null;
+      if (referencia) {
+        await this.procesarQR(referencia);
+      }
+    } catch (err) {
+      console.error('Error escáner QR:', err);
+      await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner. Ejecuta npx cap sync.');
+    } finally {
+      this.mostrandoScanner = false;
     }
   }
 
-  guardarParticipaciones() {
-    localStorage.setItem('participacionesVentaQR', JSON.stringify(this.participaciones));
-  }
+  private async procesarQR(referencia: string) {
+    const loading = await this.loadingController.create({ message: 'Procesando...' });
+    await loading.present();
 
-  iniciarScanner() {
-    this.mostrandoScanner = true;
-    // TODO: Iniciar escáner QR real con plugin de Capacitor
-    // Por ahora simulamos el escaneo después de 2 segundos
-    setTimeout(() => {
-      this.simularEscaneo();
-    }, 2000);
-  }
-
-  simularEscaneo() {
-    // Simular escaneo de una participación
-    const nuevaParticipacion = {
-      id: Date.now(),
-      numero: `1/${String(this.participaciones.length + 1).padStart(4, '0')}`,
-      entidad: 'Peña Rondalosa',
-      precio: 5.00
-    };
-    
-    this.participaciones.push(nuevaParticipacion);
-    this.guardarParticipaciones();
-    this.mostrandoScanner = false;
+    this.ventasService.sellByQr(referencia).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        if (res.success) {
+          this.participaciones.push({
+            numero: res.participation?.participation_code || referencia,
+            referencia,
+            entidad: '',
+            precio: 0
+          });
+          this.mostrarModalExito = true;
+        } else {
+          await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
+        }
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        await this.mostrarAlerta('Error', err.error?.message || 'Error al procesar el código QR.');
+      }
+    });
   }
 
   cancelarScanner() {
@@ -100,52 +113,18 @@ export class VentaQRPage implements OnInit {
     this.mostrarModalResumen = false;
   }
 
-  seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'omitir') {
+  seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {
     this.formaPago = forma;
   }
 
   async registrarVenta() {
-    if (!this.formaPago) {
-      await this.mostrarAlerta('Atención', 'Por favor selecciona una forma de pago');
-      return;
-    }
-
-    const loading = await this.loadingController.create({
-      message: 'Registrando venta...',
-    });
-    await loading.present();
-
-    try {
-      const venta = {
-        id: Date.now(),
-        tipo: 'qr',
-        participaciones: [...this.participaciones],
-        totalParticipaciones: this.participaciones.length,
-        importeTotal: this.calcularImporteTotal(),
-        formaPago: this.formaPago,
-        fecha: new Date().toISOString(),
-        estado: 'registrada'
-      };
-
-      const ventas = JSON.parse(localStorage.getItem('ventas') || '[]');
-      ventas.push(venta);
-      localStorage.setItem('ventas', JSON.stringify(ventas));
-
-      // Limpiar participaciones de esta sesión
-      this.participaciones = [];
-      localStorage.removeItem('participacionesVentaQR');
-
-      await loading.dismiss();
-      this.cerrarModalResumen();
-      this.mostrarModalExito = true;
-    } catch (error) {
-      await loading.dismiss();
-      await this.mostrarAlerta('Error', 'No se pudo registrar la venta. Intenta nuevamente.');
-    }
+    await this.cerrarModalResumen();
+    this.cerrarModalExito();
   }
 
   cerrarModalExito() {
     this.mostrarModalExito = false;
+    this.participaciones = [];
     this.router.navigate(['/tabs/vendedor-tab3']);
   }
 
