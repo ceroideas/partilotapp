@@ -124,7 +124,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
   
   .item-titulo {
     font-size: 16px;
@@ -132,10 +133,35 @@
     color: #212529;
   }
   
+  .item-descripcion {
+    font-size: 13px;
+    color: #6c757d;
+  }
+  
   .item-fecha {
     font-size: 12px;
     color: #6c757d;
   }
+}
+
+.item-fecha-hora {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6c757d;
+  flex-shrink: 0;
+  
+  .cal-icon {
+    font-size: 16px;
+    color: #6c757d;
+  }
+}
+
+.item-chevron {
+  font-size: 20px;
+  color: #adb5bd;
+  flex-shrink: 0;
 }
 
 .item-right {
@@ -168,6 +194,49 @@
   max-height: 200px;
   border-radius: 12px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Detalle venta: imagen + forma de pago a la izquierda, datos a la derecha */
+.detalle-venta-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ticket-y-pago {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.forma-pago-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  
+  .label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+  }
+}
+
+.btn-forma-pago {
+  --border-radius: 20px;
+  font-weight: 500;
+  text-transform: none;
+  max-width: 140px;
+}
+
+.detalle-venta .detalle-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.ref-row .value {
+  font-size: 12px;
+  word-break: break-all;
 }
 
 .detalle-info {
@@ -265,6 +334,32 @@
   height: 40px;
   text-transform: none;
   font-weight: 500;
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 48px 16px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  ion-icon {
+    color: #6c757d;
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.error-state ion-icon {
+  color: #dc3545;
 }
 
 .empty-state {

@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button *ngIf="!showEntitySelection"></ion-back-button>
     </ion-buttons>
     <ion-title>
       <div class="header-content">
@@ -12,17 +12,206 @@
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button menu="main-menu"></ion-menu-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="gestor-participaciones-content">
-  <div class="gestor-participaciones-container">
+<ion-content [fullscreen]="true" class="participaciones-content">
+  
+  <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
+  <div class="participaciones-container" *ngIf="isVendedor && showEntitySelection && !showTacosList && !showTacoDetail">
+    <div class="section-header">
+      <h1 class="section-title">Entidades</h1>
+      <p class="section-subtitle">Selecciona la entidad para la venta</p>
+    </div>
+    
+    <div class="entities-grid">
+      <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
+        <div class="entity-logo" *ngIf="entity.image">
+          <img [src]="entity.image" [alt]="entity.name">
+        </div>
+        <div class="entity-name">{{ entity.name }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista 2: Lista de Tacos con Resumen -->
+  <div class="participaciones-container" *ngIf="isVendedor && showTacosList && !showTacoDetail">
+    <div class="section-header">
+      <h1 class="section-title">Participaciones</h1>
+      <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
+      <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+        <img [src]="selectedEntity.image" [alt]="selectedEntity.name">
+      </div>
+    </div>
+
+    <!-- Resumen General -->
+    <div class="summary-card" *ngIf="summary">
+      <div class="summary-row">
+        <span class="summary-label">Total Participaciones:</span>
+        <span class="summary-value">{{ summary.total_participations }} ({{ summary.total_amount | number:'1.2-2' }}€)</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Ventas registradas:</span>
+        <span class="summary-value">{{ summary.sales_registered }} ({{ summary.sales_amount | number:'1.2-2' }}€)</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Participaciones Devueltas:</span>
+        <span class="summary-value">{{ summary.returned_participations }} ({{ summary.returned_amount | number:'1.2-2' }}€)</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Disponibles:</span>
+        <span class="summary-value">{{ summary.available_participations }} ({{ summary.available_amount | number:'1.2-2' }}€)</span>
+      </div>
+      
+      <div class="payment-breakdown" *ngIf="summary.payment_breakdown">
+        <div class="breakdown-title">Desglose de Pagos:</div>
+        <div class="breakdown-row" *ngIf="summary.payment_breakdown.efectivo > 0">
+          <span>Pago Efectivo:</span>
+          <span>{{ getPaymentCount(summary.payment_breakdown.efectivo, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.efectivo | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="summary.payment_breakdown.bizum > 0">
+          <span>Pago Bizum:</span>
+          <span>{{ getPaymentCount(summary.payment_breakdown.bizum, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.bizum | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="summary.payment_breakdown.transferencia > 0">
+          <span>Pago Transferencia:</span>
+          <span>{{ getPaymentCount(summary.payment_breakdown.transferencia, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.transferencia | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="summary.payment_breakdown.sin_registrar > 0">
+          <span>Pago Sin Registrar:</span>
+          <span>{{ getPaymentCount(summary.payment_breakdown.sin_registrar, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.sin_registrar | number:'1.2-2' }}€)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Tacos -->
+    <div class="tacos-list">
+      <div class="taco-card" *ngFor="let taco of tacos" (click)="viewTaco(taco)">
+        <div class="taco-header">
+          <div class="taco-ticket-icon">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+          <div class="taco-info">
+            <div class="taco-title">Taco: {{ taco.set_number }}/{{ padNumber(taco.book_number, 3) }}</div>
+            <div class="taco-subtitle">Particip.: {{ taco.participations_range }}</div>
+            <div class="taco-lottery">Sorteo: {{ taco.lottery_name }} - Fecha: {{ formatDate(taco.lottery_date) }}</div>
+          </div>
+        </div>
+        <div class="taco-stats">
+          <div class="stat-item">
+            <span class="stat-label">Ventas registradas:</span>
+            <span class="stat-value">{{ taco.sales_registered }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Participaciones Devueltas:</span>
+            <span class="stat-value">{{ taco.returned_participations }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Disponibles:</span>
+            <span class="stat-value">{{ taco.available_participations }}</span>
+          </div>
+        </div>
+        <div class="taco-action">
+          <ion-button fill="clear" size="small">
+            Ver más
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista 3: Detalle de Participaciones del Taco -->
+  <div class="participaciones-container" *ngIf="isVendedor && showTacoDetail">
+    <div class="section-header">
+      <h1 class="section-title">Participaciones</h1>
+      <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
+      <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+        <img [src]="selectedEntity.image" [alt]="selectedEntity.name">
+      </div>
+    </div>
+
+    <!-- Detalle del Taco Seleccionado -->
+    <div class="taco-detail-card" *ngIf="selectedTaco">
+      <div class="taco-detail-header">
+        <div class="taco-ticket-large">
+          <ion-icon name="ticket-outline"></ion-icon>
+        </div>
+        <div class="taco-detail-info">
+          <div class="taco-detail-title">N-{{ selectedTaco.set_number }}</div>
+          <div class="taco-detail-price">Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</div>
+          <div class="taco-detail-range">Taco: {{ selectedTaco.set_number }}/{{ padNumber(selectedTaco.book_number, 3) }} Particip.: {{ selectedTaco.participations_range }}</div>
+          <div class="taco-detail-lottery">Sorteo: {{ selectedTaco.lottery_name }} - Fecha: {{ selectedTaco.lottery_date }}</div>
+        </div>
+      </div>
+      
+      <div class="taco-detail-summary">
+        <div class="summary-stat">
+          <span>Ventas registradas:</span>
+          <span>{{ getTacoSalesCount() }} ({{ getTacoSalesAmount() | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="summary-stat">
+          <span>Participaciones Devueltas:</span>
+          <span>{{ getTacoReturnedCount() }} ({{ getTacoReturnedAmount() | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="summary-stat">
+          <span>Disponibles:</span>
+          <span>{{ getTacoAvailableCount() }} ({{ getTacoAvailableAmount() | number:'1.2-2' }}€)</span>
+        </div>
+      </div>
+
+      <div class="taco-payment-breakdown" *ngIf="getTacoPaymentBreakdown()">
+        <div class="breakdown-title">Desglose de Pagos:</div>
+        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().efectivo > 0">
+          <span>Pago Efectivo:</span>
+          <span>{{ getTacoPaymentCount('efectivo') }} ({{ getTacoPaymentBreakdown().efectivo | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().bizum > 0">
+          <span>Pago Bizum:</span>
+          <span>{{ getTacoPaymentCount('bizum') }} ({{ getTacoPaymentBreakdown().bizum | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().transferencia > 0">
+          <span>Pago Transferencia:</span>
+          <span>{{ getTacoPaymentCount('transferencia') }} ({{ getTacoPaymentBreakdown().transferencia | number:'1.2-2' }}€)</span>
+        </div>
+        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().sin_registrar > 0">
+          <span>Pago Sin Registrar:</span>
+          <span>{{ getTacoPaymentCount('sin_registrar') }} ({{ getTacoPaymentBreakdown().sin_registrar | number:'1.2-2' }}€)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Participaciones Individuales -->
+    <div class="participations-list">
+      <div class="participation-item" *ngFor="let part of tacoParticipations">
+        <div class="participation-icon">
+          <ion-icon name="ticket-outline"></ion-icon>
+        </div>
+        <div class="participation-info">
+          <div class="participation-code">Participación: {{ part.participation_code }}</div>
+          <div class="participation-date" *ngIf="part.sale_date">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ part.sale_date }} - {{ part.sale_time }}h
+          </div>
+        </div>
+        <div class="participation-status">
+          <span [class]="getStatusBadgeClass(part.status, part.payment_method)">
+            {{ getStatusText(part.status, part.payment_method) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista para Gestor (si no es vendedor) -->
+  <div class="participaciones-container" *ngIf="!isVendedor">
     <div class="empty-state">
       <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
       <h2>Participaciones</h2>
       <p>Esta vista estará disponible próximamente</p>
     </div>
   </div>
+
 </ion-content>

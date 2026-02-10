@@ -74,12 +74,14 @@ export class VentaQRPage implements OnInit {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
+          const p = res.participation || res;
           this.participaciones.push({
-            numero: res.participation?.participation_code || referencia,
+            numero: p.participation_code || p.numero || referencia,
             referencia,
-            entidad: '',
-            precio: 0
+            entidad: p.entity_name || p.entidad || '',
+            precio: p.amount || p.importeTotal || 0
           });
+          this.guardarVentaDigitalEnHistorial(res, referencia);
           this.mostrarModalExito = true;
         } else {
           await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
@@ -94,6 +96,34 @@ export class VentaQRPage implements OnInit {
 
   cancelarScanner() {
     this.mostrandoScanner = false;
+  }
+
+  guardarVentaDigitalEnHistorial(res: any, referencia: string): void {
+    const p = res.participation || res;
+    const entidad = p.entity_name || p.entidad || '—';
+    const drawDate = p.draw_date
+      ? new Date(p.draw_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+      : '—';
+    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+    historial.unshift({
+      id: Date.now(),
+      tipo: 'venta-digital',
+      fecha: new Date().toISOString(),
+      formaPago: this.formaPago || null,
+      descripcion: `Participación ${entidad}`,
+      participacion: {
+        entidad,
+        numero: p.participation_code || p.numero || referencia,
+        fechaSorteo: drawDate,
+        importeJugado: p.played_amount ?? p.importeJugado ?? 0,
+        donativo: p.donation_amount ?? p.donativo,
+        importeTotal: p.amount ?? p.importeTotal ?? 0,
+        numeroParticipacion: p.participation_code || referencia,
+        numeroReferencia: p.reference || referencia.padEnd(19, '0').slice(0, 19),
+        imagen: p.image || null
+      }
+    });
+    localStorage.setItem('historial', JSON.stringify(historial));
   }
 
   cerrarVenta() {

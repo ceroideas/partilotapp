@@ -60,8 +60,20 @@
       <p class="page-subtitle">Aquí puedes ver el historial</p>
     </div>
 
+    <!-- Cargando historial desde API -->
+    <div *ngIf="loadingHistorial" class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando historial...</p>
+    </div>
+
+    <!-- Error al cargar (solo si hay mensaje y no hay datos de respaldo) -->
+    <div *ngIf="errorHistorial && historial.length === 0" class="error-state">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <p>{{ errorHistorial }}</p>
+    </div>
+
     <!-- Lista de historial con acordeones -->
-    <ion-accordion-group *ngIf="historial.length > 0" class="historial-accordion-group">
+    <ion-accordion-group *ngIf="historial.length > 0 && !loadingHistorial" class="historial-accordion-group">
       <ion-accordion 
         *ngFor="let item of historial; let i = index"
         [value]="'item-' + i"
@@ -77,18 +89,68 @@
             </div>
             <div class="item-info">
               <span class="item-titulo">{{ getTituloTipo(item.tipo) }}</span>
-              <span class="item-fecha">{{ formatearFecha(item.fecha) }}</span>
+              <span class="item-descripcion">{{ getDescripcion(item) }}</span>
             </div>
-            <div class="item-right" *ngIf="item.importeTotal || item.importeDonacion || item.importeCodigo">
+            <div class="item-fecha-hora">
+              <ion-icon name="calendar-outline" class="cal-icon"></ion-icon>
+              <span>{{ formatearFechayHora(item.fecha) }}</span>
+            </div>
+            <div class="item-right" *ngIf="item.importeTotal || item.importeDonacion || item.importeCodigo || item.participacion?.importeTotal">
               <span class="item-importe">
-                €{{ (item.importeTotal || item.importeDonacion || item.importeCodigo) | number:'1.2-2' }}
+                €{{ (item.importeTotal || item.importeDonacion || item.importeCodigo || item.participacion?.importeTotal) | number:'1.2-2' }}
               </span>
             </div>
+            <ion-icon name="chevron-forward" class="item-chevron"></ion-icon>
           </div>
         </ion-item>
 
         <div slot="content" class="accordion-detail-content">
           
+          <!-- Detalle de Venta / Venta Digital (ventas de participaciones) -->
+          <div *ngIf="(item.tipo === 'venta' || item.tipo === 'venta-digital') && item.participacion" class="detalle-container detalle-venta">
+            <div class="detalle-venta-grid">
+              <div class="ticket-y-pago">
+                <div class="ticket-image-container" *ngIf="item.participacion.imagen">
+                  <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+                </div>
+                <div class="forma-pago-block">
+                  <span class="label">Forma de Pago</span>
+                  <ion-button fill="outline" size="small" class="btn-forma-pago">{{ getFormaPagoTexto(item.formaPago) }}</ion-button>
+                </div>
+              </div>
+              <div class="detalle-info">
+                <div class="detalle-row">
+                  <span class="label">Entidad:</span>
+                  <span class="value">{{ item.participacion.entidad || '—' }}</span>
+                </div>
+                <div class="detalle-row">
+                  <span class="label">Numero:</span>
+                  <span class="value">{{ item.participacion.numero || '—' }}</span>
+                </div>
+                <div class="detalle-row">
+                  <span class="label">Fecha Sorteo:</span>
+                  <span class="value">{{ item.participacion.fechaSorteo || '—' }}</span>
+                </div>
+                <div class="detalle-row">
+                  <span class="label">Importe Jugado:</span>
+                  <span class="value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span>
+                </div>
+                <div class="detalle-row" *ngIf="item.participacion.donativo">
+                  <span class="label">Donativo:</span>
+                  <span class="value">€{{ item.participacion.donativo | number:'1.2-2' }}</span>
+                </div>
+                <div class="detalle-row">
+                  <span class="label">Importe total:</span>
+                  <span class="value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="detalle-row ref-row">
+                  <span class="label">N°:</span>
+                  <span class="value">{{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Detalle de Digitalización -->
           <div *ngIf="item.tipo === 'digitalizacion' && item.participacion" class="detalle-container">
             <div class="ticket-image-container" *ngIf="item.participacion.imagen">
@@ -276,7 +338,7 @@
     </ion-accordion-group>
 
     <!-- Estado vacío -->
-    <div class="empty-state" *ngIf="historial.length === 0">
+    <div class="empty-state" *ngIf="historial.length === 0 && !loadingHistorial">
       <ion-icon name="time-outline"></ion-icon>
       <p>No hay historial disponible</p>
       <p class="empty-subtitle">Tus acciones aparecerán aquí</p>

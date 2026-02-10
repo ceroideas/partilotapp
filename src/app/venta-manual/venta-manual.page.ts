@@ -217,6 +217,7 @@ export class VentaManualPage implements OnInit {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success) {
+          this.guardarVentaEnHistorial(res, desde, hasta);
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {
@@ -231,6 +232,37 @@ export class VentaManualPage implements OnInit {
     });
   }
 
+  guardarVentaEnHistorial(res: any, desde: number, hasta: number): void {
+    const lottery = this.reserveSeleccionado?.lottery;
+    const entidad = this.reserveSeleccionado?.entity?.name || lottery?.name || '—';
+    const drawDate = lottery?.draw_date
+      ? new Date(lottery.draw_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+      : '—';
+    const donativo = parseFloat(this.setSeleccionado?.donation_amount) || 0;
+    const numeroDisplay = this.participacionUnidad || `${this.rangoDesde} - ${this.rangoHasta}`;
+    const participacion = res.participation || res.sale || {};
+    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+    historial.unshift({
+      id: Date.now(),
+      tipo: 'venta',
+      fecha: new Date().toISOString(),
+      formaPago: this.formaPago === 'omitir' ? null : this.formaPago,
+      descripcion: `Participación ${entidad}`,
+      participacion: {
+        entidad,
+        numero: participacion.participation_code || participacion.numero || numeroDisplay,
+        fechaSorteo: drawDate,
+        importeJugado: this.precioPorParticipacion,
+        donativo: donativo > 0 ? donativo : undefined,
+        importeTotal: this.importeTotal,
+        numeroParticipacion: participacion.participation_code || this.participacionUnidad || `${desde}/${hasta}`,
+        numeroReferencia: participacion.reference || participacion.numero_referencia || '0000000000000000000',
+        imagen: participacion.image || null
+      }
+    });
+    localStorage.setItem('historial', JSON.stringify(historial));
+  }
+
   cerrarModalExito() {
     this.mostrarModalExito = false;
     // Limpiar formulario
@@ -238,8 +270,6 @@ export class VentaManualPage implements OnInit {
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
-    // Opcional: navegar a otra vista
-    // this.router.navigate(['/vendedor']);
   }
 
   async mostrarAlerta(header: string, message: string) {

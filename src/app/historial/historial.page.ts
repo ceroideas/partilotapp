@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { VentasService } from '../core/services/ventas.service';
 
 @Component({
   selector: 'app-historial',
@@ -11,8 +12,13 @@ export class HistorialPage implements OnInit {
 
   historial: any[] = [];
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
+  loadingHistorial = false;
+  errorHistorial: string | null = null;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private ventasService: VentasService
+  ) { }
 
   ngOnInit() {
     this.detectarRol();
@@ -63,8 +69,37 @@ export class HistorialPage implements OnInit {
   }
 
   loadHistorial() {
+    this.errorHistorial = null;
+
+    // Como vendedor: cargar historial desde la API Partilot
+    if (this.rolActual === 'vendedor') {
+      this.loadingHistorial = true;
+      this.ventasService.getHistorial().subscribe({
+        next: (res) => {
+          this.loadingHistorial = false;
+          if (res.success && Array.isArray(res.historial)) {
+            this.historial = res.historial.sort((a: any, b: any) =>
+              new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+            );
+            return;
+          }
+          this.cargarHistorialDesdeLocalStorage();
+        },
+        error: () => {
+          this.loadingHistorial = false;
+          this.errorHistorial = 'No se pudo cargar el historial. Comprueba la conexión.';
+          this.cargarHistorialDesdeLocalStorage();
+        }
+      });
+      return;
+    }
+
+    // Usuario / Gestor: solo localStorage
+    this.cargarHistorialDesdeLocalStorage();
+  }
+
+  private cargarHistorialDesdeLocalStorage() {
     try {
-      // Cargar historial desde localStorage
       const historialGuardado = JSON.parse(localStorage.getItem('historial') || '[]');
       
       if (historialGuardado.length > 0) {
@@ -74,6 +109,24 @@ export class HistorialPage implements OnInit {
       } else {
         // Datos de ejemplo basados en el diseño
         this.historial = [
+          {
+            id: 0,
+            tipo: 'venta',
+            fecha: new Date('2025-09-02T16:45:00').toISOString(),
+            formaPago: 'efectivo',
+            descripcion: 'Participación CSIF-Rioja',
+            participacion: {
+              entidad: 'CSIF-Rioja',
+              numero: '40083',
+              fechaSorteo: '22/12/25',
+              importeJugado: 5.00,
+              donativo: 1.00,
+              importeTotal: 6.00,
+              numeroParticipacion: '1/0001',
+              numeroReferencia: '0000000000000000000',
+              imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+            }
+          },
           {
             id: 1,
             tipo: 'digitalizacion',
@@ -169,37 +222,76 @@ export class HistorialPage implements OnInit {
 
   getIconoTipo(tipo: string): string {
     const iconos: { [key: string]: string } = {
+      'venta': 'receipt-outline',
+      'venta-digital': 'phone-portrait-outline',
       'digitalizacion': 'qr-code-outline',
       'regalo': 'arrow-down-outline',
       'recibido-regalo': 'gift-outline',
       'cobro': 'camera-outline',
       'donacion': 'heart-outline',
-      'codigo-recarga': 'document-text-outline'
+      'codigo-recarga': 'document-text-outline',
+      'codigo': 'document-text-outline'
     };
     return iconos[tipo] || 'document-outline';
   }
 
   getTituloTipo(tipo: string): string {
     const titulos: { [key: string]: string } = {
+      'venta': 'Venta',
+      'venta-digital': 'Venta Digital',
       'digitalizacion': 'Digitalización',
       'regalo': 'Envio Regalo',
       'recibido-regalo': 'Recibido Regalo',
       'cobro': 'Cobro',
       'donacion': 'Donacion',
-      'codigo-recarga': 'Código de Recarga'
+      'codigo-recarga': 'Código de Recarga',
+      'codigo': 'Código de Recarga'
     };
     return titulos[tipo] || 'Acción';
   }
 
   getColorTipo(tipo: string): string {
     const colores: { [key: string]: string } = {
+      'venta': '#28a745',
+      'venta-digital': '#0D6EFD',
       'digitalizacion': '#0D6EFD',
       'regalo': '#F49200',
       'cobro': '#28a745',
       'donacion': '#DC3545',
-      'codigo': '#6c757d'
+      'codigo': '#6c757d',
+      'codigo-recarga': '#6c757d'
     };
     return colores[tipo] || '#6c757d';
+  }
+
+  /** Descripción para la lista: ej. "Participación CSIF-Rioja" */
+  getDescripcion(item: any): string {
+    if (item.descripcion) return item.descripcion;
+    const entidad = item.participacion?.entidad || item.entidad;
+    if (entidad) return `Participación ${entidad}`;
+    return 'Participación';
+  }
+
+  /** Fecha y hora para la cabecera del listado: "02/09/25 - 16:45h" */
+  formatearFechayHora(fecha: string): string {
+    const date = new Date(fecha);
+    const dia = date.getDate().toString().padStart(2, '0');
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    const anio = date.getFullYear().toString().slice(-2);
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    return `${dia}/${mes}/${anio} - ${h}:${m}h`;
+  }
+
+  getFormaPagoTexto(forma: string | null | undefined): string {
+    if (!forma) return '—';
+    const map: { [key: string]: string } = {
+      'efectivo': 'Efectivo',
+      'bizum': 'Bizum',
+      'transferencia': 'Transferencia',
+      'omitir': 'Omitir'
+    };
+    return map[forma] || forma;
   }
 
   formatearFecha(fecha: string): string {

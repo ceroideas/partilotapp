@@ -42,4 +42,23 @@ export class VentasService {
     }
     return this.http.post(`${this.apiUrl}/sales/qr`, body);
   }
+
+  getMyEntities(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sellers/me/entities`);
+  }
+
+  getMyTacos(entityId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sellers/me/tacos?entity_id=${entityId}`);
+  }
+
+  getTacoParticipations(setId: number, bookNumber: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sellers/me/tacos/${setId}/${bookNumber}/participations`);
+  }
+
+  /**
+   * Obtener historial de ventas del vendedor autenticado desde la API Partilot.
+   */
+  getHistorial(): Observable<{ success: boolean; historial: any[] }> {
+    return this.http.get<{ success: boolean; historial: any[] }>(`${this.apiUrl}/sales/me`);
+  }
 }

@@ -1,4 +1,4 @@
-.gestor-participaciones-content {
+.participaciones-content {
   --background: #F5F6F7;
 }
 
@@ -16,18 +16,411 @@
   letter-spacing: 0.5px;
 }
 
-.gestor-participaciones-container {
+.participaciones-container {
   padding: 16px;
   padding-bottom: 100px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.entity-logo-small {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+// Vista 1: Selección de Entidades
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.entity-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.entity-logo {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 12px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.entity-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+}
+
+// Vista 2: Resumen y Lista de Tacos
+.summary-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.summary-row {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.summary-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.payment-breakdown {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.breakdown-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 8px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.tacos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taco-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.taco-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.taco-ticket-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 8px;
+  
+  ion-icon {
+    font-size: 28px;
+    color: #F49200;
+  }
+}
+
+.taco-info {
+  flex: 1;
+}
+
+.taco-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.taco-subtitle {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.taco-lottery {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.taco-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.stat-label {
+  color: #6c757d;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #212529;
+}
+
+.taco-action {
+  text-align: right;
+}
+
+// Vista 3: Detalle del Taco
+.taco-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.taco-detail-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.taco-ticket-large {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 12px;
+  
+  ion-icon {
+    font-size: 40px;
+    color: #F49200;
+  }
+}
+
+.taco-detail-info {
+  flex: 1;
+}
+
+.taco-detail-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.taco-detail-price {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 8px;
+}
+
+.taco-detail-range {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.taco-detail-lottery {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.taco-detail-summary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.summary-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  
+  span:first-child {
+    color: #6c757d;
+  }
+  
+  span:last-child {
+    font-weight: 600;
+    color: #212529;
+  }
+}
+
+.taco-payment-breakdown {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid #f0f0f0;
+}
+
+// Lista de Participaciones Individuales
+.participations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.participation-item {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.participation-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 8px;
+  
+  ion-icon {
+    font-size: 20px;
+    color: #F49200;
+  }
+}
+
+.participation-info {
+  flex: 1;
+}
+
+.participation-code {
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.participation-date {
+  font-size: 12px;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+.participation-status {
+  span {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+.badge-vendida {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-efectivo {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-bizum {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-transferencia {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-devuelta {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-disponible {
+  background: #e2e3e5;
+  color: #383d41;
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .empty-icon {
