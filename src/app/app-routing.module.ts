@@ -13,7 +13,8 @@ const routes: Routes = [
   },
   {
     path: 'digitalizar-participacion',
-    loadChildren: () => import('./digitalizar-participacion/digitalizar-participacion.module').then( m => m.DigitalizarParticipacionPageModule)
+    redirectTo: '/tabs/digitalizar-participacion',
+    pathMatch: 'full'
   },
   {
     path: 'regalar-participacion',
@@ -117,7 +118,8 @@ const routes: Routes = [
   },
   {
     path: 'cobrar-gestionar',
-    loadChildren: () => import('./cobrar-gestionar/cobrar-gestionar.module').then( m => m.CobrarGestionarPageModule)
+    redirectTo: '/tabs/cobrar-gestionar',
+    pathMatch: 'full'
   }
 ];
 @NgModule({

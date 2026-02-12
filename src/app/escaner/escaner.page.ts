@@ -4,6 +4,8 @@ import { AlertController, LoadingController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { VentasService } from '../core/services/ventas.service';
+import { CarteraService } from '../core/services/cartera.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-escaner',
@@ -284,7 +286,7 @@ export class EscanerPage implements OnInit {
     if (!this.ticketEscaneado || !this.ticketEscaneado.premio || this.ticketEscaneado.premio === 0) return;
 
     // Navegar a gestión de premio
-    this.router.navigate(['/cobrar-gestionar']);
+    this.router.navigate(['/tabs/cobrar-gestionar']);
   }
 
   volverAEscanear() {

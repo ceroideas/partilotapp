@@ -29,6 +29,14 @@ const routes: Routes = [
         path: 'tab5',
         loadChildren: () => import('../escaner/escaner.module').then(m => m.EscanerPageModule)
       },
+      {
+        path: 'digitalizar-participacion',
+        loadChildren: () => import('../digitalizar-participacion/digitalizar-participacion.module').then(m => m.DigitalizarParticipacionPageModule)
+      },
+      {
+        path: 'cobrar-gestionar',
+        loadChildren: () => import('../cobrar-gestionar/cobrar-gestionar.module').then(m => m.CobrarGestionarPageModule)
+      },
       // Tabs para Vendedor (requieren login)
       {
         path: 'vendedor-tab1',

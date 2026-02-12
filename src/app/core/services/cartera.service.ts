@@ -68,4 +68,30 @@ export class CarteraService {
   }): Observable<{ success: boolean; message?: string; collected_count?: number }> {
     return this.http.post<{ success: boolean; message?: string; collected_count?: number }>(`${this.apiUrl}/wallet/cobro`, data);
   }
+
+  /** Registrar donación (participation_ids, importe_donacion, importe_codigo, datos personales opcionales) */
+  registrarDonacion(data: {
+    participation_ids: number[];
+    importe_donacion: number;
+    importe_codigo: number;
+    nombre?: string;
+    apellidos?: string;
+    nif?: string;
+  }): Observable<{ 
+    success: boolean; 
+    message?: string; 
+    donation_id?: number;
+    codigo_recarga?: string;
+    importe_donacion?: number;
+    importe_codigo?: number;
+  }> {
+    return this.http.post<{ 
+      success: boolean; 
+      message?: string; 
+      donation_id?: number;
+      codigo_recarga?: string;
+      importe_donacion?: number;
+      importe_codigo?: number;
+    }>(`${this.apiUrl}/wallet/donacion`, data);
+  }
 }

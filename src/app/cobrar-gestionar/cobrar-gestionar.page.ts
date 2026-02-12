@@ -23,6 +23,7 @@ export class CobrarGestionarPage implements OnInit {
   mostrarModalCuenta = false;
   mostrarModalConfigDonacion = false;
   mostrarMensajeExito = false;
+  mostrarMensajeCodigo = false; // Segunda alerta para código de recarga
   
   datosPersonales = {
     nombre: '',
@@ -42,6 +43,7 @@ export class CobrarGestionarPage implements OnInit {
   
   tipoMensaje: 'cobro' | 'donacion' | 'codigo' = 'cobro';
   codigoRecarga: string = '';
+  resultadoDonacion: any = null; // Guardar resultado de la donación para mostrar ambas alertas
 
   constructor(
     private router: Router,
@@ -91,21 +93,20 @@ export class CobrarGestionarPage implements OnInit {
     this.modoDonacion = true;
     this.modoCobro = false;
     this.resetSeleccion();
+    // Cargar participaciones al activar el modo donación
+    this.loadParticipaciones();
   }
 
   toggleSeleccion(participacion: any, event?: Event) {
     event?.stopPropagation();
     const id = participacion.id;
-    const antes = this.participacionesSeleccionadas.size;
     if (this.participacionesSeleccionadas.has(id)) {
       this.participacionesSeleccionadas.delete(id);
     } else {
       this.participacionesSeleccionadas.add(id);
     }
     this.calcularImporteTotal();
-    if (antes === 0 && this.participacionesSeleccionadas.size >= 1) {
-      this.mostrarModalDatos = true;
-    }
+    // No abrir automáticamente ningún modal, permitir seleccionar múltiples participaciones
   }
 
   estaSeleccionada(participacionId: number): boolean {
@@ -387,99 +388,139 @@ export class CobrarGestionarPage implements OnInit {
   actualizarPorcentajes(event: any) {
     const porcentaje = event.detail.value;
     this.porcentajeDonacion = porcentaje;
-    this.importeDonacion = (this.importeTotal * porcentaje) / 100;
-    this.importeCodigo = this.importeTotal - this.importeDonacion;
+    // Calcular importe de donación redondeado a 2 decimales
+    this.importeDonacion = Math.round((this.importeTotal * porcentaje) / 100 * 100) / 100;
+    // Asegurar que la suma sea exactamente igual al total (ajustar el código con la diferencia)
+    this.importeCodigo = Math.round((this.importeTotal - this.importeDonacion) * 100) / 100;
+    // Ajuste final para garantizar que sumen exactamente el total
+    const suma = this.importeDonacion + this.importeCodigo;
+    const diferencia = this.importeTotal - suma;
+    if (Math.abs(diferencia) > 0.001) {
+      this.importeCodigo = Math.round((this.importeCodigo + diferencia) * 100) / 100;
+    }
   }
 
   async procesarDonacion() {
     this.mostrarModalConfigDonacion = false;
     
-    // Si se dona algo, pedir datos personales
+    // Si se dona algo, pedir datos personales (opcionales)
     if (this.importeDonacion > 0) {
       this.mostrarModalDatos = true;
       return;
     }
     
-    // Si solo se genera código, procesar directamente
-    await this.generarCodigoRecarga();
+    // Si solo se genera código, procesar directamente sin pedir datos
+    await this.procesarDonacionAPI();
   }
 
   async omitirDatos() {
     this.mostrarModalDatos = false;
-    await this.generarCodigoRecarga();
+    await this.procesarDonacionAPI();
   }
 
   async enviarDatos() {
-    if (!this.datosPersonales.nombre || !this.datosPersonales.apellidos || !this.datosPersonales.nif) {
-      const alert = await this.alertController.create({
-        header: 'Datos incompletos',
-        message: 'Por favor, completa todos los campos requeridos.',
-        buttons: ['OK']
-      });
-      await alert.present();
-      return;
+    // Validar NIF/NIE si se proporciona
+    if (this.datosPersonales.nif && this.datosPersonales.nif.trim()) {
+      const nifLimpio = this.datosPersonales.nif.trim().toUpperCase();
+      if (!this.validarDocumentoEspanol(nifLimpio)) {
+        const alert = await this.alertController.create({
+          header: 'NIF/NIE no válido',
+          message: 'El campo NIF/NIE no es un NIF, NIE, DNI o CIF válido.',
+          buttons: ['OK']
+        });
+        await alert.present();
+        return;
+      }
     }
 
     this.mostrarModalDatos = false;
-    await this.generarCodigoRecarga();
+    await this.procesarDonacionAPI();
   }
 
-  async generarCodigoRecarga() {
-    // Generar código de recarga aleatorio
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let codigo = '';
-    for (let i = 0; i < 10; i++) {
-      codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  async procesarDonacionAPI() {
+    const ids = Array.from(this.participacionesSeleccionadas);
+    
+    // Asegurar que los importes sumen exactamente el total antes de enviar
+    const suma = this.importeDonacion + this.importeCodigo;
+    const diferencia = this.importeTotal - suma;
+    if (Math.abs(diferencia) > 0.001) {
+      // Ajustar el código con la diferencia para que sumen exactamente el total
+      this.importeCodigo = Math.round((this.importeCodigo + diferencia) * 100) / 100;
     }
-    this.codigoRecarga = codigo;
+    
+    // Preparar datos para la API con valores redondeados a 2 decimales
+    const datosDonacion: any = {
+      participation_ids: ids,
+      importe_donacion: Math.round(this.importeDonacion * 100) / 100,
+      importe_codigo: Math.round(this.importeCodigo * 100) / 100
+    };
 
-    // Actualizar estado de participaciones
-    const participaciones = JSON.parse(localStorage.getItem('participaciones') || '[]');
-    Array.from(this.participacionesSeleccionadas).forEach(id => {
-      const index = participaciones.findIndex((p: any) => p.id === id);
-      if (index !== -1) {
-        if (this.importeDonacion > 0) {
-          participaciones[index].estado = 'donada';
+    // Añadir datos personales solo si se proporcionaron
+    if (this.datosPersonales.nombre && this.datosPersonales.nombre.trim()) {
+      datosDonacion.nombre = this.datosPersonales.nombre.trim();
+    }
+    if (this.datosPersonales.apellidos && this.datosPersonales.apellidos.trim()) {
+      datosDonacion.apellidos = this.datosPersonales.apellidos.trim();
+    }
+    if (this.datosPersonales.nif && this.datosPersonales.nif.trim()) {
+      datosDonacion.nif = this.datosPersonales.nif.trim().toUpperCase();
+    }
+
+    this.carteraService.registrarDonacion(datosDonacion).subscribe({
+      next: (res) => {
+        this.resultadoDonacion = res;
+        this.codigoRecarga = res.codigo_recarga || '';
+        
+        // Recargar participaciones para reflejar el nuevo estado
+        this.loadParticipaciones();
+        // Notificar a la cartera principal para que recargue
+        this.carteraService.notifyParticipacionesChanged();
+        
+        // Mostrar alertas de éxito
+        // Si hay donación y código, mostrar primero la de donación, luego la de código
+        if (this.importeDonacion > 0 && this.importeCodigo > 0 && this.codigoRecarga) {
+          this.tipoMensaje = 'donacion';
+          this.mostrarMensajeExito = true;
+        } else if (this.importeDonacion > 0) {
+          // Solo donación
+          this.tipoMensaje = 'donacion';
+          this.mostrarMensajeExito = true;
+        } else if (this.importeCodigo > 0 && this.codigoRecarga) {
+          // Solo código
+          this.tipoMensaje = 'codigo';
+          this.mostrarMensajeExito = true;
         }
-        participaciones[index].codigoRecarga = this.codigoRecarga;
-        participaciones[index].fechaDonacion = new Date().toISOString();
+        
+        this.resetSeleccion();
+      },
+      error: async (err) => {
+        const msg = err.error?.message || 'No se pudo registrar la donación.';
+        const alert = await this.alertController.create({
+          header: 'Error',
+          message: msg,
+          buttons: ['OK']
+        });
+        await alert.present();
       }
     });
-    localStorage.setItem('participaciones', JSON.stringify(participaciones));
-
-    // Guardar en historial
-    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
-    historial.unshift({
-      id: Date.now(),
-      tipo: this.importeDonacion > 0 ? 'donacion' : 'codigo',
-      fecha: new Date().toISOString(),
-      participaciones: Array.from(this.participacionesSeleccionadas).map(id => 
-        this.participaciones.find(p => p.id === id)
-      ),
-      importeDonacion: this.importeDonacion,
-      importeCodigo: this.importeCodigo,
-      codigoRecarga: this.codigoRecarga
-    });
-    localStorage.setItem('historial', JSON.stringify(historial));
-
-    // Mostrar mensaje de éxito
-    if (this.importeDonacion > 0) {
-      this.tipoMensaje = 'donacion';
-    } else {
-      this.tipoMensaje = 'codigo';
-    }
-
-    this.resetSeleccion();
-    this.loadParticipaciones();
-    this.mostrarMensajeExito = true;
   }
 
   cerrarMensajeExito() {
     this.mostrarMensajeExito = false;
+    
+    // Si hay código de recarga y se mostró la alerta de donación, mostrar ahora la de código
+    if (this.tipoMensaje === 'donacion' && this.importeCodigo > 0 && this.codigoRecarga) {
+      this.tipoMensaje = 'codigo';
+      this.mostrarMensajeExito = true;
+      return;
+    }
+    
+    // Si ya se mostraron ambas o solo una, limpiar todo
     this.datosPersonales = { nombre: '', apellidos: '', nif: '' };
     this.ibanFormateado = '';
     this.codigoRecarga = '';
-    this.datosGuardados = false; // Resetear el flag
+    this.datosGuardados = false;
+    this.resultadoDonacion = null;
     // Recargar participaciones para asegurar que se refleje el nuevo estado
     this.loadParticipaciones();
   }

@@ -101,12 +101,7 @@
   justify-content: center;
 }
 
-.logo-text {
-  font-weight: bold;
-  font-size: 18px;
-  color: #F49200;
-  letter-spacing: 0.5px;
-}
+// Logo ahora es una imagen, estilos en global.scss
 
 .comprobacion-header {
   display: flex;
@@ -333,7 +328,10 @@
   border-bottom: 1px solid #E9ECEF;
   
   ion-title {
-    flex: 1;
+    flex: 0 0 321.11px !important;
+    width: 321.11px !important;
+    max-width: 321.11px !important;
+    min-width: 321.11px !important;
     text-align: center;
     
     .info-title {

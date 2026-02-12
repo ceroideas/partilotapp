@@ -42,7 +42,8 @@ export class AuthService {
     );
   }
 
-  /** Login perfil Usuario (solo cuentas con rol client). No guarda seller. */
+  /** Login perfil Usuario (permite tanto client como seller). 
+   * Si el usuario es vendedor, guarda también el seller para permitir cambio de roles. */
   loginUsuario(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login-usuario`, { email, password }).pipe(
       tap(response => {
@@ -51,9 +52,15 @@ export class AuthService {
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
-          localStorage.removeItem('seller');
+          // Si el usuario es vendedor y tiene seller activo, guardarlo para permitir cambio de roles
+          if (response.seller) {
+            localStorage.setItem('seller', JSON.stringify(response.seller));
+          } else {
+            localStorage.removeItem('seller');
+          }
           localStorage.setItem('rolActual', 'usuario');
-          localStorage.setItem('esVendedor', 'false');
+          // Si tiene seller, puede cambiar a vendedor, pero por defecto entra como usuario
+          localStorage.setItem('esVendedor', response.seller ? 'true' : 'false');
         }
       })
     );

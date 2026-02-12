@@ -43,6 +43,13 @@
 	margin-left: 5%;
 	margin-bottom: 28px;
 	height: 75px;
+	z-index: 1001 !important; // Por encima de los modales (que tienen z-index 1000)
+	position: relative !important;
+}
+
+ion-tab-bar {
+	z-index: 1001 !important; // Por encima de los modales (que tienen z-index 1000)
+	position: relative !important;
 }
 
 ion-tab-button {
@@ -138,5 +145,72 @@ ion-menu-button {
   &::part(native) {
     padding: 8px;
   }
+}
+
+/* Logo en el header - reemplaza el texto PARTILOT */
+/* Eliminar padding/margin de elementos padre que puedan causar desfase */
+ion-header {
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  &::part(native) {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+ion-toolbar {
+  padding: 0 !important;
+  margin: 0 !important;
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --padding-top: 0 !important;
+  --padding-bottom: 0 !important;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  
+  &::part(native) {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* Ocultar ion-title vacío para que no interfiera con el header-content posicionado absolutamente */
+ion-title:empty {
+  display: none !important;
+}
+
+ion-title {
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  &::part(native) {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+.header-content {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.header-content .logo-image {
+  height: 24px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  pointer-events: auto;
 }
 

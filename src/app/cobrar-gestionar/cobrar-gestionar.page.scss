@@ -2,46 +2,23 @@
   --background: #F5F6F7;
 }
 
-// Estilos globales para modales action sheet en esta página (excluyendo el modal de éxito)
-::ng-deep ion-modal:not(.success-modal-normal) {
-  .modal-wrapper {
-    border-radius: 24px 24px 0 0 !important;
-    overflow: hidden !important;
-    background: white !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-  }
-  
-  &::part(content) {
-    border-radius: 24px 24px 0 0 !important;
-    overflow: visible !important;
-    background: white !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-  }
-  
-  // Asegurar que ion-content tenga altura
-  ion-content {
-    min-height: 300px !important;
-    height: auto !important;
-    flex: 1 1 auto !important;
-    display: block !important;
-  }
-}
+// Los modales ahora son personalizados (excepto el de éxito), no se necesitan estilos para ion-modal aquí
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  .logo-image {
+    height: 32px;
+    width: auto;
+  }
 }
 
-.logo-text {
-  font-weight: bold;
-  font-size: 18px;
-  color: #F49200;
-  letter-spacing: 0.5px;
+// Asegurar que el botón de retroceso sea visible
+ion-back-button {
+  --color: #212529 !important;
+  display: inline-flex !important;
 }
 
 .main-container {
@@ -280,7 +257,7 @@
 
 .footer-actions {
   position: fixed;
-  bottom: 70px;
+  bottom: 0;
   left: 0;
   right: 0;
   background: white;
@@ -319,100 +296,7 @@
   min-width: 120px;
 }
 
-// Modales action sheet (ion-modal) - Estilo como modal de regalar
-// Esquinas redondeadas superiores y posición detrás del menú inferior
-ion-modal {
-  --width: 100%;
-  --height: auto;
-  --backdrop-opacity: 0.5; // Backdrop semi-transparente (no opaco)
-  z-index: 9999 !important; // Detrás del menú inferior
-  
-  // Aplicar border-radius al contenido del modal usando ::part
-  &::part(content) {
-    border-radius: 24px 24px 0 0 !important;
-    padding-bottom: 80px !important; // Espacio para el menú inferior
-    overflow: visible !important; // Cambiar a visible para que se vea el contenido
-    background: white !important;
-    opacity: 1 !important; // Asegurar que el contenido sea opaco
-    height: auto !important;
-    min-height: 300px !important; // Altura mínima para que se vea el contenido
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  
-  // El backdrop debe ser transparente
-  &::part(backdrop) {
-    background: rgba(0, 0, 0, 0.5) !important;
-    opacity: 1 !important;
-  }
-  
-  ion-header {
-    border-radius: 24px 24px 0 0;
-    overflow: hidden;
-    background: white !important;
-    
-    ion-toolbar {
-      --border-width: 0;
-      --padding-top: 8px;
-      --padding-bottom: 8px;
-      border-radius: 24px 24px 0 0;
-      overflow: hidden;
-      background: white !important;
-    }
-  }
-  
-  ion-content {
-    --padding-bottom: 0; // Sin padding inferior, el footer lo maneja
-    --padding-top: 16px;
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --background: white;
-    background: white !important;
-    overflow-y: auto !important;
-    min-height: 400px !important; // Altura mínima para que se vea el contenido y el footer
-    height: auto !important;
-    flex: 1 1 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  
-  // Asegurar que el contenido dentro de ion-content use flex
-  ion-content .scroll-content {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 100% !important;
-  }
-  
-  // Asegurar que el ng-template tenga altura
-  ng-template {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-  }
-}
-
-// Estilos globales usando selector de clase para el wrapper del modal
-ion-modal {
-  .modal-wrapper {
-    border-radius: 24px 24px 0 0 !important;
-    overflow: hidden !important;
-    background: white !important;
-    opacity: 1 !important;
-  }
-}
-
-// Estilos adicionales usando selector de atributo para asegurar que se apliquen
-ion-modal[breakpoints] {
-  &::part(content) {
-    border-radius: 24px 24px 0 0 !important;
-    overflow: visible !important; // Cambiar a visible
-    background: white !important;
-    opacity: 1 !important;
-    height: auto !important;
-  }
-}
-
-// Modales
+// Modales personalizados (como en vendedores) - Bottom sheet que queda detrás del tab-bar
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -421,60 +305,178 @@ ion-modal[breakpoints] {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  z-index: 10000;
-  padding: 16px;
+  z-index: 1000; // Mismo z-index que en vendedores, detrás del tab-bar
+  backdrop-filter: blur(4px);
+  
+  &.bottom-sheet {
+    align-items: flex-end;
+  }
 }
 
 .modal-container {
   background: white;
-  border-radius: 16px;
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
+  box-shadow: 0px -4px 16px rgba(0, 0, 0, 0.2);
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
-  animation: modalSlideIn 0.3s ease;
+  overflow-y: auto;
+  animation: slideUpBottom 0.3s ease-out;
+  
+  &.bottom-sheet-content {
+    border-radius: 24px 24px 0 0;
+  }
 }
 
-@keyframes modalSlideIn {
+@keyframes slideUpBottom {
   from {
+    transform: translateY(100%);
     opacity: 0;
-    transform: translateY(20px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 20px 8px 20px;
-  
-  .modal-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #212529;
-    margin: 0;
+// Estilos específicos para el modal de datos
+.datos-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0;
+    }
+    
+    .close-button {
+      --color: #212529;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --border-radius: 50%;
+      --background: white;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
   }
   
-  .close-button {
-    --color: #6c757d;
-    margin: 0;
+  .modal-content {
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 20px 0;
+    }
   }
 }
+
+// Estilos específicos para el modal de cuenta
+.cuenta-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0;
+    }
+    
+    .close-button {
+      --color: #212529;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --border-radius: 50%;
+      --background: white;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  
+  .modal-content {
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 20px 0;
+      text-align: center;
+    }
+  }
+}
+
+// Estilos específicos para el modal de configuración de donación
+.config-donacion-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0;
+    }
+    
+    .close-button {
+      --color: #212529;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --border-radius: 50%;
+      --background: white;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  
+  .modal-content {
+    padding: 0;
+  }
+  
+  .config-modal-content {
+    padding: 0;
+  }
+}
+
+// Los modales ahora son personalizados, no ion-modal (excepto el de éxito)
+
+// Los estilos de modal-overlay y modal-container ya están definidos arriba
 
 .modal-subtitle {
   padding: 0;
   font-size: 14px;
   color: #6c757d;
   margin: 0 0 20px 0;
-  // No centrado, solo el texto del mensaje de seguridad debe estar centrado
+  
+  // Centrado solo para el modal de configuración de donación
+  &.centered {
+    text-align: center;
+  }
 }
 
 .modal-content {
@@ -521,10 +523,9 @@ ion-modal[breakpoints] {
 
 .modal-info-text {
   background: #FFF3CD;
-  border-left: 4px solid #FFC107;
   border-radius: 8px;
-  padding: 12px;
-  margin-top: 16px;
+  padding: 16px;
+  margin-top: 20px;
   
   .info-title {
     font-size: 14px;
@@ -534,10 +535,15 @@ ion-modal[breakpoints] {
   }
   
   p {
-    font-size: 12px;
+    font-size: 13px;
     color: #856404;
-    line-height: 1.5;
+    line-height: 1.6;
     margin: 0;
+    
+    strong {
+      font-weight: 600;
+      color: #212529;
+    }
   }
 }
 
@@ -574,13 +580,21 @@ ion-modal[breakpoints] {
   width: 100% !important;
   
   .omitir-button {
-    --border-color: #212529;
+    --border-color: #6c757d;
+    --border-width: 1px;
+    --border-style: solid;
+    --border-radius: 24px !important;
     --color: #212529;
-    width: 100% !important;
+    --background: transparent;
     height: 48px !important;
-    border-radius: 24px !important;
     text-transform: none !important;
     margin: 0 !important;
+    font-weight: 500 !important;
+    
+    // Estilos para el shadow root del botón
+    &::part(native) {
+      border-radius: 24px !important;
+    }
   }
   
   .guardar-button,
@@ -603,54 +617,69 @@ ion-modal[breakpoints] {
   }
 }
 
-// Modal de configuración de donación
-.config-modal {
+// Estilos para el contenido del modal de configuración de donación (ahora es modal personalizado)
+.config-donacion-modal {
   .importe-total-display {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 12px;
     background: #F5F6F7;
     border-radius: 12px;
     padding: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    align-items: center;
     
     .importe-label {
       font-size: 14px;
       color: #6c757d;
+      font-weight: 400;
+      text-align: center;
     }
     
-    .importe-value {
-      font-size: 20px;
-      font-weight: bold;
-      color: #212529;
+    .importe-value-container {
+      background: white;
+      border: 1px solid #E9ECEF;
+      border-radius: 20px;
+      padding: 8px 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      
+      .importe-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #212529;
+      }
     }
   }
 
   .slider-container {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    padding: 0 4px;
     
     ion-range {
       padding: 0;
-      --bar-height: 6px;
+      --bar-height: 8px;
       --bar-background: #E9ECEF;
-      --bar-background-active: #F49200;
-      --knob-size: 24px;
-      --knob-background: #F49200;
+      --bar-background-active: #2196F3;
+      --knob-size: 28px;
+      --knob-background: #ffffff;
+      --knob-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
     
     .slider-labels {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
-      font-size: 14px;
-      color: #6c757d;
+      margin-top: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #212529;
+      padding: 0 4px;
     }
   }
 
   .distribucion-boxes {
     display: flex;
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .distribucion-box {
@@ -658,56 +687,70 @@ ion-modal[breakpoints] {
     background: #F5F6F7;
     border-radius: 12px;
     padding: 16px;
-    text-align: center;
-    
-    .box-icon {
-      font-size: 32px;
-      color: #F49200;
-      margin-bottom: 12px;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     
     .box-label {
-      font-size: 12px;
-      color: #6c757d;
-      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #212529;
+      margin: 0 0 12px 0;
+      font-weight: 500;
+      text-align: left;
     }
     
     .box-percentage {
-      font-size: 18px;
-      font-weight: bold;
-      color: #212529;
-      margin: 0 0 4px 0;
+      font-size: 14px;
+      font-weight: 400;
+      color: #6c757d;
+      margin: 0 auto 12px auto;
+      text-align: center;
+      width: 100%;
     }
     
-    .box-amount {
-      font-size: 16px;
-      font-weight: 600;
-      color: #F49200;
-      margin: 0;
+    .box-amount-container {
+      background: white;
+      border: 1px solid #E9ECEF;
+      border-radius: 20px;
+      padding: 8px 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      text-align: center;
+      
+      .box-amount {
+        font-size: 18px;
+        font-weight: bold;
+        color: #212529;
+        margin: 0;
+      }
     }
   }
 }
 
 // Modal de éxito (modal normal centrado) - Estilos específicos para este modal
+// Este sigue siendo ion-modal pero con z-index menor que el tab-bar
 ::ng-deep ion-modal.success-modal-normal {
   --width: auto;
   --max-width: 90%;
   --height: auto;
   --border-radius: 16px;
   --backdrop-opacity: 0.5;
+  z-index: 1000 !important; // Mismo z-index que los modales personalizados, detrás del tab-bar
   
   .modal-wrapper {
-    border-radius: 16px !important; // Bordes redondeados completos (no solo arriba)
+    border-radius: 16px !important;
     overflow: visible !important;
     background: transparent !important;
     max-width: 90% !important;
     width: auto !important;
     margin: auto !important;
-    box-shadow: none !important; // El contenedor interno maneja la sombra
+    box-shadow: none !important;
+    margin-bottom: 120px !important; // Espacio para el tab-bar
+    position: relative !important;
   }
   
   &::part(content) {
-    border-radius: 16px !important; // Bordes redondeados completos
+    border-radius: 16px !important;
     padding: 0 !important;
     overflow: visible !important;
     background: transparent !important;
@@ -719,12 +762,15 @@ ion-modal[breakpoints] {
     margin: auto !important;
     height: auto !important;
     min-height: auto !important;
-    padding-bottom: 0 !important; // Sin padding extra para el menú inferior
+    padding-bottom: 0 !important;
+    margin-bottom: 120px !important; // Espacio para el tab-bar
   }
   
   &::part(backdrop) {
     background: rgba(0, 0, 0, 0.5) !important;
     opacity: 1 !important;
+    z-index: 999 !important; // Detrás del modal y del tab-bar
+    clip-path: inset(0 0 103px 0) !important; // Recortar el backdrop para dejar espacio al tab-bar
   }
 }
 

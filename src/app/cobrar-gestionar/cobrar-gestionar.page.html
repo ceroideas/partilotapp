@@ -1,13 +1,12 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
-    <ion-title>
-      <div class="header-content">
-        <span class="logo-text">PARTILOT</span>
-      </div>
-    </ion-title>
+    <ion-title></ion-title>
+    <div class="header-content">
+      <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
+    </div>
     <ion-buttons slot="end">
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
@@ -51,21 +50,27 @@
     <!-- Carga -->
     <div class="loading-section" *ngIf="loading">
       <ion-spinner name="crescent"></ion-spinner>
-      <p>Cargando participaciones cobrables...</p>
+      <p>{{ modoDonacion ? 'Cargando participaciones para donar...' : 'Cargando participaciones cobrables...' }}</p>
     </div>
 
-    <!-- Mensaje cuando no hay participaciones que cobrar -->
-    <div class="empty-state" *ngIf="modoCobro && !loading && participaciones.length === 0">
+    <!-- Mensaje cuando no hay participaciones -->
+    <div class="empty-state" *ngIf="(modoCobro || modoDonacion) && !loading && participaciones.length === 0">
       <ion-icon name="information-circle-outline" class="empty-icon"></ion-icon>
-      <h3 class="empty-title">No hay participaciones que cobrar</h3>
+      <h3 class="empty-title">{{ modoCobro ? 'No hay participaciones que cobrar' : 'No hay participaciones para donar' }}</h3>
       <p class="empty-message">
-        No tienes participaciones disponibles para cobrar en este momento. 
-        Las participaciones deben tener premio y no estar regaladas o donadas para poder cobrarlas.
+        <span *ngIf="modoCobro">
+          No tienes participaciones disponibles para cobrar en este momento. 
+          Las participaciones deben tener premio y no estar regaladas o donadas para poder cobrarlas.
+        </span>
+        <span *ngIf="modoDonacion">
+          No tienes participaciones disponibles para donar en este momento. 
+          Las participaciones deben tener premio y no estar regaladas, donadas o cobradas para poder donarlas.
+        </span>
       </p>
     </div>
 
-    <!-- Lista de participaciones cobrables -->
-    <div class="participaciones-list" *ngIf="modoCobro && !loading && participaciones.length > 0">
+    <!-- Lista de participaciones cobrables/donables -->
+    <div class="participaciones-list" *ngIf="(modoCobro || modoDonacion) && !loading && participaciones.length > 0">
       <div 
         class="participacion-item" 
         [class.selected]="estaSeleccionada(participacion.id)"
@@ -123,105 +128,105 @@
 </ion-content>
 
 <!-- Modal: Datos Necesarios -->
-<ion-modal [isOpen]="mostrarModalDatos" (didDismiss)="cerrarModalDatos()" [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="1" [handle]="true" [canDismiss]="true">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Datos Necesarios</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="cerrarModalDatos()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content style="display: flex; flex-direction: column;">
-      <div style="flex: 1; overflow-y: auto; padding: 16px;">
-        <p class="modal-subtitle">Rellena tus datos para el cobro</p>
-        
-        <ion-item class="modal-input-item">
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          <ion-label position="stacked">Nombre</ion-label>
-          <ion-input 
-            [(ngModel)]="datosPersonales.nombre" 
-            placeholder="Nombre"
-            type="text"></ion-input>
-        </ion-item>
-        
-        <ion-item class="modal-input-item">
-          <ion-icon name="people-outline" slot="start"></ion-icon>
-          <ion-label position="stacked">Apellidos</ion-label>
-          <ion-input 
-            [(ngModel)]="datosPersonales.apellidos" 
-            placeholder="Apellidos"
-            type="text"></ion-input>
-        </ion-item>
-        
-        <ion-item class="modal-input-item">
-          <ion-icon name="id-card-outline" slot="start"></ion-icon>
-          <ion-label position="stacked">Nif / Nie</ion-label>
-          <ion-input 
-            [(ngModel)]="datosPersonales.nif" 
-            placeholder="NIF / NIE"
-            type="text"></ion-input>
-        </ion-item>
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalDatos" (click)="cerrarModalDatos()">
+  <div class="modal-container datos-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Datos Necesarios</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalDatos()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="modal-content">
+      <p class="modal-subtitle">{{ modoDonacion ? 'Rellena tus datos para la donación' : 'Rellena tus datos para el cobro' }}</p>
+      
+      <ion-item class="modal-input-item">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Nombre<ion-text color="danger">*</ion-text></ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.nombre" 
+          placeholder="Nombre"
+          type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item class="modal-input-item">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Apellidos<ion-text color="danger">*</ion-text></ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.apellidos" 
+          placeholder="Apellidos"
+          type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item class="modal-input-item">
+        <ion-icon name="id-card-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Nif / Nie</ion-label>
+        <ion-input 
+          [(ngModel)]="datosPersonales.nif" 
+          placeholder="Nif / Nie"
+          type="text"></ion-input>
+      </ion-item>
 
-        <div class="modal-info-text" *ngIf="modoDonacion">
-          <p class="info-title">Importante:</p>
-          <p>Para recibir tu certificado de donación (válido para beneficios fiscales), completa todos los datos requeridos. Si no los rellenas, la donación será anónima y no se emitirá certificado.</p>
-        </div>
+      <div class="modal-info-text" *ngIf="modoDonacion">
+        <p class="info-title">Importante:</p>
+        <p>Para recibir tu certificado de donación (válido para beneficios fiscales), completa todos los datos requeridos. Si no los rellenas, <strong>la donación será anónima</strong> y no se emitirá certificado.</p>
       </div>
       
       <div class="modal-footer">
+        <div style="display: flex; gap: 12px; width: 100%;" *ngIf="modoDonacion">
+          <ion-button 
+            class="omitir-button" 
+            fill="outline"
+            expand="block"
+            (click)="omitirDatos()"
+            style="flex: 1;">
+            Omitir
+          </ion-button>
+          <ion-button 
+            class="guardar-button" 
+            expand="block"
+            (click)="enviarDatos()"
+            style="flex: 1;">
+            Enviar
+          </ion-button>
+        </div>
         <ion-button 
-          *ngIf="modoDonacion"
-          class="omitir-button" 
-          fill="outline"
-          expand="block"
-          (click)="omitirDatos()">
-          Omitir
-        </ion-button>
-        <ion-button 
+          *ngIf="!modoDonacion"
           class="guardar-button" 
           expand="block"
-          (click)="modoCobro ? guardarDatos() : enviarDatos()">
-          {{ modoCobro ? 'Guardar' : 'Enviar' }}
+          (click)="guardarDatos()">
+          Guardar
         </ion-button>
       </div>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Número de Cuenta -->
-<ion-modal [isOpen]="mostrarModalCuenta" (didDismiss)="cerrarModalCuenta()" [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="1" [handle]="true">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Número de Cuenta</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="cerrarModalCuenta()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content style="display: flex; flex-direction: column;">
-      <div style="flex: 1; overflow-y: auto; padding: 16px;">
-        <p class="modal-subtitle">Introduce el número de cuenta Bancaria</p>
-        
-        <ion-item class="modal-input-item iban-input-item">
-          <span slot="start" class="iban-prefix">ES</span>
-          <ion-input 
-            [(ngModel)]="ibanFormateado" 
-            (ionInput)="onIbanInput($event)"
-            placeholder="12 1234 1234 12 1234567890"
-            inputmode="numeric"
-            maxlength="26"></ion-input>
-        </ion-item>
-        
-        <div class="security-message">
-          <p>Por motivos de seguridad, <strong>no almacenamos</strong> tu número de cuenta en nuestros servidores. Cada vez que desees cobrar un premio, deberás introducirlo nuevamente.</p>
-        </div>
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalCuenta" (click)="cerrarModalCuenta()">
+  <div class="modal-container cuenta-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Número de Cuenta</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalCuenta()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="modal-content">
+      <p class="modal-subtitle">Introduce el número de cuenta Bancaria</p>
+      
+      <ion-item class="modal-input-item iban-input-item">
+        <span slot="start" class="iban-prefix">ES</span>
+        <ion-input 
+          [(ngModel)]="ibanFormateado" 
+          (ionInput)="onIbanInput($event)"
+          placeholder="12 1234 1234 12 1234567890"
+          inputmode="numeric"
+          maxlength="26"></ion-input>
+      </ion-item>
+      
+      <div class="security-message">
+        <p>Por motivos de seguridad, <strong>no almacenamos</strong> tu número de cuenta en nuestros servidores. Cada vez que desees cobrar un premio, deberás introducirlo nuevamente.</p>
       </div>
       
       <div class="modal-footer">
@@ -232,29 +237,28 @@
           Cobrar
         </ion-button>
       </div>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Configuración Donación -->
-<ion-modal [isOpen]="mostrarModalConfigDonacion" (didDismiss)="cerrarModalConfigDonacion()" [breakpoints]="[0, 0.5, 0.75, 1]" [initialBreakpoint]="0.75" [handle]="true" [canDismiss]="true">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Donar / Generar código</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="cerrarModalConfigDonacion()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content>
-      <p class="modal-subtitle">Gestiona tus participaciones</p>
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalConfigDonacion" (click)="cerrarModalConfigDonacion()">
+  <div class="modal-container config-donacion-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Donar/ Generar código</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalConfigDonacion()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="modal-content config-modal-content">
+      <p class="modal-subtitle" style="text-align: center; padding: 0; margin-bottom: 16px;">Gestiona tus participaciones</p>
       
       <div class="importe-total-display">
         <span class="importe-label">Importe total</span>
-        <span class="importe-value">€{{ importeTotal | number:'1.2-2' }}</span>
+        <div class="importe-value-container">
+          <span class="importe-value">€{{ importeTotal | number:'1.2-2' }}</span>
+        </div>
       </div>
 
       <div class="slider-container">
@@ -274,24 +278,18 @@
 
       <div class="distribucion-boxes">
         <div class="distribucion-box donacion-box">
-          <div class="box-icon">
-            <ion-icon name="heart-outline"></ion-icon>
-          </div>
-          <div class="box-content">
-            <p class="box-label">Donación a una entidad</p>
-            <p class="box-percentage">{{ porcentajeDonacion }}%</p>
-            <p class="box-amount">€{{ importeDonacion | number:'1.2-2' }}</p>
+          <p class="box-label">Donación <br> a una entidad</p>
+          <p class="box-percentage">{{ porcentajeDonacion }}%</p>
+          <div class="box-amount-container">
+            <span class="box-amount">€{{ importeDonacion | number:'1.2-2' }}</span>
           </div>
         </div>
 
         <div class="distribucion-box codigo-box">
-          <div class="box-icon">
-            <ion-icon name="qr-code-outline"></ion-icon>
-          </div>
-          <div class="box-content">
-            <p class="box-label">Generación código</p>
-            <p class="box-percentage">{{ 100 - porcentajeDonacion }}%</p>
-            <p class="box-amount">€{{ importeCodigo | number:'1.2-2' }}</p>
+          <p class="box-label">Generación <br> código</p>
+          <p class="box-percentage">{{ 100 - porcentajeDonacion }}%</p>
+          <div class="box-amount-container">
+            <span class="box-amount">€{{ importeCodigo | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>
@@ -304,9 +302,9 @@
           Donar y Generar
         </ion-button>
       </div>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+    </div>
+  </div>
+</div>
 
 <!-- Modal: Mensaje de Éxito (Modal normal centrado) -->
 <ion-modal [isOpen]="mostrarMensajeExito" (didDismiss)="cerrarMensajeExito()" class="success-modal-normal">

@@ -67,22 +67,30 @@ export class TabsPage implements OnInit, OnDestroy {
   }
 
   detectarRol() {
-    // Perfil real: si tiene 'seller' en localStorage es vendedor; si no tiene pero tiene token es usuario
+    // Si tiene seller guardado, puede ser tanto vendedor como usuario
+    // Si no tiene seller, solo puede ser usuario
     const tieneSeller = this.authService.isSeller();
     const rolGuardado = localStorage.getItem('rolActual');
 
-    if (tieneSeller) {
-      this.rolActual = 'vendedor';
-      if (rolGuardado !== 'vendedor') {
+    // Si hay un rol guardado, usarlo (permite que vendedores elijan modo usuario)
+    if (rolGuardado) {
+      this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
+      // Si elige vendedor pero no tiene seller, forzar a usuario
+      if (this.rolActual === 'vendedor' && !tieneSeller) {
+        this.rolActual = 'usuario';
+        localStorage.setItem('rolActual', 'usuario');
+        localStorage.setItem('esVendedor', 'false');
+      }
+    } else {
+      // Si no hay rol guardado, determinar según tenga seller o no
+      if (tieneSeller) {
+        // Si tiene seller, por defecto puede ser vendedor, pero puede cambiar a usuario
+        this.rolActual = 'vendedor';
         localStorage.setItem('rolActual', 'vendedor');
         localStorage.setItem('esVendedor', 'true');
-      }
-    } else if (rolGuardado === 'gestor') {
-      this.rolActual = 'gestor';
-    } else {
-      // Usuario (client) o sin sesión
-      this.rolActual = 'usuario';
-      if (rolGuardado && rolGuardado !== 'usuario') {
+      } else {
+        // Si no tiene seller, solo puede ser usuario
+        this.rolActual = 'usuario';
         localStorage.setItem('rolActual', 'usuario');
         localStorage.setItem('esVendedor', 'false');
       }

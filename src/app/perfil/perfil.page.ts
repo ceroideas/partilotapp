@@ -38,7 +38,7 @@ export class PerfilPage implements OnInit {
   }
 
   goToDigitalizarParticipacion() {
-    this.router.navigate(['/digitalizar-participacion']);
+    this.router.navigate(['/tabs/digitalizar-participacion']);
   }
 
   goToRegalarParticipacion() {

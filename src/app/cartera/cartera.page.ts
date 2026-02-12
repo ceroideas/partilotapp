@@ -28,7 +28,7 @@ export class CarteraPage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private carteraService: CarteraService,
-    private authService: AuthService,
+    public authService: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController
   ) { }
@@ -58,9 +58,15 @@ export class CarteraPage implements OnInit, OnDestroy {
   detectarRol() {
     const rolGuardado = localStorage.getItem('rolActual');
     const esVendedorStr = localStorage.getItem('esVendedor');
+    const tieneSeller = this.authService.isSeller();
+    
     if (rolGuardado) {
       this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
-    } else if (esVendedorStr === 'true') {
+      // Si elige vendedor pero no tiene seller, forzar a usuario
+      if (this.rolActual === 'vendedor' && !tieneSeller) {
+        this.rolActual = 'usuario';
+      }
+    } else if (esVendedorStr === 'true' && tieneSeller) {
       this.rolActual = 'vendedor';
     } else {
       this.rolActual = 'usuario';
@@ -68,13 +74,22 @@ export class CarteraPage implements OnInit, OnDestroy {
   }
 
   cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
+    // Verificar que el usuario puede cambiar a ese rol
+    const tieneSeller = this.authService.isSeller();
+    
+    // Solo permitir cambiar a vendedor si tiene seller guardado
+    if (rol === 'vendedor' && !tieneSeller) {
+      return; // No permitir cambio a vendedor si no tiene seller
+    }
+    
     this.rolActual = rol;
     localStorage.setItem('rolActual', rol);
     if (rol === 'vendedor') {
       localStorage.setItem('esVendedor', 'true');
       this.router.navigate(['/tabs/vendedor-tab3']);
     } else if (rol === 'usuario') {
-      localStorage.setItem('esVendedor', 'false');
+      // Mantener esVendedor como 'true' si tiene seller, para permitir volver a vendedor
+      localStorage.setItem('esVendedor', tieneSeller ? 'true' : 'false');
       this.router.navigate(['/tabs/tab3']);
     } else if (rol === 'gestor') {
       localStorage.setItem('esVendedor', 'false');
@@ -83,7 +98,8 @@ export class CarteraPage implements OnInit, OnDestroy {
   }
 
   loadParticipaciones() {
-    if (!this.authService.isLoggedIn() || this.authService.isSeller()) {
+    // Solo cargar participaciones si está logueado y está en modo usuario (no en modo vendedor)
+    if (!this.authService.isLoggedIn() || this.rolActual === 'vendedor') {
       this.participaciones = [];
       return;
     }
@@ -109,11 +125,11 @@ export class CarteraPage implements OnInit, OnDestroy {
   }
 
   agregarParticipacion() {
-    this.router.navigate(['/digitalizar-participacion']);
+    this.router.navigate(['/tabs/digitalizar-participacion']);
   }
 
   irACobrarGestionar() {
-    this.router.navigate(['/cobrar-gestionar']);
+    this.router.navigate(['/tabs/cobrar-gestionar']);
   }
 
   toggleDetalle(participacion: any) {
