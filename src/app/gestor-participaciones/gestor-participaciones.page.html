@@ -56,8 +56,14 @@
       </ion-button>
     </div>
 
+    <!-- Spinner de carga -->
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
     <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
-    <div class="participaciones-container" *ngIf="isVendedor && showEntitySelection && !showTacosList && !showTacoDetail">
+    <div class="participaciones-container" *ngIf="isVendedor && showEntitySelection && !showTacosList && !showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Entidades</h1>
       <p class="section-subtitle">Selecciona la entidad para la venta</p>
@@ -74,7 +80,7 @@
   </div>
 
   <!-- Vista 2: Lista de Tacos con Resumen -->
-  <div class="participaciones-container" *ngIf="isVendedor && showTacosList && !showTacoDetail">
+  <div class="participaciones-container" *ngIf="isVendedor && showTacosList && !showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
@@ -178,7 +184,7 @@
   </div>
 
   <!-- Vista 3: Detalle de Participaciones del Taco -->
-  <div class="participaciones-container" *ngIf="isVendedor && showTacoDetail">
+  <div class="participaciones-container" *ngIf="isVendedor && showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>

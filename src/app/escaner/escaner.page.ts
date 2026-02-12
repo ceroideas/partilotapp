@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { VentasService } from '../core/services/ventas.service';
@@ -34,10 +34,12 @@ export class EscanerPage implements OnInit {
   status: 'can_link' | 'already_mine' | 'already_other' | 'not_found' | null = null;
   mensajeError = '';
 
+  loading = false;
+  loadingMessage = '';
+
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private loadingController: LoadingController,
     private authService: AuthService,
     private ventasService: VentasService,
     private carteraService: CarteraService
@@ -107,11 +109,11 @@ export class EscanerPage implements OnInit {
   }
 
   async consultarReferencia(referencia: string) {
-    const loading = await this.loadingController.create({ message: 'Buscando...' });
-    await loading.present();
+    this.loading = true;
+    this.loadingMessage = 'Buscando...';
     this.carteraService.checkByReference(referencia).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         this.participacion = res.participation || null;
         this.status = res.status || null;
         this.mensajeError = res.message || '';
@@ -143,7 +145,7 @@ export class EscanerPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         const msg = err.error?.message || (err.status === 422
           ? 'La participación no se puede vincular porque ya se encuentra leída por otro usuario.'
           : 'No se encuentra la participación. Comprueba la referencia o el código QR.');
@@ -164,13 +166,11 @@ export class EscanerPage implements OnInit {
   }
 
   private async procesarQRDigitalizacion(referencia: string) {
-    const loading = await this.loadingController.create({ message: 'Procesando...' });
-    await loading.present();
-
-    // Llamar a la API para digitalizar la participación
+    this.loading = true;
+    this.loadingMessage = 'Procesando...';
     this.ventasService.digitalizeParticipation(referencia).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           const p = res.participation || res;
           const participacion = {
@@ -190,7 +190,7 @@ export class EscanerPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         await this.mostrarAlerta('Error', err.error?.message || 'Error al procesar el código QR.');
       }
     });
@@ -278,10 +278,9 @@ export class EscanerPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({ message: 'Registrando ventas...' });
-    await loading.present();
+    this.loading = true;
+    this.loadingMessage = 'Registrando ventas...';
 
-    // Procesar cada participación digitalizada
     const ventas = [];
     for (const participacion of this.participacionesDigitalizadas) {
       try {
@@ -295,7 +294,7 @@ export class EscanerPage implements OnInit {
       }
     }
 
-    await loading.dismiss();
+    this.loading = false;
 
     if (ventas.length > 0) {
       // Guardar en historial

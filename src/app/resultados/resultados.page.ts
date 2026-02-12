@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LotteryService } from '../core/services/lottery.service';
-import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-resultados',
@@ -21,8 +20,7 @@ export class ResultadosPage implements OnInit {
 
   constructor(
     private router: Router,
-    private lotteryService: LotteryService,
-    private loadingController: LoadingController
+    private lotteryService: LotteryService
   ) { }
 
   ngOnInit() {

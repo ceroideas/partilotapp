@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
-import { LoadingController, AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -30,12 +30,13 @@ export class GestorParticipacionesPage implements OnInit {
   tacoParticipations: any[] = [];
   showTacoDetail: boolean = false;
 
+  loading = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private ventasService: VentasService,
     private authService: AuthService,
-    private loadingController: LoadingController,
     private alertController: AlertController
   ) { }
 
@@ -81,12 +82,10 @@ export class GestorParticipacionesPage implements OnInit {
   }
 
   async loadEntities() {
-    const loading = await this.loadingController.create({ message: 'Cargando...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.getMyEntities().subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success && res.entities) {
           this.entities = res.entities || [];
           if (this.entities.length === 1) {
@@ -102,7 +101,7 @@ export class GestorParticipacionesPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         console.error('Error al cargar entidades:', err);
         const errorMessage = err?.error?.message || 'Error al cargar las entidades.';
         await this.mostrarAlerta('Error', errorMessage);
@@ -118,13 +117,10 @@ export class GestorParticipacionesPage implements OnInit {
 
   async loadTacos() {
     if (!this.selectedEntity) return;
-
-    const loading = await this.loadingController.create({ message: 'Cargando participaciones...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.getMyTacos(this.selectedEntity.id).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           this.summary = res.summary;
           this.tacos = res.tacos || [];
@@ -139,7 +135,7 @@ export class GestorParticipacionesPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         console.error('Error al cargar tacos:', err);
         const errorMessage = err?.error?.message || 'Error al cargar los tacos.';
         await this.mostrarAlerta('Error', errorMessage);
@@ -148,12 +144,10 @@ export class GestorParticipacionesPage implements OnInit {
   }
 
   async viewTaco(taco: any) {
-    const loading = await this.loadingController.create({ message: 'Cargando...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.getTacoParticipations(taco.set_id, taco.book_number).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           this.selectedTaco = res.taco_info;
           this.tacoParticipations = res.participations;
@@ -161,7 +155,7 @@ export class GestorParticipacionesPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         await this.mostrarAlerta('Error', 'Error al cargar las participaciones.');
       }
     });

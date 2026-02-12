@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
-import { LoadingController, AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -53,11 +53,12 @@ export class VentaPage implements OnInit {
   // Modal de éxito
   mostrarModalExito: boolean = false;
 
+  loading = false;
+
   constructor(
     private router: Router,
     private ventasService: VentasService,
     private authService: AuthService,
-    private loadingController: LoadingController,
     private alertController: AlertController
   ) { }
 
@@ -69,12 +70,10 @@ export class VentaPage implements OnInit {
   }
 
   async loadEntities() {
-    const loading = await this.loadingController.create({ message: 'Cargando...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.getMyEntities().subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success && res.entities) {
           this.entities = res.entities || [];
           if (this.entities.length === 1) {
@@ -90,7 +89,7 @@ export class VentaPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         console.error('Error al cargar entidades:', err);
         const errorMessage = err?.error?.message || 'Error al cargar las entidades.';
         await this.mostrarAlerta('Error', errorMessage);
@@ -106,13 +105,10 @@ export class VentaPage implements OnInit {
 
   async loadLotteries() {
     if (!this.selectedEntity) return;
-
-    const loading = await this.loadingController.create({ message: 'Cargando sorteos...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.getMyLotteries(this.selectedEntity.id).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           this.lotteries = res.lotteries || [];
           if (this.lotteries.length === 1) {
@@ -128,7 +124,7 @@ export class VentaPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         console.error('Error al cargar sorteos:', err);
         const errorMessage = err?.error?.message || 'Error al cargar los sorteos.';
         await this.mostrarAlerta('Error', errorMessage);
@@ -145,13 +141,10 @@ export class VentaPage implements OnInit {
   
   async loadReservesAndSets() {
     if (!this.selectedLottery || !this.selectedEntity) return;
-    
-    const loading = await this.loadingController.create({ message: 'Cargando datos...' });
-    await loading.present();
-    
+    this.loading = true;
     this.ventasService.getReserves().subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         console.log('Respuesta completa de getReserves:', res);
         if (res.success && res.reserves) {
           console.log('Reserves recibidas:', res.reserves);
@@ -214,7 +207,7 @@ export class VentaPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         console.error('Error al cargar reservas:', err);
       }
     });
@@ -404,15 +397,11 @@ export class VentaPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Registrando venta...',
-    });
-    await loading.present();
-
+    this.loading = true;
     const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
     this.ventasService.sellManual(this.setSeleccionado.id, desde, hasta, paymentMethod).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           this.guardarVentaEnHistorial(res, desde, hasta);
           this.cerrarModalResumen();
@@ -422,7 +411,7 @@ export class VentaPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         const msg = err.error?.message || 'Error de conexión. Intenta de nuevo.';
         await this.mostrarAlerta('Error', msg);
       }

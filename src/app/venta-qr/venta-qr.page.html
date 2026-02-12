@@ -62,6 +62,11 @@
       </ion-button>
     </div>
 
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Procesando...</p>
+    </div>
+
     <!-- Card Venta QR -->
     <div class="venta-qr-card figma-card">
       <div class="card-header">

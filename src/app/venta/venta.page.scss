@@ -7,6 +7,17 @@
   padding-bottom: 100px;
 }
 
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #6c757d;
+  ion-spinner { margin-bottom: 12px; }
+  p { margin: 0; font-size: 14px; }
+}
+
 .header-content {
   display: flex;
   align-items: center;

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
 import { Subscription } from 'rxjs';
 
@@ -29,8 +29,7 @@ export class CarteraPage implements OnInit, OnDestroy {
     private router: Router,
     private carteraService: CarteraService,
     public authService: AuthService,
-    private alertController: AlertController,
-    private loadingController: LoadingController
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {

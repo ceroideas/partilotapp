@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 
 type TipoAcceso = 'usuario' | 'vendedor';
 
@@ -16,13 +16,14 @@ export class LoginPage {
   password = '';
   tipoAcceso: TipoAcceso = 'usuario';
   returnUrl = '/tabs';
+  loading = false;
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private alertController: AlertController,
-    private loadingController: LoadingController
+    private alertController: AlertController
   ) {
     const returnUrl = this.route.snapshot.queryParams['returnUrl'];
     this.returnUrl = returnUrl || '/tabs';
@@ -44,24 +45,41 @@ export class LoginPage {
     }
   }
 
+  setTipoAccesoValue(value: TipoAcceso) {
+    this.tipoAcceso = value;
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  async recordarPassword() {
+    await this.mostrarAlerta('Recordar contraseña', 'Contacta con tu entidad o administrador para recuperar tu contraseña.');
+  }
+
+  loginBiometrico() {
+    // Placeholder: integración con Capacitor Identity o similar
+    this.mostrarAlerta('Acceso biométrico', 'Próximamente disponible.');
+  }
+
+  irARegistro() {
+    this.router.navigate(['/registro']);
+  }
+
   async onSubmit() {
     if (!this.email.trim() || !this.password) {
       await this.mostrarAlerta('Atención', 'Introduce email y contraseña');
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Iniciando sesión...',
-    });
-    await loading.present();
-
+    this.loading = true;
     const request$ = this.tipoAcceso === 'usuario'
       ? this.authService.loginUsuario(this.email, this.password)
       : this.authService.login(this.email, this.password);
 
     request$.subscribe({
       next: async (response) => {
-        await loading.dismiss();
+        this.loading = false;
         if (response.success) {
           if (this.tipoAcceso === 'usuario') {
             this.router.navigateByUrl('/tabs');
@@ -73,7 +91,7 @@ export class LoginPage {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         const message = err.error?.message || 'Error de conexión. Verifica la URL de la API.';
         await this.mostrarAlerta('Error', message);
       }

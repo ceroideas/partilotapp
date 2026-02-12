@@ -24,8 +24,13 @@
 <ion-content [fullscreen]="true" class="digitalizar-content">
   <div class="digitalizar-container">
 
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ participacion ? 'Añadiendo a tu cartera...' : 'Buscando...' }}</p>
+    </div>
+
     <!-- Paso: Elegir escanear o añadir manualmente (solo referencia) -->
-    <div class="paso-block" *ngIf="paso === 'elegir'">
+    <div class="paso-block" *ngIf="paso === 'elegir' && !loading">
       <h2 class="section-title">Digitalizar Participación</h2>
       <p class="section-subtitle">Escanea el QR o introduce solo el número de referencia</p>
       <ion-button class="btn-block primary" expand="block" (click)="abrirEscaner()" [disabled]="mostrandoScanner">
@@ -39,7 +44,7 @@
     </div>
 
     <!-- Paso: Entrada manual (solo referencia) -->
-    <div class="paso-block" *ngIf="paso === 'manual'">
+    <div class="paso-block" *ngIf="paso === 'manual' && !loading">
       <h2 class="section-title">Número de referencia</h2>
       <p class="section-subtitle">Solo necesitas el número de referencia; los datos se obtienen automáticamente</p>
       <ion-item class="input-item">
@@ -59,7 +64,7 @@
     </div>
 
     <!-- Paso: Detalle de la participación (panel 3) -->
-    <div class="paso-block detalle-block" *ngIf="paso === 'detalle' && participacion">
+    <div class="paso-block detalle-block" *ngIf="paso === 'detalle' && participacion && !loading">
       <h2 class="section-title">Digitalizar Participación</h2>
       <p class="section-subtitle">Gestiona tus participaciones</p>
 

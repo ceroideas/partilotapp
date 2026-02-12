@@ -2,6 +2,18 @@
   --background: #F5F6F7;
 }
 
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--ion-color-medium);
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+}
+
 .regalar-container {
   padding: 16px;
 }

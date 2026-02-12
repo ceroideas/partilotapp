@@ -18,7 +18,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="regalar-content">
-  <div class="regalar-container">
+  <div class="loading-section" *ngIf="loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>{{ loadingMessage }}</p>
+  </div>
+  <div class="regalar-container" *ngIf="!loading">
     <!-- Información -->
     <div class="info-card figma-card">
       <h2>Regala una participación</h2>

@@ -17,6 +17,14 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="escaner-content">
+
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-section">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>{{ loadingMessage }}</p>
+    </div>
+  </div>
   
   <!-- Vista de escáner -->
   <div class="scanner-view" *ngIf="modoEscaneo && !mostrarInfoDigitalizacion">

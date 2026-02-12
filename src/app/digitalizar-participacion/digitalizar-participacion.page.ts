@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
 import { environment } from '../../environments/environment';
@@ -18,10 +18,10 @@ export class DigitalizarParticipacionPage implements OnInit {
   status: 'can_link' | 'already_mine' | 'already_other' | 'not_found' | null = null;
   mensajeError = '';
   mostrandoScanner = false;
+  loading = false;
 
   constructor(
     private alertController: AlertController,
-    private loadingController: LoadingController,
     private router: Router,
     private carteraService: CarteraService
   ) { }
@@ -76,11 +76,10 @@ export class DigitalizarParticipacionPage implements OnInit {
 
   async consultarReferencia(referencia: string) {
     const pasoAnterior = this.paso;
-    const loading = await this.loadingController.create({ message: 'Buscando...' });
-    await loading.present();
+    this.loading = true;
     this.carteraService.checkByReference(referencia).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         this.participacion = res.participation || null;
         this.status = res.status || null;
         this.mensajeError = res.message || '';
@@ -95,7 +94,7 @@ export class DigitalizarParticipacionPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         const msg = err.error?.message || (err.status === 422
           ? 'La participación no se puede vincular porque ya se encuentra leída por otro usuario.'
           : 'No se encuentra la participación. Comprueba la referencia o el código QR.');
@@ -108,18 +107,17 @@ export class DigitalizarParticipacionPage implements OnInit {
 
   async confirmarDigitalizar() {
     if (!this.participacion?.referencia || this.status !== 'can_link') return;
-    const loading = await this.loadingController.create({ message: 'Añadiendo a tu cartera...' });
-    await loading.present();
+    this.loading = true;
     this.carteraService.linkToWallet(this.participacion.referencia).subscribe({
       next: async () => {
-        await loading.dismiss();
+        this.loading = false;
         // Notificar a la cartera para que recargue las participaciones
         this.carteraService.notifyParticipacionesChanged();
         await this.mostrarAlerta('Listo', 'Participación añadida a tu cartera.');
         this.router.navigate(['/tabs/tab1']);
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         await this.mostrarAlerta('Error', err.error?.message || 'No se pudo añadir.');
       }
     });

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
@@ -15,10 +15,11 @@ export class RegalarParticipacionPage implements OnInit {
   destinatarioNombre: string = '';
   destinatarioEmail: string = '';
   mensajePersonal: string = '';
+  loading = false;
+  loadingMessage = '';
 
   constructor(
     private alertController: AlertController,
-    private loadingController: LoadingController,
     private router: Router
   ) { }
 
@@ -73,10 +74,8 @@ export class RegalarParticipacionPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Enviando regalo...',
-    });
-    await loading.present();
+    this.loading = true;
+    this.loadingMessage = 'Enviando regalo...';
 
     try {
       // TODO: Integrar con servicio para enviar regalo
@@ -101,7 +100,7 @@ export class RegalarParticipacionPage implements OnInit {
         localStorage.setItem('participaciones', JSON.stringify(todasParticipaciones));
       }
 
-      await loading.dismiss();
+      this.loading = false;
 
       const alert = await this.alertController.create({
         header: '¡Regalo enviado!',
@@ -117,7 +116,7 @@ export class RegalarParticipacionPage implements OnInit {
       });
       await alert.present();
     } catch (error) {
-      await loading.dismiss();
+      this.loading = false;
       await this.mostrarAlerta('Error', 'No se pudo enviar el regalo. Intenta nuevamente.');
     }
   }

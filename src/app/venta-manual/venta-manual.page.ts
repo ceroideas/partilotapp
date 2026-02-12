@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 
 @Component({
@@ -39,11 +39,11 @@ export class VentaManualPage implements OnInit {
   mostrarModalExito: boolean = false;
   
   precioPorParticipacion: number = 0;
+  loading = false;
 
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private loadingController: LoadingController,
     private ventasService: VentasService
   ) { }
 
@@ -207,15 +207,11 @@ export class VentaManualPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Registrando venta...',
-    });
-    await loading.present();
-
+    this.loading = true;
     const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
     this.ventasService.sellManual(this.setSeleccionado.id, desde, hasta, paymentMethod).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           this.guardarVentaEnHistorial(res, desde, hasta);
           this.cerrarModalResumen();
@@ -225,7 +221,7 @@ export class VentaManualPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         const msg = err.error?.message || 'Error de conexión. Intenta de nuevo.';
         await this.mostrarAlerta('Error', msg);
       }

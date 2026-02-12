@@ -1,19 +1,9 @@
-<ion-content [fullscreen]="true" class="login-content">
-  <div class="login-container">
+<ion-content [fullscreen]="true" class="registro-content">
+  <div class="registro-container">
     <div class="brand-section">
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
-      <h1 class="welcome-title">Bienvenido</h1>
-      <p class="welcome-subtitle">de nuevo a <strong>PARTILOT</strong></p>
-    </div>
-
-    <div class="tipo-acceso-row">
-      <button type="button" class="tipo-acceso-link" [class.active]="tipoAcceso === 'usuario'" (click)="setTipoAccesoValue('usuario')">
-        Usuario
-      </button>
-      <span class="tipo-acceso-sep">|</span>
-      <button type="button" class="tipo-acceso-link" [class.active]="tipoAcceso === 'vendedor'" (click)="setTipoAccesoValue('vendedor')">
-        Vendedor
-      </button>
+      <h1 class="welcome-title">Crea una cuenta</h1>
+      <p class="welcome-subtitle">y únete a <strong>PARTILOT</strong></p>
     </div>
 
     <form (ngSubmit)="onSubmit()">
@@ -45,25 +35,34 @@
         </button>
       </div>
 
-      <a href="javascript:void(0)" class="link-recordar" (click)="recordarPassword()">Recordar Contraseña</a>
+      <div class="input-wrap">
+        <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
+        <ion-input
+          type="date"
+          [(ngModel)]="fechaNacimiento"
+          name="fechaNacimiento"
+          placeholder="Fecha de Nacimiento"
+          class="input-field"
+          required>
+        </ion-input>
+      </div>
+
+      <label class="checkbox-wrap">
+        <input type="checkbox" [(ngModel)]="aceptarCondiciones" name="aceptarCondiciones" class="checkbox-input">
+        <span class="checkbox-label">Acepto las <button type="button" class="link-inline" (click)="verCondiciones(); $event.preventDefault()">Condiciones de uso</button></span>
+      </label>
 
       <div class="loading-inline" *ngIf="loading">
         <ion-spinner name="crescent"></ion-spinner>
-        <span>Iniciando sesión...</span>
+        <span>Creando cuenta...</span>
       </div>
-      <ion-button type="submit" class="btn-accede" [disabled]="loading" expand="block">
-        Accede
+      <ion-button type="submit" class="btn-registro" [disabled]="loading" expand="block">
+        Registrate
       </ion-button>
     </form>
 
-    <div class="biometric-row">
-      <button type="button" class="btn-biometric" (click)="loginBiometrico()" aria-label="Acceso biométrico">
-        <ion-icon name="finger-print-outline"></ion-icon>
-      </button>
-    </div>
-
-    <p class="footer-registro">
-      Aún no tienes cuenta? <a href="javascript:void(0)" class="link-registro" (click)="irARegistro()">Regístrate</a>
+    <p class="footer-accede">
+      Ya tienes cuenta? <a href="javascript:void(0)" class="link-accede" (click)="irALogin()">Accede</a>
     </p>
   </div>
 </ion-content>

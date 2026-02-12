@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 
 @Component({
@@ -22,10 +22,11 @@ export class VentaQRPage implements OnInit {
   // Modal de éxito
   mostrarModalExito: boolean = false;
 
+  loading = false;
+
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private loadingController: LoadingController,
     private ventasService: VentasService
   ) { }
 
@@ -67,12 +68,10 @@ export class VentaQRPage implements OnInit {
   }
 
   private async procesarQR(referencia: string) {
-    const loading = await this.loadingController.create({ message: 'Procesando...' });
-    await loading.present();
-
+    this.loading = true;
     this.ventasService.sellByQr(referencia).subscribe({
       next: async (res: any) => {
-        await loading.dismiss();
+        this.loading = false;
         if (res.success) {
           const p = res.participation || res;
           this.participaciones.push({
@@ -88,7 +87,7 @@ export class VentaQRPage implements OnInit {
         }
       },
       error: async (err) => {
-        await loading.dismiss();
+        this.loading = false;
         await this.mostrarAlerta('Error', err.error?.message || 'Error al procesar el código QR.');
       }
     });

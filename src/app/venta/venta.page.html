@@ -49,8 +49,14 @@
       </ion-button>
     </div>
 
+    <!-- Spinner de carga -->
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
     <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
-    <div class="venta-container" *ngIf="isVendedor && showEntitySelection && !showLotteriesList && !showVentaView">
+    <div class="venta-container" *ngIf="isVendedor && showEntitySelection && !showLotteriesList && !showVentaView && !loading">
     <div class="section-header">
       <h1 class="section-title">Entidades</h1>
       <p class="section-subtitle">Selecciona la entidad para la venta</p>
@@ -117,7 +123,7 @@
   </div>
 
   <!-- Vista 3: Venta (Física o Digital) -->
-  <div class="venta-container" *ngIf="isVendedor && showVentaView">
+  <div class="venta-container" *ngIf="isVendedor && showVentaView && !loading">
     <!-- Botón para volver a sorteos -->
     <!-- <ion-button 
       *ngIf="lotteries.length > 1"

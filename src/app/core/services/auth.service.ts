@@ -42,6 +42,28 @@ export class AuthService {
     );
   }
 
+  /** Registro de cliente sencillo (email, password, fecha_nacimiento). */
+  register(email: string, password: string, fechaNacimiento: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, {
+      email,
+      password,
+      fecha_nacimiento: fechaNacimiento,
+      aceptar_condiciones: true,
+    }).pipe(
+      tap(response => {
+        if (response.success && response.token) {
+          localStorage.setItem('token', response.token);
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+          localStorage.removeItem('seller');
+          localStorage.setItem('rolActual', 'usuario');
+          localStorage.setItem('esVendedor', 'false');
+        }
+      })
+    );
+  }
+
   /** Login perfil Usuario (permite tanto client como seller). 
    * Si el usuario es vendedor, guarda también el seller para permitir cambio de roles. */
   loginUsuario(email: string, password: string): Observable<LoginResponse> {
