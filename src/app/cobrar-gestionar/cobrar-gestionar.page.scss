@@ -2,6 +2,35 @@
   --background: #F5F6F7;
 }
 
+// Estilos globales para modales action sheet en esta página (excluyendo el modal de éxito)
+::ng-deep ion-modal:not(.success-modal-normal) {
+  .modal-wrapper {
+    border-radius: 24px 24px 0 0 !important;
+    overflow: hidden !important;
+    background: white !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+  
+  &::part(content) {
+    border-radius: 24px 24px 0 0 !important;
+    overflow: visible !important;
+    background: white !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+  
+  // Asegurar que ion-content tenga altura
+  ion-content {
+    min-height: 300px !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    display: block !important;
+  }
+}
+
 .header-content {
   display: flex;
   align-items: center;
@@ -47,24 +76,37 @@
 
 .actions-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 12px;
   margin-bottom: 24px;
 }
 
 .action-button {
+  flex: 1;
   height: 56px;
   border-radius: 12px;
   font-weight: 500;
   text-transform: none;
   
   &.cobrar-button {
+    --background: #e9ecef;
+    --color: #212529;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.cobrar-button.active {
     --background: #212529;
     --color: #ffffff;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
   }
   
   &.donar-button {
+    --background: #e9ecef;
+    --color: #212529;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.donar-button.active {
     --background: #F49200;
     --color: #ffffff;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
@@ -74,6 +116,48 @@
     font-size: 24px;
     margin-right: 8px;
   }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: 40px;
+
+  .empty-icon {
+    font-size: 64px;
+    color: #6c757d;
+    margin-bottom: 16px;
+  }
+
+  .empty-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0 0 12px 0;
+  }
+
+  .empty-message {
+    font-size: 14px;
+    color: #6c757d;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 400px;
+  }
+}
+
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #6c757d;
+  ion-spinner { margin-bottom: 12px; }
+  p { margin: 0; font-size: 14px; }
 }
 
 .participaciones-list {
@@ -235,6 +319,99 @@
   min-width: 120px;
 }
 
+// Modales action sheet (ion-modal) - Estilo como modal de regalar
+// Esquinas redondeadas superiores y posición detrás del menú inferior
+ion-modal {
+  --width: 100%;
+  --height: auto;
+  --backdrop-opacity: 0.5; // Backdrop semi-transparente (no opaco)
+  z-index: 9999 !important; // Detrás del menú inferior
+  
+  // Aplicar border-radius al contenido del modal usando ::part
+  &::part(content) {
+    border-radius: 24px 24px 0 0 !important;
+    padding-bottom: 80px !important; // Espacio para el menú inferior
+    overflow: visible !important; // Cambiar a visible para que se vea el contenido
+    background: white !important;
+    opacity: 1 !important; // Asegurar que el contenido sea opaco
+    height: auto !important;
+    min-height: 300px !important; // Altura mínima para que se vea el contenido
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  // El backdrop debe ser transparente
+  &::part(backdrop) {
+    background: rgba(0, 0, 0, 0.5) !important;
+    opacity: 1 !important;
+  }
+  
+  ion-header {
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+    background: white !important;
+    
+    ion-toolbar {
+      --border-width: 0;
+      --padding-top: 8px;
+      --padding-bottom: 8px;
+      border-radius: 24px 24px 0 0;
+      overflow: hidden;
+      background: white !important;
+    }
+  }
+  
+  ion-content {
+    --padding-bottom: 0; // Sin padding inferior, el footer lo maneja
+    --padding-top: 16px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --background: white;
+    background: white !important;
+    overflow-y: auto !important;
+    min-height: 400px !important; // Altura mínima para que se vea el contenido y el footer
+    height: auto !important;
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  // Asegurar que el contenido dentro de ion-content use flex
+  ion-content .scroll-content {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100% !important;
+  }
+  
+  // Asegurar que el ng-template tenga altura
+  ng-template {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+}
+
+// Estilos globales usando selector de clase para el wrapper del modal
+ion-modal {
+  .modal-wrapper {
+    border-radius: 24px 24px 0 0 !important;
+    overflow: hidden !important;
+    background: white !important;
+    opacity: 1 !important;
+  }
+}
+
+// Estilos adicionales usando selector de atributo para asegurar que se apliquen
+ion-modal[breakpoints] {
+  &::part(content) {
+    border-radius: 24px 24px 0 0 !important;
+    overflow: visible !important; // Cambiar a visible
+    background: white !important;
+    opacity: 1 !important;
+    height: auto !important;
+  }
+}
+
 // Modales
 .modal-overlay {
   position: fixed;
@@ -293,14 +470,15 @@
 }
 
 .modal-subtitle {
-  padding: 0 20px;
+  padding: 0;
   font-size: 14px;
   color: #6c757d;
   margin: 0 0 20px 0;
+  // No centrado, solo el texto del mensaje de seguridad debe estar centrado
 }
 
 .modal-content {
-  padding: 0 20px;
+  padding: 0;
   flex: 1;
   overflow-y: auto;
 }
@@ -310,10 +488,34 @@
   --border-radius: 12px;
   margin-bottom: 16px;
   border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
   
   ion-icon {
     color: #6c757d;
     font-size: 20px;
+  }
+  
+  // Estilo específico para el input de IBAN con addon "ES"
+  &.iban-input-item {
+    --padding-start: 12px;
+    display: flex;
+    align-items: center;
+    
+    .iban-prefix {
+      font-weight: 600;
+      font-size: 16px;
+      color: #212529;
+      margin-right: 12px;
+      display: inline-block;
+      min-width: 32px;
+      text-align: left;
+    }
+    
+    ion-input {
+      flex: 1;
+    }
   }
 }
 
@@ -340,46 +542,64 @@
 }
 
 .security-message {
-  background: #D1ECF1;
-  border-left: 4px solid #0D6EFD;
+  // background: #D1ECF1;
+  // border-left: 4px solid #0D6EFD;
   border-radius: 8px;
   padding: 12px;
-  margin-top: 16px;
+  margin-top: 32px;
+  margin-bottom: 32px;
+  text-align: center; // Centrar el texto del mensaje
   
   p {
     font-size: 12px;
     color: #0C5460;
     line-height: 1.5;
     margin: 0;
+    text-align: center; // Centrar el párrafo
   }
 }
 
 .modal-footer {
-  padding: 20px;
-  display: flex;
-  gap: 12px;
-  border-top: 1px solid #E9ECEF;
+  padding: 16px !important;
+  padding-top: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  border-top: 1px solid #E9ECEF !important;
+  margin-top: auto !important; // Empujar el footer hacia abajo
+  background: white !important;
+  position: relative !important;
+  z-index: 10 !important;
+  flex-shrink: 0 !important; // No reducir el tamaño del footer
+  width: 100% !important;
   
   .omitir-button {
     --border-color: #212529;
     --color: #212529;
-    flex: 1;
-    height: 48px;
-    border-radius: 24px;
-    text-transform: none;
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 24px !important;
+    text-transform: none !important;
+    margin: 0 !important;
   }
   
   .guardar-button,
   .cobrar-button-modal,
   .donar-generar-button,
   .aceptar-button {
-    --background: #F49200;
-    --color: #ffffff;
-    flex: 1;
-    height: 48px;
-    border-radius: 24px;
-    font-weight: 500;
-    text-transform: none;
+    --background: #F49200 !important;
+    --color: #ffffff !important;
+    --border-radius: 28px !important; // Más redondeado como en la captura (usando CSS variable para shadow root)
+    width: 100% !important;
+    height: 48px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    margin: 0 !important;
+    
+    // Estilos para el shadow root del botón
+    &::part(native) {
+      border-radius: 28px !important;
+    }
   }
 }
 
@@ -468,9 +688,60 @@
   }
 }
 
-// Modal de éxito
-.success-modal {
+// Modal de éxito (modal normal centrado) - Estilos específicos para este modal
+::ng-deep ion-modal.success-modal-normal {
+  --width: auto;
+  --max-width: 90%;
+  --height: auto;
+  --border-radius: 16px;
+  --backdrop-opacity: 0.5;
+  
+  .modal-wrapper {
+    border-radius: 16px !important; // Bordes redondeados completos (no solo arriba)
+    overflow: visible !important;
+    background: transparent !important;
+    max-width: 90% !important;
+    width: auto !important;
+    margin: auto !important;
+    box-shadow: none !important; // El contenedor interno maneja la sombra
+  }
+  
+  &::part(content) {
+    border-radius: 16px !important; // Bordes redondeados completos
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: 90% !important;
+    width: auto !important;
+    margin: auto !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding-bottom: 0 !important; // Sin padding extra para el menú inferior
+  }
+  
+  &::part(backdrop) {
+    background: rgba(0, 0, 0, 0.5) !important;
+    opacity: 1 !important;
+  }
+}
+
+.modal-success-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
   text-align: center;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
+  
+  // Asegurar que el modal tenga márgenes laterales
+  @media (min-width: 400px) {
+    max-width: 400px;
+  }
   
   .success-icon {
     font-size: 64px;
@@ -526,6 +797,19 @@
       strong {
         color: #212529;
       }
+    }
+  }
+
+  .modal-footer {
+    margin-top: 24px;
+    
+    .aceptar-button {
+      --background: #F49200;
+      --color: #ffffff;
+      height: 48px;
+      border-radius: 24px;
+      font-weight: 500;
+      text-transform: none;
     }
   }
 }

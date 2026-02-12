@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-tabs',
@@ -16,7 +17,10 @@ export class TabsPage implements OnInit, OnDestroy {
   private intervalId: any;
   private routerSubscription: Subscription | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     this.detectarRol();
@@ -63,43 +67,52 @@ export class TabsPage implements OnInit, OnDestroy {
   }
 
   detectarRol() {
-    // Detectar rol desde localStorage o desde la ruta actual
-    const esVendedorStr = localStorage.getItem('esVendedor');
+    // Perfil real: si tiene 'seller' en localStorage es vendedor; si no tiene pero tiene token es usuario
+    const tieneSeller = this.authService.isSeller();
     const rolGuardado = localStorage.getItem('rolActual');
-    const usuarioStr = localStorage.getItem('usuario');
-    
-    // Prioridad: rol guardado > esVendedor > usuario.tipo > ruta
-    if (rolGuardado) {
-      this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
-    } else if (esVendedorStr === 'true') {
+
+    if (tieneSeller) {
       this.rolActual = 'vendedor';
-    } else if (usuarioStr) {
-      try {
-        const usuario = JSON.parse(usuarioStr);
-        if (usuario.tipo === 'vendedor' || usuario.rol === 'vendedor') {
-          this.rolActual = 'vendedor';
-        } else if (usuario.tipo === 'gestor' || usuario.rol === 'gestor') {
-          this.rolActual = 'gestor';
-        } else {
-          this.rolActual = 'usuario';
-        }
-      } catch (e) {
-        this.rolActual = 'usuario';
-      }
-    } else {
-      // Detectar desde la ruta actual
-      const ruta = window.location.pathname;
-      if (ruta.includes('/gestor-tab') || ruta.includes('/gestor-home') || ruta.includes('/gestor-vendedores') || ruta.includes('/gestor-devolucion') || ruta.includes('/gestor-pago')) {
-        this.rolActual = 'gestor';
-        localStorage.setItem('rolActual', 'gestor');
-        localStorage.setItem('esVendedor', 'false');
-      } else if (ruta.includes('/vendedor-tab') || ruta.includes('/venta') || ruta.includes('/gestor-participaciones') || ruta.includes('/venta-qr') || ruta.includes('/venta-manual')) {
-        this.rolActual = 'vendedor';
+      if (rolGuardado !== 'vendedor') {
         localStorage.setItem('rolActual', 'vendedor');
         localStorage.setItem('esVendedor', 'true');
-      } else {
-        this.rolActual = 'usuario';
       }
+    } else if (rolGuardado === 'gestor') {
+      this.rolActual = 'gestor';
+    } else {
+      // Usuario (client) o sin sesión
+      this.rolActual = 'usuario';
+      if (rolGuardado && rolGuardado !== 'usuario') {
+        localStorage.setItem('rolActual', 'usuario');
+        localStorage.setItem('esVendedor', 'false');
+      }
+    }
+
+    this.redirigirSiRutaNoCorrespondeAlPerfil();
+  }
+
+  /**
+   * Si estás logueado como vendedor no puedes ver tabs de usuario y viceversa.
+   */
+  private redirigirSiRutaNoCorrespondeAlPerfil() {
+    if (!this.authService.isLoggedIn()) return;
+
+    const ruta = this.router.url;
+    const enTabUsuario = /\/tabs\/(tab[1-5])(?:\/|$)/.test(ruta);
+    const enTabVendedor = /\/tabs\/vendedor-tab/.test(ruta);
+    const enTabGestor = /\/tabs\/gestor-tab/.test(ruta);
+
+    if (this.rolActual === 'vendedor' && enTabUsuario) {
+      this.router.navigate(['/tabs/vendedor-tab3'], { replaceUrl: true });
+      return;
+    }
+    if (this.rolActual === 'usuario' && (enTabVendedor || enTabGestor)) {
+      this.router.navigate(['/tabs/tab3'], { replaceUrl: true });
+      return;
+    }
+    if (this.rolActual === 'gestor' && (enTabUsuario || enTabVendedor)) {
+      this.router.navigate(['/tabs/gestor-tab3'], { replaceUrl: true });
+      return;
     }
   }
 

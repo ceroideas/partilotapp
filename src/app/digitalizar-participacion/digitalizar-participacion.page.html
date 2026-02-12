@@ -1,7 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button *ngIf="paso !== 'elegir'"></ion-back-button>
+      <ion-button fill="clear" (click)="volver()" *ngIf="paso === 'elegir'">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>
       <div class="header-content">
@@ -12,89 +15,100 @@
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-button fill="clear" (click)="cerrar()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="digitalizar-content">
   <div class="digitalizar-container">
-    <!-- Instrucciones -->
-    <div class="info-card figma-card">
-      <h2>Digitaliza tu participación</h2>
-      <p>Toma una foto de tu boleto de lotería para agregarlo a tu cartera digital</p>
+
+    <!-- Paso: Elegir escanear o añadir manualmente (solo referencia) -->
+    <div class="paso-block" *ngIf="paso === 'elegir'">
+      <h2 class="section-title">Digitalizar Participación</h2>
+      <p class="section-subtitle">Escanea el QR o introduce solo el número de referencia</p>
+      <ion-button class="btn-block primary" expand="block" (click)="abrirEscaner()" [disabled]="mostrandoScanner">
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        Escanear código
+      </ion-button>
+      <ion-button class="btn-block outline" expand="block" (click)="irAManual()">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        Añadir manualmente (solo referencia)
+      </ion-button>
     </div>
 
-    <!-- Vista previa de imagen -->
-    <div class="preview-section" *ngIf="imagenCapturada">
-      <div class="preview-card figma-card">
-        <img [src]="imagenCapturada" alt="Participación digitalizada" class="preview-image">
-        <div class="preview-actions">
-          <ion-button fill="outline" (click)="eliminarImagen()">
-            <ion-icon name="trash" slot="start"></ion-icon>
-            Eliminar
-          </ion-button>
-          <ion-button fill="outline" (click)="capturarOtra()">
-            <ion-icon name="camera" slot="start"></ion-icon>
-            Otra foto
-          </ion-button>
+    <!-- Paso: Entrada manual (solo referencia) -->
+    <div class="paso-block" *ngIf="paso === 'manual'">
+      <h2 class="section-title">Número de referencia</h2>
+      <p class="section-subtitle">Solo necesitas el número de referencia; los datos se obtienen automáticamente</p>
+      <ion-item class="input-item">
+        <ion-label position="floating">Referencia</ion-label>
+        <ion-input
+          [(ngModel)]="referenciaManual"
+          type="text"
+          placeholder="Ej: 0000000000000000000"
+          (keyup.enter)="buscarPorReferencia()"></ion-input>
+      </ion-item>
+      <ion-button class="btn-block primary" expand="block" (click)="buscarPorReferencia()">
+        Buscar y ver datos
+      </ion-button>
+      <ion-button class="btn-block outline" expand="block" (click)="volver()">
+        Volver
+      </ion-button>
+    </div>
+
+    <!-- Paso: Detalle de la participación (panel 3) -->
+    <div class="paso-block detalle-block" *ngIf="paso === 'detalle' && participacion">
+      <h2 class="section-title">Digitalizar Participación</h2>
+      <p class="section-subtitle">Gestiona tus participaciones</p>
+
+      <div class="entidad-badge">{{ participacion.entidad }}</div>
+
+      <div class="ticket-image-wrap" *ngIf="participacion.snapshot_path">
+        <img [src]="getImageUrl(participacion.snapshot_path)" [alt]="participacion.entidad" class="ticket-image">
+      </div>
+      <div class="ticket-number">{{ participacion.numeroReservado || participacion.numero }}</div>
+
+      <div class="detalle-box">
+        <div class="detalle-row">
+          <span class="detalle-label">Fecha Sorteo:</span>
+          <span class="detalle-value">{{ participacion.fechaSorteo || '—' }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-label">Importe Jugado:</span>
+          <span class="detalle-value">€{{ (participacion.importeJugado ?? 0) | number:'1.2-2' }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-label">Donativo:</span>
+          <span class="detalle-value">€{{ (participacion.donativo ?? 0) | number:'1.2-2' }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-label">Importe total:</span>
+          <span class="detalle-value">€{{ (participacion.importeTotal ?? 0) | number:'1.2-2' }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-label">Nº:</span>
+          <span class="detalle-value">{{ participacion.numeroParticipacion || '—' }}</span>
+        </div>
+        <div class="detalle-row">
+          <span class="detalle-label">Nº Referencia:</span>
+          <span class="detalle-value">{{ participacion.numeroReferencia || '—' }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Área de captura -->
-    <div class="capture-section" *ngIf="!imagenCapturada">
-      <div class="camera-area figma-card">
-        <div class="camera-placeholder">
-          <ion-icon name="camera" size="large"></ion-icon>
-          <p>Prepara tu boleto para la foto</p>
-        </div>
-      </div>
-    </div>
+      <p class="mensaje-ya-posees" *ngIf="status === 'already_mine'">Ya la posees en tu cartera.</p>
 
-    <!-- Formulario de información -->
-    <div class="form-section figma-card" *ngIf="imagenCapturada">
-      <h3>Información de la participación</h3>
-      <ion-item class="figma-input-item">
-        <ion-label position="stacked">Número de participación</ion-label>
-        <ion-input [(ngModel)]="numeroParticipacion" placeholder="Ingresa el número"></ion-input>
-      </ion-item>
-      <ion-item class="figma-input-item">
-        <ion-label position="stacked">Fecha del sorteo</ion-label>
-        <ion-datetime [(ngModel)]="fechaSorteo" displayFormat="DD/MM/YYYY" placeholder="Selecciona la fecha"></ion-datetime>
-      </ion-item>
-      <ion-item class="figma-input-item">
-        <ion-label position="stacked">Números jugados</ion-label>
-        <ion-input [(ngModel)]="numerosJugados" placeholder="Ej: 1, 5, 12, 23, 34"></ion-input>
-      </ion-item>
-    </div>
-
-    <!-- Botones de acción -->
-    <div class="actions-section">
-      <ion-button 
-        *ngIf="!imagenCapturada"
-        class="figma-button" 
-        expand="block" 
-        (click)="abrirCamara()">
-        <ion-icon name="camera" slot="start"></ion-icon>
-        Tomar foto
+      <ion-button
+        class="btn-digitalizar"
+        expand="block"
+        *ngIf="status === 'can_link'"
+        (click)="confirmarDigitalizar()">
+        Digitalizar
       </ion-button>
-      <ion-button 
-        *ngIf="!imagenCapturada"
-        class="figma-button-accent" 
-        expand="block" 
-        (click)="abrirGaleria()">
-        <ion-icon name="images" slot="start"></ion-icon>
-        Seleccionar de galería
-      </ion-button>
-      <ion-button 
-        *ngIf="imagenCapturada"
-        class="figma-button" 
-        expand="block" 
-        [disabled]="!puedeGuardar()"
-        (click)="guardarParticipacion()">
-        <ion-icon name="save" slot="start"></ion-icon>
-        Guardar participación
+      <ion-button class="btn-block outline" expand="block" (click)="volver()">
+        Volver
       </ion-button>
     </div>
   </div>

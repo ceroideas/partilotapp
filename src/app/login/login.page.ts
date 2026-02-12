@@ -3,6 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { AlertController, LoadingController } from '@ionic/angular';
 
+type TipoAcceso = 'usuario' | 'vendedor';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -12,7 +14,8 @@ import { AlertController, LoadingController } from '@ionic/angular';
 export class LoginPage {
   email = '';
   password = '';
-  returnUrl = '/vendedor';
+  tipoAcceso: TipoAcceso = 'usuario';
+  returnUrl = '/tabs';
 
   constructor(
     private authService: AuthService,
@@ -21,12 +24,23 @@ export class LoginPage {
     private alertController: AlertController,
     private loadingController: LoadingController
   ) {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/vendedor';
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+    this.returnUrl = returnUrl || '/tabs';
   }
 
   ionViewDidEnter() {
-    if (this.authService.isLoggedIn() && this.authService.isSeller()) {
-      this.router.navigateByUrl(this.returnUrl);
+    if (!this.authService.isLoggedIn()) return;
+    if (this.authService.isSeller()) {
+      this.router.navigateByUrl(this.returnUrl || '/tabs/vendedor-tab3');
+    } else {
+      this.router.navigateByUrl(this.returnUrl || '/tabs');
+    }
+  }
+
+  setTipoAcceso(event: any) {
+    const value = event?.detail?.value;
+    if (value === 'usuario' || value === 'vendedor') {
+      this.tipoAcceso = value;
     }
   }
 
@@ -41,11 +55,19 @@ export class LoginPage {
     });
     await loading.present();
 
-    this.authService.login(this.email, this.password).subscribe({
+    const request$ = this.tipoAcceso === 'usuario'
+      ? this.authService.loginUsuario(this.email, this.password)
+      : this.authService.login(this.email, this.password);
+
+    request$.subscribe({
       next: async (response) => {
         await loading.dismiss();
         if (response.success) {
-          this.router.navigateByUrl(this.returnUrl);
+          if (this.tipoAcceso === 'usuario') {
+            this.router.navigateByUrl('/tabs');
+          } else {
+            this.router.navigateByUrl(this.returnUrl || '/tabs/vendedor-tab3');
+          }
         } else {
           await this.mostrarAlerta('Error', response.message || 'No se pudo iniciar sesión');
         }

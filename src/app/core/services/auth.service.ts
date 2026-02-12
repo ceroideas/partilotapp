@@ -23,6 +23,7 @@ export class AuthService {
     private router: Router
   ) {}
 
+  /** Login perfil Vendedor (solo cuentas con rol seller). */
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
       tap(response => {
@@ -34,6 +35,25 @@ export class AuthService {
           if (response.seller) {
             localStorage.setItem('seller', JSON.stringify(response.seller));
           }
+          localStorage.setItem('rolActual', 'vendedor');
+          localStorage.setItem('esVendedor', 'true');
+        }
+      })
+    );
+  }
+
+  /** Login perfil Usuario (solo cuentas con rol client). No guarda seller. */
+  loginUsuario(email: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login-usuario`, { email, password }).pipe(
+      tap(response => {
+        if (response.success && response.token) {
+          localStorage.setItem('token', response.token);
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+          localStorage.removeItem('seller');
+          localStorage.setItem('rolActual', 'usuario');
+          localStorage.setItem('esVendedor', 'false');
         }
       })
     );
@@ -58,6 +78,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('seller');
+    localStorage.removeItem('rolActual');
     this.router.navigate(['/login']);
   }
 

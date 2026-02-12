@@ -32,6 +32,18 @@
   width: 100%;
   max-width: 400px;
 
+  ion-segment {
+    margin-bottom: 20px;
+    --background: #F5F6F7;
+    border-radius: 12px;
+  }
+
+  ion-segment-button {
+    --indicator-color: #F49200;
+    text-transform: none;
+    font-weight: 500;
+  }
+
   .login-title {
     font-size: 22px;
     font-weight: bold;

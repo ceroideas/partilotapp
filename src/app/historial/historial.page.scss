@@ -384,3 +384,257 @@
     margin: 0;
   }
 }
+
+// ============================================
+// ESTILOS ESPECÍFICOS PARA VENDEDOR
+// ============================================
+
+.vendedor-historial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vendedor-historial-item {
+  background: #E9ECEF;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: background-color 0.2s ease;
+  overflow: hidden;
+}
+
+.vendedor-item-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #495057;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .vendedor-icon {
+    font-size: 22px;
+    color: white;
+    stroke-width: 1.5;
+  }
+}
+
+.vendedor-item-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.vendedor-item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.vendedor-item-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #212529;
+  line-height: 1.2;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vendedor-item-subtitle {
+  font-size: 14px;
+  color: #6C757D;
+  line-height: 1.2;
+  width: 100%;
+  // El subtítulo puede extenderse completamente, sin restricciones
+}
+
+.vendedor-item-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.vendedor-item-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6C757D;
+  
+  .vendedor-cal-icon {
+    font-size: 16px;
+    color: #6C757D;
+  }
+}
+
+.vendedor-item-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  
+  &:active {
+    background: #E9ECEF;
+  }
+  
+  ion-icon {
+    font-size: 18px;
+    color: #6C757D;
+  }
+  
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.vendedor-historial-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.vendedor-item-detail {
+  background: #F5F6F7;
+  border-radius: 0 0 16px 16px;
+  margin-top: -12px;
+  padding: 16px;
+  padding-top: 20px;
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    padding-top: 20px;
+    padding-bottom: 16px;
+  }
+}
+
+.vendedor-detail-content {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.vendedor-detail-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.vendedor-ticket-image-container {
+  text-align: center;
+}
+
+.vendedor-ticket-image {
+  max-width: 200px;
+  height: auto;
+  max-height: 250px;
+  border-radius: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vendedor-forma-pago-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  
+  .vendedor-label {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+  }
+}
+
+.vendedor-btn-forma-pago {
+  --border-radius: 20px;
+  font-weight: 500;
+  text-transform: none;
+  max-width: 140px;
+  --border-color: #6c757d;
+  --color: #212529;
+}
+
+.vendedor-detail-info {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.vendedor-detail-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 4px;
+  
+  .vendedor-detail-label {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+  
+  .vendedor-detail-value {
+    font-size: 14px;
+    color: #212529;
+    font-weight: 600;
+    flex: 1;
+  }
+}
+
+.vendedor-detail-ref-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #E9ECEF;
+  width: 100%;
+  
+  .vendedor-detail-ref-text {
+    font-size: 12px;
+    color: #6c757d;
+    word-break: break-all;
+    display: block;
+  }
+}
+
+.vendedor-detail-info-full {
+  width: 100%;
+}
+
+.vendedor-detail-value.destacado {
+  font-weight: 700;
+  font-size: 16px;
+  color: #28a745;
+}

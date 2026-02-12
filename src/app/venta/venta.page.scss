@@ -21,6 +21,712 @@
   padding-bottom: 100px;
 }
 
+.back-button {
+  margin-bottom: 16px;
+  --border-color: #6c757d;
+  --color: #6c757d;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.section-header {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.entity-logo-small {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+// Vista 1: Selección de Entidades
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.entity-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.entity-logo {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 12px;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.entity-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+}
+
+// Vista 2: Lista de Sorteos
+.lotteries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.lottery-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.lottery-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.lottery-ticket-icon {
+  width: 48px;
+  height: 48px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  ion-icon {
+    font-size: 24px;
+    color: #6c757d;
+  }
+}
+
+.lottery-info {
+  flex: 1;
+}
+
+.lottery-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.lottery-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin-bottom: 2px;
+}
+
+.lottery-type {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.lottery-action {
+  display: flex;
+  align-items: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  
+  .empty-icon {
+    font-size: 64px;
+    color: #6c757d;
+    margin-bottom: 16px;
+  }
+  
+  h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 8px 0;
+  }
+  
+  p {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+}
+
+// Vista 3: Card de Venta
+.vender-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .vender-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    
+    .vender-title-section {
+      flex: 1;
+      
+      .vender-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+      
+      .vender-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+    
+    .vender-logo {
+      flex-shrink: 0;
+      margin-left: 16px;
+      
+      .entity-logo-small {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 8px;
+        }
+        
+        .entity-logo-fallback {
+          width: 40px;
+          height: 40px;
+          background: #DC3545;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 24px;
+        }
+      }
+    }
+  }
+  
+  .tipo-participacion-selector {
+    margin-bottom: 24px;
+    
+    ion-segment {
+      --background: #F5F6F7;
+      border-radius: 12px;
+      padding: 4px;
+      
+      ion-segment-button {
+        --indicator-color: transparent;
+        --color: #6c757d;
+        --color-checked: #212529;
+        --background-checked: #212529;
+        --color-checked: #ffffff;
+        min-height: 44px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: none;
+        
+        ion-icon {
+          font-size: 20px;
+          margin-bottom: 4px;
+        }
+      }
+    }
+  }
+  
+  .sorteo-info {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #F5F6F7;
+    border-radius: 8px;
+    
+    .sorteo-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+  
+  .escaner-section {
+    margin-bottom: 24px;
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 8px 0;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 16px 0;
+    }
+    
+    .escanear-qr-button {
+      --background: #F49200;
+      --color: #ffffff;
+      --border-radius: 12px;
+      height: 48px;
+      font-weight: 500;
+      text-transform: none;
+    }
+  }
+  
+  .manual-section {
+    margin-bottom: 24px;
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 8px 0;
+    }
+    
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+  
+  .participaciones-fisicas {
+    .participacion-unidad,
+    .participaciones-rango {
+      margin-bottom: 20px;
+      
+      .input-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #212529;
+        display: block;
+        margin-bottom: 8px;
+      }
+      
+      .input-item {
+        --background: white;
+        --border-radius: 12px;
+        --padding-start: 16px;
+        --padding-end: 16px;
+        --inner-padding-end: 0;
+        border: 1px solid #E9ECEF;
+        margin-bottom: 12px;
+        
+        ion-input {
+          font-size: 16px;
+        }
+      }
+    }
+    
+    .rango-inputs {
+      display: flex;
+      gap: 12px;
+      
+      .input-item {
+        flex: 1;
+      }
+    }
+  }
+  
+  .participaciones-digitales {
+    .numero-participaciones-section {
+      .counter-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+      
+      .counter-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-bottom: 16px;
+        
+        .counter-button {
+          --color: #212529;
+          width: 48px;
+          height: 48px;
+          --border-radius: 50%;
+          --background: #F5F6F7;
+          
+          ion-icon {
+            font-size: 24px;
+          }
+          
+          &[disabled] {
+            --color: #6c757d;
+            opacity: 0.5;
+          }
+        }
+        
+        .counter-value {
+          font-size: 32px;
+          font-weight: bold;
+          color: #212529;
+          min-width: 60px;
+          text-align: center;
+        }
+      }
+      
+      .disponibilidad {
+        text-align: center;
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+  }
+  
+  .vender-button {
+    --background: #212529;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 56px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 18px;
+    margin-top: 24px;
+    
+    &[disabled] {
+      --background: #E9ECEF;
+      --color: #6c757d;
+      opacity: 0.6;
+    }
+  }
+  
+  .selector-section {
+    margin-bottom: 20px;
+    
+    .input-item {
+      --background: white;
+      --border-radius: 12px;
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --inner-padding-end: 0;
+      border: 1px solid #E9ECEF;
+      margin-bottom: 12px;
+    }
+    
+    .set-info {
+      margin-bottom: 12px;
+      
+      .set-name-display {
+        padding: 12px 16px;
+        background: #F5F6F7;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #212529;
+        font-weight: 500;
+      }
+    }
+    
+    .no-sets-message {
+      padding: 12px 16px;
+      background: #fff3cd;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      
+      .input-label {
+        color: #856404;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Modales
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  
+  &.bottom-sheet {
+    align-items: flex-end;
+  }
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0px -4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUpBottom 0.3s ease-out;
+  
+  &.bottom-sheet-content {
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+@keyframes slideUpBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.resumen-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      ion-icon {
+        font-size: 24px;
+        color: #212529;
+      }
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+    
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+    
+    .close-button {
+      --color: #212529;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --border-radius: 50%;
+      --background: white;
+      margin: 0;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  
+  .modal-content {
+    .resumen-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 20px;
+      margin-bottom: 24px;
+      background: transparent;
+      
+      .resumen-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        
+        .resumen-label {
+          font-size: 14px;
+          color: #6c757d;
+        }
+        
+        .resumen-value {
+          font-size: 24px;
+          font-weight: bold;
+          color: #212529;
+          
+          &.importe-total {
+            color: #28a745;
+          }
+        }
+      }
+      
+      .resumen-divider {
+        width: 1px;
+        height: 60px;
+        background: #E9ECEF;
+      }
+    }
+    
+    .forma-pago-section {
+      .forma-pago-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+      
+      .forma-pago-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0 0 16px 0;
+      }
+      
+      .opciones-pago {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        .pago-option {
+          --background: white;
+          --color: #212529;
+          --border-radius: 12px;
+          height: 56px;
+          font-weight: 500;
+          text-transform: none;
+          justify-content: flex-start;
+          --padding-start: 16px;
+          border: 1px solid #E9ECEF;
+          
+          ion-icon {
+            margin-right: 12px;
+            font-size: 24px;
+          }
+          
+          &.selected {
+            --background: #212529;
+            --color: #ffffff;
+            border-color: #212529;
+          }
+        }
+      }
+    }
+  }
+  
+  .registrar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+}
+
+.exito-modal {
+  border-radius: 16px;
+  max-width: 400px;
+  animation: slideUp 0.3s ease-out;
+  
+  .modal-title-exito {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 16px 0;
+    text-align: center;
+  }
+  
+  .modal-content-exito {
+    margin-bottom: 24px;
+    
+    p {
+      font-size: 16px;
+      color: #212529;
+      line-height: 1.6;
+      margin: 0;
+      text-align: center;
+    }
+  }
+  
+  .aceptar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .rol-selector {
   display: flex;
   gap: 8px;

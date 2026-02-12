@@ -72,8 +72,188 @@
       <p>{{ errorHistorial }}</p>
     </div>
 
-    <!-- Lista de historial con acordeones -->
-    <ion-accordion-group *ngIf="historial.length > 0 && !loadingHistorial" class="historial-accordion-group">
+    <!-- Lista de historial (mismo diseño para Usuario y Vendedor): digitalizaciones, regalos, cobros / ventas -->
+    <div *ngIf="historialParaLista.length > 0 && !loadingHistorial" class="vendedor-historial-list">
+      <div 
+        *ngFor="let item of historialParaLista; let i = index"
+        class="vendedor-historial-item-wrapper">
+        <div class="vendedor-historial-item">
+          <div class="vendedor-item-icon" [style.background-color]="getColorTipo(item.tipo) + 'E6'">
+            <ion-icon 
+              [name]="getIconoTipo(item.tipo)"
+              class="vendedor-icon"
+              [style.color]="rolActual === 'vendedor' ? 'white' : getColorTipo(item.tipo)">
+            </ion-icon>
+          </div>
+          <div class="vendedor-item-main">
+            <div class="vendedor-item-title-row">
+              <div class="vendedor-item-title">{{ getTituloTipo(item.tipo) }}</div>
+              <div class="vendedor-item-right">
+                <div class="vendedor-item-date">
+                  <ion-icon name="calendar-outline" class="vendedor-cal-icon"></ion-icon>
+                  <span>{{ formatearFechayHora(item.fecha) }}</span>
+                </div>
+                <div 
+                  class="vendedor-item-arrow" 
+                  [class.expanded]="estaExpandido(item)"
+                  (click)="toggleDetalleVenta(item, $event)">
+                  <ion-icon [name]="estaExpandido(item) ? 'chevron-down-outline' : 'chevron-forward-outline'"></ion-icon>
+                </div>
+              </div>
+            </div>
+            <div class="vendedor-item-subtitle">{{ getDescripcion(item) }}</div>
+          </div>
+        </div>
+        
+        <!-- Detalle expandible: Venta (vendedor) -->
+        <div *ngIf="estaExpandido(item) && (item.tipo === 'venta' || item.tipo === 'venta-digital') && item.participacion" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-left">
+              <div class="vendedor-ticket-image-container">
+                <img 
+                  *ngIf="getParticipacionImageUrl(item.participacion)" 
+                  [src]="getParticipacionImageUrl(item.participacion)" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image"
+                  (error)="onImageError($event)">
+                <img 
+                  *ngIf="!getParticipacionImageUrl(item.participacion)" 
+                  src="/assets/participacion.png" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image">
+              </div>
+              <div class="vendedor-forma-pago-block">
+                <span class="vendedor-label">Forma de Pago</span>
+                <ion-button fill="outline" size="small" class="vendedor-btn-forma-pago">
+                  {{ getFormaPagoTexto(item.formaPago || 'efectivo') }}
+                </ion-button>
+              </div>
+            </div>
+            <div class="vendedor-detail-info">
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="item.participacion.donativo"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ item.participacion.donativo | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
+            </div>
+          </div>
+          <div class="vendedor-detail-ref-section">
+            <span class="vendedor-detail-ref-text">N°: {{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
+          </div>
+        </div>
+
+        <!-- Detalle expandible: Digitalización -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'digitalizacion' && item.participacion" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-left">
+              <div class="vendedor-ticket-image-container">
+                <img 
+                  *ngIf="getParticipacionImageUrl(item.participacion)" 
+                  [src]="getParticipacionImageUrl(item.participacion)" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image"
+                  (error)="onImageError($event)">
+                <img 
+                  *ngIf="!getParticipacionImageUrl(item.participacion)" 
+                  src="/assets/participacion.png" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image">
+              </div>
+            </div>
+            <div class="vendedor-detail-info">
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="item.participacion.donativo"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ item.participacion.donativo | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
+            </div>
+          </div>
+          <div class="vendedor-detail-ref-section">
+            <span class="vendedor-detail-ref-text">N°: {{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
+          </div>
+        </div>
+
+        <!-- Detalle expandible: Regalo enviado -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'regalo' && item.participacion" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-left">
+              <div class="vendedor-ticket-image-container">
+                <img 
+                  *ngIf="getParticipacionImageUrl(item.participacion)" 
+                  [src]="getParticipacionImageUrl(item.participacion)" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image"
+                  (error)="onImageError($event)">
+                <img 
+                  *ngIf="!getParticipacionImageUrl(item.participacion)" 
+                  src="/assets/participacion.png" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image">
+              </div>
+            </div>
+            <div class="vendedor-detail-info">
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="item.emailDestinatario || item.destinatario"><span class="vendedor-detail-label">Enviado a:</span><span class="vendedor-detail-value">{{ item.emailDestinatario || item.destinatario }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle expandible: Recibido regalo -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'recibido-regalo' && item.participacion" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-left">
+              <div class="vendedor-ticket-image-container">
+                <img 
+                  *ngIf="getParticipacionImageUrl(item.participacion)" 
+                  [src]="getParticipacionImageUrl(item.participacion)" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image"
+                  (error)="onImageError($event)">
+                <img 
+                  *ngIf="!getParticipacionImageUrl(item.participacion)" 
+                  src="/assets/participacion.png" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image">
+              </div>
+            </div>
+            <div class="vendedor-detail-info">
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="item.emailRemitente || item.remitente"><span class="vendedor-detail-label">Enviado por:</span><span class="vendedor-detail-value">{{ item.emailRemitente || item.remitente }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle expandible: Cobro -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'cobro'" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-info vendedor-detail-info-full">
+              <div class="vendedor-detail-row">
+                <span class="vendedor-detail-label">Número de participaciones:</span>
+                <span class="vendedor-detail-value">{{ item.participaciones?.length || 1 }}</span>
+              </div>
+              <div class="vendedor-detail-row">
+                <span class="vendedor-detail-label">Importe total:</span>
+                <span class="vendedor-detail-value destacado">€{{ item.importeTotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="vendedor-detail-row">
+                <span class="vendedor-detail-label">Fecha de cobro:</span>
+                <span class="vendedor-detail-value">{{ formatearFecha(item.fecha) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de historial con acordeones (solo Gestor; Usuario y Vendedor usan el listado unificado arriba) -->
+    <ion-accordion-group *ngIf="rolActual === 'gestor' && historial.length > 0 && !loadingHistorial" class="historial-accordion-group">
       <ion-accordion 
         *ngFor="let item of historial; let i = index"
         [value]="'item-' + i"
@@ -111,7 +291,7 @@
             <div class="detalle-venta-grid">
               <div class="ticket-y-pago">
                 <div class="ticket-image-container" *ngIf="item.participacion.imagen">
-                  <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+                  <img [src]="getImageUrl(item.participacion.imagen)" alt="Ticket" class="ticket-image" (error)="onImageError($event)">
                 </div>
                 <div class="forma-pago-block">
                   <span class="label">Forma de Pago</span>
@@ -154,7 +334,7 @@
           <!-- Detalle de Digitalización -->
           <div *ngIf="item.tipo === 'digitalizacion' && item.participacion" class="detalle-container">
             <div class="ticket-image-container" *ngIf="item.participacion.imagen">
-              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+              <img [src]="getImageUrl(item.participacion.imagen)" alt="Ticket" class="ticket-image" (error)="onImageError($event)">
             </div>
             
             <div class="detalle-info">
@@ -192,7 +372,7 @@
           <!-- Detalle de Envío de Regalo -->
           <div *ngIf="item.tipo === 'regalo' && item.participacion" class="detalle-container">
             <div class="ticket-image-container" *ngIf="item.participacion.imagen">
-              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+              <img [src]="getImageUrl(item.participacion.imagen)" alt="Ticket" class="ticket-image" (error)="onImageError($event)">
             </div>
             
             <div class="detalle-info">
@@ -230,7 +410,7 @@
           <!-- Detalle de Recibido Regalo -->
           <div *ngIf="item.tipo === 'recibido-regalo' && item.participacion" class="detalle-container">
             <div class="ticket-image-container" *ngIf="item.participacion.imagen">
-              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+              <img [src]="getImageUrl(item.participacion.imagen)" alt="Ticket" class="ticket-image" (error)="onImageError($event)">
             </div>
             
             <div class="detalle-info">
@@ -288,7 +468,7 @@
           <!-- Detalle de Código de Recarga -->
           <div *ngIf="item.tipo === 'codigo-recarga'" class="detalle-container">
             <div class="ticket-image-container" *ngIf="item.participacion?.imagen">
-              <img [src]="item.participacion.imagen" alt="Ticket" class="ticket-image">
+              <img [src]="getImageUrl(item.participacion.imagen)" alt="Ticket" class="ticket-image" (error)="onImageError($event)">
             </div>
             
             <div class="detalle-info">
@@ -338,7 +518,7 @@
     </ion-accordion-group>
 
     <!-- Estado vacío -->
-    <div class="empty-state" *ngIf="historial.length === 0 && !loadingHistorial">
+    <div class="empty-state" *ngIf="historialParaLista.length === 0 && !loadingHistorial">
       <ion-icon name="time-outline"></ion-icon>
       <p>No hay historial disponible</p>
       <p class="empty-subtitle">Tus acciones aparecerán aquí</p>

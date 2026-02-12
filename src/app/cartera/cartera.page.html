@@ -69,7 +69,6 @@
         <ion-icon name="qr-code-outline" slot="start"></ion-icon>
         Digitalizar + Participación
       </ion-button>
-      
       <ion-button 
         class="action-button gestionar-button" 
         fill="outline"
@@ -80,55 +79,98 @@
     </div>
 
     <!-- Lista de participaciones -->
-    <div class="participaciones-list">
+    <ion-spinner *ngIf="loading" name="crescent" class="loading-spinner"></ion-spinner>
+    <div class="participaciones-list" *ngIf="!loading">
       <div 
-        class="participacion-item" 
-        *ngFor="let participacion of participaciones"
-        (click)="verDetalle(participacion)">
+        class="participacion-card" 
+        *ngFor="let participacion of participaciones">
         
-        <div class="participacion-image">
-          <img 
-            *ngIf="obtenerImagenSegura(participacion.imagen)"
-            [src]="obtenerImagenSegura(participacion.imagen)" 
-            [alt]="participacion.entidad || 'Participación'"
-            (error)="manejarErrorImagen($event)">
-          <div 
-            class="image-placeholder"
-            *ngIf="!obtenerImagenSegura(participacion.imagen)">
-            <ion-icon name="ticket-outline"></ion-icon>
+        <div class="participacion-item" [class.regalada]="participacion.estado === 'regalada'" (click)="toggleDetalle(participacion)">
+          <div class="participacion-image">
+            <img 
+              *ngIf="participacion.snapshot_path"
+              [src]="getImageUrl(participacion.snapshot_path)" 
+              [alt]="participacion.entidad || 'Participación'"
+              (error)="manejarErrorImagen($event)">
+            <div class="image-placeholder" *ngIf="!participacion.snapshot_path">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+          </div>
+          <div class="participacion-info">
+            <div class="participacion-header">
+              <span class="entidad">{{ participacion.entidad || 'Entidad' }}</span>
+              <span class="numero">{{ participacion.numeroReservado || participacion.numero || participacion.id }}</span>
+            </div>
+          </div>
+          <div class="participacion-right">
+            <div class="participacion-meta">
+              <div class="participacion-top-right">
+                <span class="fecha">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  {{ participacion.fechaSorteo || '—' }}
+                </span>
+                <span 
+                  class="status-badge pagada"
+                  *ngIf="participacion.estado === 'cobrada'">Pagada</span>
+                <span 
+                  class="status-badge caducada"
+                  *ngIf="participacion.estado === 'caducada'">Caducada</span>
+                <span 
+                  class="status-badge regalada"
+                  *ngIf="participacion.estado === 'regalada'">Regalada</span>
+              </div>
+              <span class="importe premio" *ngIf="participacion.estado !== 'regalada' && participacion.premio != null && participacion.premio > 0">€{{ (participacion.premio ?? 0) | number:'1.2-2' }}</span>
+            </div>
+            <ion-icon 
+              [name]="estaExpandida(participacion) ? 'chevron-down-outline' : 'chevron-forward-outline'" 
+              class="chevron-icon"></ion-icon>
           </div>
         </div>
-        
-        <div class="participacion-info">
-          <div class="participacion-header">
-            <span class="entidad">{{ participacion.entidad || 'Entidad' }}</span>
-            <span class="numero">{{ participacion.numero || participacion.id }}</span>
+
+        <!-- Detalle desplegable -->
+        <div class="participacion-detalle" *ngIf="estaExpandida(participacion)">
+          <div class="detalle-box">
+            <div class="detalle-row">
+              <span class="detalle-label">Fecha Sorteo:</span>
+              <span class="detalle-value">{{ participacion.fechaSorteo || '—' }}</span>
+            </div>
+            <div class="detalle-row">
+              <span class="detalle-label">Importe Jugado:</span>
+              <span class="detalle-value">€{{ (participacion.importeJugado ?? 0) | number:'1.2-2' }}</span>
+            </div>
+            <div class="detalle-row">
+              <span class="detalle-label">Donativo:</span>
+              <span class="detalle-value">€{{ (participacion.donativo ?? 0) | number:'1.2-2' }}</span>
+            </div>
+            <div class="detalle-row">
+              <span class="detalle-label">Importe total:</span>
+              <span class="detalle-value">€{{ (participacion.importeTotal ?? 0) | number:'1.2-2' }}</span>
+            </div>
+            <div class="detalle-row">
+              <span class="detalle-label">Nº:</span>
+              <span class="detalle-value">{{ participacion.numeroParticipacion || '—' }}</span>
+            </div>
+            <div class="detalle-row">
+              <span class="detalle-label">Nº Referencia:</span>
+              <span class="detalle-value">{{ participacion.numeroReferencia || '—' }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="participacion.estado === 'regalada' && participacion.gifted_to_email">
+              <span class="detalle-label">Enviado a:</span>
+              <span class="detalle-value">{{ participacion.gifted_to_email }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="participacion.received_from_email">
+              <span class="detalle-label">Recibida de:</span>
+              <span class="detalle-value">{{ participacion.received_from_email }}</span>
+            </div>
+            <ion-button
+              *ngIf="puedeRegalar(participacion)"
+              class="regalar-button"
+              expand="block"
+              (click)="abrirModalRegalo(participacion, $event)">
+              <ion-icon name="gift-outline" slot="start"></ion-icon>
+              Regalar
+            </ion-button>
           </div>
-          <div class="participacion-details">
-            <span class="fecha">
-              <ion-icon name="calendar-outline"></ion-icon>
-              {{ participacion.fechaSorteo || participacion.fecha || 'N/A' }}
-            </span>
-            <span 
-              class="importe"
-              [class.cobrada]="participacion.estado === 'cobrada'"
-              [class.activa]="participacion.estado === 'activa'"
-              [class.caducada]="participacion.estado === 'caducada'">
-              €{{ (participacion.importeTotal || participacion.importe || 0) | number:'1.2-2' }}
-            </span>
-          </div>
-        </div>
-        
-        <div class="participacion-status">
-          <span 
-            class="status-badge"
-            *ngIf="participacion.estado === 'cobrada' || participacion.estado === 'donada' || participacion.estado === 'caducada'"
-            [class.cobrada]="participacion.estado === 'cobrada'"
-            [class.donada]="participacion.estado === 'donada'"
-            [class.caducada]="participacion.estado === 'caducada'">
-            {{ getEstadoTexto(participacion.estado) }}
-          </span>
-          <ion-icon name="chevron-forward-outline" class="chevron-icon"></ion-icon>
         </div>
       </div>
 
@@ -142,3 +184,43 @@
     </div>
   </div>
 </ion-content>
+
+<!-- Modal Regalo (bottom sheet): email destinatario - por encima del menú de tabs -->
+<div class="modal-overlay bottom-sheet" *ngIf="participacionParaRegalar" (click)="cerrarModalRegalo()">
+  <div class="modal-container modal-regalo bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-regalo-header">
+      <h2 class="modal-regalo-title">Email Destinatario</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalRegalo()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <p class="modal-regalo-texto">Dinos a quién quieres regalar la participación.</p>
+    <p class="modal-regalo-aviso">Introduce <strong>el email del destinatario</strong> para enviarle esta participación. Por favor, <strong>asegúrate de que el correo es correcto</strong>, ya que una vez enviada, la acción no podrá deshacerse.</p>
+    <ion-item lines="full" class="ion-no-padding modal-regalo-input">
+      <ion-icon name="mail-outline" slot="start"></ion-icon>
+      <ion-input 
+        type="email" 
+        [(ngModel)]="emailDestinatario" 
+        placeholder="Email"
+        (keyup.enter)="enviarRegalo()"></ion-input>
+    </ion-item>
+    <ion-button 
+      class="regalar-button-modal" 
+      expand="block" 
+      (click)="enviarRegalo()"
+      [disabled]="!emailDestinatario.trim()">
+      <ion-icon name="gift-outline" slot="start"></ion-icon>
+      Regalar
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal Éxito regalo - compacto, por encima del menú de tabs -->
+<div class="modal-overlay modal-exito-overlay" *ngIf="mostrarModalExito" (click)="cerrarModalExito()">
+  <div class="modal-container modal-exito-regalo" (click)="$event.stopPropagation()">
+    <h2 class="modal-exito-title">Participación enviada con éxito</h2>
+    <p class="modal-exito-mensaje">{{ mensajeExitoRegalo }}</p>
+    <p class="modal-exito-sub">El destinatario recibirá un email con todos los detalles del regalo.</p>
+    <ion-button expand="block" class="aceptar-button" (click)="cerrarModalExito()">Aceptar</ion-button>
+  </div>
+</div>

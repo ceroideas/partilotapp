@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
 import { LoadingController, AlertController } from '@ionic/angular';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-gestor-participaciones',
@@ -52,7 +53,7 @@ export class GestorParticipacionesPage implements OnInit {
       next: async (res: any) => {
         await loading.dismiss();
         if (res.success && res.entities) {
-          this.entities = res.entities;
+          this.entities = res.entities || [];
           if (this.entities.length === 1) {
             this.selectedEntity = this.entities[0];
             this.loadTacos();
@@ -61,11 +62,15 @@ export class GestorParticipacionesPage implements OnInit {
           } else {
             await this.mostrarAlerta('Sin entidades', 'No tienes entidades asignadas.');
           }
+        } else {
+          await this.mostrarAlerta('Error', res.message || 'Error al cargar las entidades.');
         }
       },
       error: async (err) => {
         await loading.dismiss();
-        await this.mostrarAlerta('Error', 'Error al cargar las entidades.');
+        console.error('Error al cargar entidades:', err);
+        const errorMessage = err?.error?.message || 'Error al cargar las entidades.';
+        await this.mostrarAlerta('Error', errorMessage);
       }
     });
   }
@@ -87,13 +92,22 @@ export class GestorParticipacionesPage implements OnInit {
         await loading.dismiss();
         if (res.success) {
           this.summary = res.summary;
-          this.tacos = res.tacos;
+          this.tacos = res.tacos || [];
           this.showTacosList = true;
+          
+          // Si no hay tacos, mostrar mensaje
+          if (this.tacos.length === 0) {
+            await this.mostrarAlerta('Sin participaciones', 'No tienes participaciones asignadas para esta entidad.');
+          }
+        } else {
+          await this.mostrarAlerta('Error', res.message || 'Error al cargar los tacos.');
         }
       },
       error: async (err) => {
         await loading.dismiss();
-        await this.mostrarAlerta('Error', 'Error al cargar los tacos.');
+        console.error('Error al cargar tacos:', err);
+        const errorMessage = err?.error?.message || 'Error al cargar los tacos.';
+        await this.mostrarAlerta('Error', errorMessage);
       }
     });
   }
@@ -230,5 +244,16 @@ export class GestorParticipacionesPage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  getImageUrl(imagePath: string | null | undefined): string {
+    if (!imagePath) return '';
+    // Si ya es una URL completa, retornarla tal cual
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    // Construir URL completa desde la API base (sin /api)
+    const apiBaseUrl = environment.apiUrl.replace('/api', '');
+    return `${apiBaseUrl}/uploads/${imagePath}`;
   }
 }

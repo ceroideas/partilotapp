@@ -1,5 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { CarteraService } from '../core/services/cartera.service';
+import { AuthService } from '../core/services/auth.service';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { environment } from '../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-cartera',
@@ -7,20 +12,45 @@ import { Router } from '@angular/router';
   styleUrls: ['./cartera.page.scss'],
   standalone: false,
 })
-export class CarteraPage implements OnInit {
+export class CarteraPage implements OnInit, OnDestroy {
 
   participaciones: any[] = [];
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
+  participacionExpandidaId: number | null = null;
+  loading = false;
+  participacionParaRegalar: any = null;
+  emailDestinatario = '';
+  mostrarModalExito = false;
+  mensajeExitoRegalo = '';
+  emailRegaladoA = '';
+  private participacionesChangedSubscription?: Subscription;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private carteraService: CarteraService,
+    private authService: AuthService,
+    private alertController: AlertController,
+    private loadingController: LoadingController
+  ) { }
 
   ngOnInit() {
     this.detectarRol();
     this.loadParticipaciones();
+    
+    // Suscribirse a cambios en las participaciones
+    this.participacionesChangedSubscription = this.carteraService.getParticipacionesChanged().subscribe(() => {
+      this.loadParticipaciones();
+    });
+  }
+
+  ngOnDestroy() {
+    // Limpiar suscripción al destruir el componente
+    if (this.participacionesChangedSubscription) {
+      this.participacionesChangedSubscription.unsubscribe();
+    }
   }
 
   ionViewWillEnter() {
-    // Recargar participaciones cuando se entre a la vista
     this.detectarRol();
     this.loadParticipaciones();
   }
@@ -28,7 +58,6 @@ export class CarteraPage implements OnInit {
   detectarRol() {
     const rolGuardado = localStorage.getItem('rolActual');
     const esVendedorStr = localStorage.getItem('esVendedor');
-    
     if (rolGuardado) {
       this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
     } else if (esVendedorStr === 'true') {
@@ -41,131 +70,122 @@ export class CarteraPage implements OnInit {
   cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
     this.rolActual = rol;
     localStorage.setItem('rolActual', rol);
-    
     if (rol === 'vendedor') {
       localStorage.setItem('esVendedor', 'true');
-      // Siempre navegar a la home de vendedor dentro de tabs
       this.router.navigate(['/tabs/vendedor-tab3']);
     } else if (rol === 'usuario') {
       localStorage.setItem('esVendedor', 'false');
-      // Siempre navegar a la home de usuario
       this.router.navigate(['/tabs/tab3']);
     } else if (rol === 'gestor') {
       localStorage.setItem('esVendedor', 'false');
-      // Siempre navegar a la home de gestor dentro de tabs
       this.router.navigate(['/tabs/gestor-tab3']);
     }
   }
 
   loadParticipaciones() {
-    try {
-      // Cargar participaciones del localStorage
-      const participacionesGuardadas = JSON.parse(localStorage.getItem('participaciones') || '[]');
-      
-      if (participacionesGuardadas.length > 0) {
-        this.participaciones = participacionesGuardadas;
-      } else {
-        // Datos de ejemplo si no hay participaciones guardadas
-        this.participaciones = [
-          { 
-            id: 1, 
-            numero: '40083',
-            entidad: 'CSIF-Rioja',
-            fechaSorteo: '22/12/25',
-            importeTotal: 25.00,
-            estado: 'activa',
-            imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-          },
-          { 
-            id: 2, 
-            numero: '60089',
-            entidad: 'Peña Rondalosa',
-            fechaSorteo: '22/12/25',
-            importeTotal: 5.00,
-            estado: 'activa',
-            imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-          },
-          {
-            id: 3,
-            numero: '40083',
-            entidad: 'CSIF-Rioja',
-            fechaSorteo: '22/12/25',
-            importeTotal: 25.00,
-            estado: 'cobrada',
-            imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-          },
-          {
-            id: 4,
-            numero: '46545-93934',
-            entidad: 'UGT',
-            fechaSorteo: '22/12/25',
-            importeTotal: 5.00,
-            estado: 'cobrada',
-            imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-          },
-          {
-            id: 5,
-            numero: '40083',
-            entidad: 'CSIF-Rioja',
-            fechaSorteo: '22/12/24',
-            importeTotal: 5.00,
-            estado: 'caducada',
-            imagen: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
-          }
-        ];
-        localStorage.setItem('participaciones', JSON.stringify(this.participaciones));
-      }
-    } catch (error) {
-      console.error('Error cargando participaciones:', error);
+    if (!this.authService.isLoggedIn() || this.authService.isSeller()) {
       this.participaciones = [];
+      return;
     }
+    this.loading = true;
+    this.carteraService.getParticipations().subscribe({
+      next: (res) => {
+        this.loading = false;
+        this.participaciones = (res.participations || []).map((p: any) => ({ ...p, estado: p.estado || 'activa' }));
+      },
+      error: () => {
+        this.loading = false;
+        this.participaciones = [];
+      }
+    });
+  }
+
+  getImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    if (path.startsWith('storage/')) return `${base}/${path}`;
+    return `${base}/storage/${path}`;
   }
 
   agregarParticipacion() {
-    // Navegar a la vista de digitalizar participación
     this.router.navigate(['/digitalizar-participacion']);
   }
 
   irACobrarGestionar() {
-    // Navegar a la vista de cobrar/gestionar
     this.router.navigate(['/cobrar-gestionar']);
   }
 
-  verDetalle(participacion: any) {
-    // TODO: Navegar a detalle de participación
-    console.log('Ver detalle:', participacion);
+  toggleDetalle(participacion: any) {
+    const id = participacion.id;
+    this.participacionExpandidaId = this.participacionExpandidaId === id ? null : id;
+  }
+
+  estaExpandida(participacion: any): boolean {
+    return this.participacionExpandidaId === participacion.id;
   }
 
   getEstadoTexto(estado: string): string {
-    const estados: { [key: string]: string } = {
-      'cobrada': 'Cobrada',
-      'donada': 'Donada',
-      'caducada': 'Caducada',
-      'activa': ''
+    const map: { [key: string]: string } = {
+      cobrada: 'Pagada',
+      donada: 'Donada',
+      caducada: 'Caducada',
+      regalada: 'Regalada',
+      recibida: 'Recibida',
+      activa: ''
     };
-    return estados[estado] || '';
+    return map[estado] || '';
   }
 
-  actualizarParticipaciones() {
-    this.loadParticipaciones();
+  puedeRegalar(participacion: any): boolean {
+    if (!participacion) return false;
+    const e = participacion.estado || 'activa';
+    if (e === 'cobrada' || e === 'caducada' || e === 'regalada') return false;
+    if (participacion.received_from_email) return false;
+    return true;
+  }
+
+  abrirModalRegalo(participacion: any, event: Event) {
+    event?.stopPropagation();
+    this.participacionParaRegalar = participacion;
+    this.emailDestinatario = '';
+  }
+
+  cerrarModalRegalo() {
+    this.participacionParaRegalar = null;
+    this.emailDestinatario = '';
+  }
+
+  enviarRegalo() {
+    if (!this.participacionParaRegalar || !this.emailDestinatario.trim()) return;
+    const email = this.emailDestinatario.trim();
+    this.carteraService.gift(this.participacionParaRegalar.id, email).subscribe({
+      next: (res: any) => {
+        this.cerrarModalRegalo();
+        this.mensajeExitoRegalo = `La participación perteneciente a ${this.participacionParaRegalar?.entidad || 'la entidad'} ha sido enviada correctamente a ${res.gifted_to_email || email}.`;
+        this.emailRegaladoA = res.gifted_to_email || email;
+        this.mostrarModalExito = true;
+        this.loadParticipaciones();
+      },
+      error: async (err) => {
+        const msg = err.error?.message || 'No se pudo enviar el regalo.';
+        const alert = await this.alertController.create({ header: 'Error', message: msg, buttons: ['OK'] });
+        await alert.present();
+      }
+    });
+  }
+
+  cerrarModalExito() {
+    this.mostrarModalExito = false;
+    this.mensajeExitoRegalo = '';
+    this.emailRegaladoA = '';
   }
 
   manejarErrorImagen(event: any) {
-    // Evitar bucle infinito verificando si ya es el placeholder
-    if (event.target.src && !event.target.src.includes('data:image')) {
-      // Si falla la imagen, usar un placeholder base64 o simplemente ocultar
+    if (event?.target) {
       event.target.style.display = 'none';
-      event.target.parentElement.classList.add('image-error');
+      const parent = event.target.closest('.participacion-image');
+      if (parent) parent.classList.add('image-error');
     }
   }
-
-  obtenerImagenSegura(imagen: string | undefined): string {
-    // Si la imagen es base64, devolverla directamente
-    if (imagen && imagen.startsWith('data:image')) {
-      return imagen;
-    }
-    // Si no hay imagen o no es válida, devolver null para usar el placeholder CSS
-    return imagen || '';
-  }
-
 }

@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../core/services/auth.service';
+import { VentasService } from '../core/services/ventas.service';
 
 @Component({
   selector: 'app-escaner',
@@ -13,23 +16,70 @@ export class EscanerPage implements OnInit {
   modoEscaneo: boolean = true;
   ticketEscaneado: any = null;
   imagenTicket: string | null = null;
+  
+  // Modo vendedor (digitalización múltiple)
+  isVendedor: boolean = false;
+  participacionesDigitalizadas: any[] = [];
+  mostrarInfoDigitalizacion: boolean = false;
+  
+  // Modal de resumen y pago
+  mostrarModalResumen: boolean = false;
+  formaPago: 'efectivo' | 'bizum' | 'transferencia' | 'omitir' | null = null;
+  mostrarModalExito: boolean = false;
 
   constructor(
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private loadingController: LoadingController,
+    private authService: AuthService,
+    private ventasService: VentasService
   ) { }
 
   ngOnInit() {
+    this.isVendedor = this.authService.isSeller();
     this.modoEscaneo = true;
   }
 
   async scanQR() {
+    if (this.isVendedor) {
+      // Modo vendedor: escáner para digitalización múltiple
+      await this.iniciarScannerVendedor();
+    } else {
+      // Modo usuario: escáner normal
+      await this.iniciarScannerUsuario();
+    }
+  }
+
+  async iniciarScannerVendedor() {
+    this.modoEscaneo = true;
+    try {
+      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+        scanText: 'Escanea el código QR de la participación'
+      });
+      const referencia = result?.ScanResult?.trim() || null;
+      if (referencia) {
+        await this.procesarQRDigitalizacion(referencia);
+      }
+    } catch (err: any) {
+      console.error('Error escáner QR:', err);
+      if (err.message && err.message.includes('User canceled')) {
+        // Usuario canceló, no hacer nada
+        return;
+      }
+      await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner.');
+    } finally {
+      this.modoEscaneo = false;
+    }
+  }
+
+  async iniciarScannerUsuario() {
     // TODO: Implementar escáner QR real con plugin de Capacitor
     // Por ahora simulamos el escaneo
     this.modoEscaneo = false;
     
-    // Simular datos del ticket escaneado - puedes cambiar esto para probar diferentes casos
-    // Caso 1: Sin premio
+    // Simular datos del ticket escaneado
     this.ticketEscaneado = {
       numero: '60089',
       entidad: 'Peña Rondalosa',
@@ -40,24 +90,43 @@ export class EscanerPage implements OnInit {
       numeroParticipacion: '1/0001',
       numeroReferencia: '0000000000000000000',
       premio: 0.00,
-      tipo: 'social' // 'social' o 'nacional'
+      tipo: 'social'
     };
     
-    // Para probar con premio, descomenta esto:
-    // this.ticketEscaneado = {
-    //   numero: '60089',
-    //   entidad: 'Lotería Nacional',
-    //   fechaSorteo: '22/12/25',
-    //   importeJugado: 20.00,
-    //   donativo: 0.00,
-    //   importeTotal: 20.00,
-    //   numeroParticipacion: '1/0001',
-    //   numeroReferencia: '0000000000000000000',
-    //   premio: 20.00,
-    //   tipo: 'nacional'
-    // };
-    
     this.imagenTicket = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  }
+
+  private async procesarQRDigitalizacion(referencia: string) {
+    const loading = await this.loadingController.create({ message: 'Procesando...' });
+    await loading.present();
+
+    // Llamar a la API para digitalizar la participación
+    this.ventasService.digitalizeParticipation(referencia).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        if (res.success) {
+          const p = res.participation || res;
+          const participacion = {
+            id: Date.now(),
+            numero: p.participation_code || p.numero || referencia,
+            referencia,
+            entidad: p.entity_name || p.entidad || p.set?.reserve?.entity?.name || '',
+            precio: p.amount || p.importeTotal || p.played_amount || 0,
+            fechaSorteo: p.draw_date || p.fechaSorteo || '',
+            imagen: p.image || p.snapshot_path || null
+          };
+          this.participacionesDigitalizadas.push(participacion);
+          this.mostrarInfoDigitalizacion = true;
+          this.modoEscaneo = false;
+        } else {
+          await this.mostrarAlerta('Error', res.message || 'No se pudo digitalizar la participación.');
+        }
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        await this.mostrarAlerta('Error', err.error?.message || 'Error al procesar el código QR.');
+      }
+    });
   }
 
   async digitalizar() {
@@ -111,6 +180,104 @@ export class EscanerPage implements OnInit {
       console.error('Error digitalizando:', error);
       this.mostrarAlerta('Error', 'No se pudo digitalizar la participación.');
     }
+  }
+
+  nuevaDigitalizacion() {
+    // Volver al escáner para agregar otra participación
+    this.modoEscaneo = true;
+    this.mostrarInfoDigitalizacion = false;
+  }
+
+  calcularImporteTotal(): number {
+    return this.participacionesDigitalizadas.reduce((total, p) => total + (p.precio || 0), 0);
+  }
+
+  mostrarResumen() {
+    this.formaPago = null;
+    this.mostrarModalResumen = true;
+  }
+
+  cerrarModalResumen() {
+    this.mostrarModalResumen = false;
+  }
+
+  seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {
+    this.formaPago = forma;
+  }
+
+  async venderDigitalizaciones() {
+    if (!this.formaPago) {
+      await this.mostrarAlerta('Atención', 'Por favor selecciona una forma de pago');
+      return;
+    }
+
+    const loading = await this.loadingController.create({ message: 'Registrando ventas...' });
+    await loading.present();
+
+    // Procesar cada participación digitalizada
+    const ventas = [];
+    for (const participacion of this.participacionesDigitalizadas) {
+      try {
+        const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
+        const res = await firstValueFrom(this.ventasService.sellByQr(participacion.referencia, undefined, undefined, paymentMethod));
+        if (res?.success) {
+          ventas.push(res);
+        }
+      } catch (err) {
+        console.error('Error vendiendo participación:', err);
+      }
+    }
+
+    await loading.dismiss();
+
+    if (ventas.length > 0) {
+      // Guardar en historial
+      ventas.forEach((res, index) => {
+        const p = res.participation || res;
+        const participacion = this.participacionesDigitalizadas[index];
+        this.guardarVentaDigitalEnHistorial(res, participacion.referencia);
+      });
+
+      this.cerrarModalResumen();
+      this.mostrarModalExito = true;
+    } else {
+      await this.mostrarAlerta('Error', 'No se pudo registrar ninguna venta.');
+    }
+  }
+
+  guardarVentaDigitalEnHistorial(res: any, referencia: string): void {
+    const p = res.participation || res;
+    const entidad = p.entity_name || p.entidad || '—';
+    const drawDate = p.draw_date
+      ? new Date(p.draw_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+      : '—';
+    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+    historial.unshift({
+      id: Date.now(),
+      tipo: 'venta-digital',
+      fecha: new Date().toISOString(),
+      formaPago: this.formaPago || null,
+      descripcion: `Participación ${entidad}`,
+      participacion: {
+        entidad,
+        numero: p.participation_code || p.numero || referencia,
+        fechaSorteo: drawDate,
+        importeJugado: p.played_amount ?? p.importeJugado ?? 0,
+        donativo: p.donation_amount ?? p.donativo,
+        importeTotal: p.amount ?? p.importeTotal ?? 0,
+        numeroParticipacion: p.participation_code || referencia,
+        numeroReferencia: p.reference || referencia.padEnd(19, '0').slice(0, 19),
+        imagen: p.image || null
+      }
+    });
+    localStorage.setItem('historial', JSON.stringify(historial));
+  }
+
+  cerrarModalExito() {
+    this.mostrarModalExito = false;
+    this.participacionesDigitalizadas = [];
+    this.mostrarInfoDigitalizacion = false;
+    this.modoEscaneo = true;
   }
 
   async gestionarPremio() {

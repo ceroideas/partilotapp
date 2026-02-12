@@ -47,6 +47,10 @@ export class VentasService {
     return this.http.get(`${this.apiUrl}/sellers/me/entities`);
   }
 
+  getMyLotteries(entityId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sellers/me/lotteries?entity_id=${entityId}`);
+  }
+
   getMyTacos(entityId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/sellers/me/tacos?entity_id=${entityId}`);
   }
@@ -60,5 +64,12 @@ export class VentasService {
    */
   getHistorial(): Observable<{ success: boolean; historial: any[] }> {
     return this.http.get<{ success: boolean; historial: any[] }>(`${this.apiUrl}/sales/me`);
+  }
+
+  /**
+   * Digitalizar participación escaneando QR
+   */
+  digitalizeParticipation(referencia: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/participations/digitalize`, { referencia });
   }
 }

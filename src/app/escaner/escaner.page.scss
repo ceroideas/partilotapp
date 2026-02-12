@@ -312,3 +312,313 @@
     }
   }
 }
+
+/* Vista Info Digitalización (Modo Vendedor) */
+.info-digitalizacion-view {
+  height: 100%;
+  background: #F5F6F7;
+}
+
+.info-digitalizacion-container {
+  padding: 16px;
+  background: white;
+  min-height: 100%;
+}
+
+.info-digitalizacion-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E9ECEF;
+  
+  ion-title {
+    flex: 1;
+    text-align: center;
+    
+    .info-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0;
+    }
+  }
+  
+  ion-button {
+    --color: #212529;
+  }
+}
+
+.participaciones-digitalizadas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.participacion-digitalizada-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #F5F6F7;
+  border-radius: 12px;
+  
+  .participacion-info {
+    flex: 1;
+    
+    .participacion-numero {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+  
+  .participacion-precio {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+  }
+}
+
+.importe-total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid #E9ECEF;
+  margin-bottom: 24px;
+  
+  .importe-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+  }
+  
+  .importe-valor {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212529;
+  }
+}
+
+.actions-section-digitalizacion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  .nueva-digitalizacion-button {
+    --background: #F5F6F7;
+    --color: #212529;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 500;
+    text-transform: none;
+  }
+  
+  .vender-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 56px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 18px;
+  }
+}
+
+// Modales (reutilizados de venta-qr)
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  
+  &.bottom-sheet {
+    align-items: flex-end;
+  }
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+  
+  &.resumen-modal {
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.resumen-modal {
+  .modal-header {
+    position: relative;
+    margin-bottom: 24px;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+    
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+    
+    .close-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      --color: #6c757d;
+      --padding-start: 0;
+      --padding-end: 0;
+    }
+  }
+  
+  .modal-content {
+    .resumen-info {
+      background: #F5F6F7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      
+      .resumen-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 16px;
+        color: #212529;
+        
+        &.total {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 2px solid #212529;
+          font-weight: bold;
+          font-size: 18px;
+          
+          .importe-total {
+            color: #28a745;
+            font-weight: bold;
+          }
+        }
+        
+        &:last-child:not(.total) {
+          margin-bottom: 0;
+        }
+      }
+    }
+    
+    .forma-pago-section {
+      .forma-pago-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+      
+      .forma-pago-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0 0 16px 0;
+      }
+      
+      .opciones-pago {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        .pago-option {
+          --background: #F5F6F7;
+          --color: #212529;
+          --border-radius: 12px;
+          height: 56px;
+          font-weight: 500;
+          text-transform: none;
+          justify-content: flex-start;
+          --padding-start: 16px;
+          
+          ion-icon {
+            margin-right: 12px;
+            font-size: 24px;
+          }
+          
+          &.selected {
+            --background: #212529;
+            --color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+  
+  .registrar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+}
+
+.exito-modal {
+  border-radius: 16px;
+  max-width: 400px;
+  margin: auto;
+  
+  .modal-title-exito {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 16px 0;
+    text-align: center;
+  }
+  
+  .modal-content-exito {
+    margin-bottom: 24px;
+    
+    p {
+      font-size: 16px;
+      color: #212529;
+      line-height: 1.6;
+      margin: 0;
+      text-align: center;
+    }
+  }
+  
+  .aceptar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+  }
+}

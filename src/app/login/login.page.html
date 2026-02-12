@@ -12,8 +12,20 @@
   <div class="login-container">
     
     <div class="login-card figma-card">
-      <h2 class="login-title">Acceso Vendedor</h2>
-      <p class="login-subtitle">Inicia sesión para gestionar tus ventas</p>
+      <!-- Selector de tipo de acceso: Usuario | Vendedor -->
+      <ion-segment [value]="tipoAcceso" (ionChange)="setTipoAcceso($event)">
+        <ion-segment-button value="usuario">
+          <ion-label>Usuario</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="vendedor">
+          <ion-label>Vendedor</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <h2 class="login-title" *ngIf="tipoAcceso === 'usuario'">Acceso Usuario</h2>
+      <p class="login-subtitle" *ngIf="tipoAcceso === 'usuario'">Inicia sesión para ver tu cartera y participaciones</p>
+      <h2 class="login-title" *ngIf="tipoAcceso === 'vendedor'">Acceso Vendedor</h2>
+      <p class="login-subtitle" *ngIf="tipoAcceso === 'vendedor'">Inicia sesión para gestionar tus ventas</p>
 
       <form (ngSubmit)="onSubmit()">
         <ion-item class="input-item">

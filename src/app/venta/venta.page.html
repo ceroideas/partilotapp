@@ -1,5 +1,14 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button *ngIf="!showEntitySelection && !showLotteriesList && !showVentaView"></ion-back-button>
+      <ion-button *ngIf="showLotteriesList" fill="clear" (click)="backToEntities()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="showVentaView && !showEntitySelection && !showLotteriesList" fill="clear" (click)="backToLotteries()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title>
       <div class="header-content">
         <span class="logo-text">PARTILOT</span>
@@ -9,72 +18,359 @@
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button menu="main-menu"></ion-menu-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="venta-content">
-  <div class="venta-container">
+  
+  <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+  <div class="rol-selector">
+    <ion-button 
+      class="rol-button" 
+      fill="clear"
+      (click)="cambiarRol('usuario')">
+      <ion-icon name="person-outline" slot="start"></ion-icon>
+      Usuario
+    </ion-button>
+    <ion-button 
+      class="rol-button active" 
+      fill="clear"
+      [disabled]="true">
+      <ion-icon name="bag-outline" slot="start"></ion-icon>
+      Vendedor
+    </ion-button>
+    <ion-button 
+      class="rol-button" 
+      fill="clear"
+      (click)="cambiarRol('gestor')">
+      <ion-icon name="people-outline" slot="start"></ion-icon>
+      Gestor
+    </ion-button>
+  </div>
+
+  <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
+  <div class="venta-container" *ngIf="isVendedor && showEntitySelection && !showLotteriesList && !showVentaView">
+    <div class="section-header">
+      <h1 class="section-title">Entidades</h1>
+      <p class="section-subtitle">Selecciona la entidad para la venta</p>
+    </div>
     
-    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
-    <div class="rol-selector">
-      <ion-button 
-        class="rol-button" 
-        fill="clear"
-        (click)="cambiarRol('usuario')">
-        <ion-icon name="person-outline" slot="start"></ion-icon>
-        Usuario
-      </ion-button>
-      <ion-button 
-        class="rol-button active" 
-        fill="clear"
-        [disabled]="true">
-        <ion-icon name="bag-outline" slot="start"></ion-icon>
-        Vendedor
-      </ion-button>
-      <ion-button 
-        class="rol-button" 
-        fill="clear"
-        (click)="cambiarRol('gestor')">
-        <ion-icon name="people-outline" slot="start"></ion-icon>
-        Gestor
-      </ion-button>
-    </div>
-
-    <!-- Información -->
-    <div class="info-card figma-card">
-      <h2>Selecciona el tipo de venta</h2>
-      <p>Elige cómo quieres realizar la venta de la participación</p>
-    </div>
-
-    <!-- Opciones de venta -->
-    <div class="opciones-venta">
-      <ion-card class="opcion-card" (click)="irAVentaQR()">
-        <ion-card-content>
-          <div class="opcion-icon">
-            <ion-icon name="qr-code" size="large"></ion-icon>
-          </div>
-          <h3>Venta QR</h3>
-          <p>Escanear código QR del cliente para generar la participación</p>
-          <ion-button fill="outline" expand="block" class="opcion-button">
-            Seleccionar
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card class="opcion-card" (click)="irAVentaManual()">
-        <ion-card-content>
-          <div class="opcion-icon">
-            <ion-icon name="create" size="large"></ion-icon>
-          </div>
-          <h3>Venta Manual</h3>
-          <p>Ingresar manualmente los datos del cliente y la participación</p>
-          <ion-button fill="outline" expand="block" class="opcion-button">
-            Seleccionar
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
+    <div class="entities-grid">
+      <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
+        <div class="entity-logo" *ngIf="entity.image">
+          <img [src]="getImageUrl(entity.image)" [alt]="entity.name">
+        </div>
+        <div class="entity-name">{{ entity.name }}</div>
+      </div>
     </div>
   </div>
+
+  <!-- Vista 2: Selección de Sorteos -->
+  <div class="venta-container" *ngIf="isVendedor && showLotteriesList && !showVentaView">
+    <div class="section-header">
+      <h1 class="section-title">Sorteos</h1>
+      <p class="section-subtitle">Selecciona el Sorteo para la venta</p>
+      <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+      </div>
+    </div>
+    
+    <!-- Botón para volver a entidades -->
+    <ion-button 
+      *ngIf="entities.length > 1"
+      fill="outline" 
+      class="back-button"
+      (click)="backToEntities()">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      Volver a Entidades
+    </ion-button>
+
+    <!-- Lista de Sorteos -->
+    <div class="lotteries-list">
+      <div class="lottery-card" *ngFor="let lottery of lotteries" (click)="selectLottery(lottery)">
+        <div class="lottery-header">
+          <div class="lottery-ticket-icon">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+          <div class="lottery-info">
+            <div class="lottery-title">Sorteo: {{ lottery.name }}</div>
+            <div class="lottery-subtitle">Fecha: {{ formatDate(lottery.draw_date) }}</div>
+            <div class="lottery-type" *ngIf="lottery.lottery_type">{{ lottery.lottery_type }}</div>
+          </div>
+        </div>
+        <div class="lottery-action">
+          <ion-button fill="clear" size="small">
+            Seleccionar
+            <ion-icon name="chevron-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mensaje cuando no hay sorteos -->
+    <div class="empty-state" *ngIf="showLotteriesList && lotteries.length === 0">
+      <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
+      <h2>No hay sorteos</h2>
+      <p>No hay sorteos disponibles con reservas, sets y diseño para esta entidad.</p>
+    </div>
+  </div>
+
+  <!-- Vista 3: Venta (Física o Digital) -->
+  <div class="venta-container" *ngIf="isVendedor && showVentaView">
+    <!-- Botón para volver a sorteos -->
+    <ion-button 
+      *ngIf="lotteries.length > 1"
+      fill="outline" 
+      class="back-button"
+      (click)="backToLotteries()">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      Volver a Sorteos
+    </ion-button>
+    
+    <!-- Card Vender -->
+    <div class="vender-card figma-card">
+      <div class="vender-header">
+        <div class="vender-title-section">
+          <h2 class="vender-title">Vender</h2>
+          <p class="vender-subtitle">Gestiona la venta de participaciones</p>
+        </div>
+        <div class="vender-logo" *ngIf="selectedEntity">
+          <div class="entity-logo-small">
+            <img *ngIf="selectedEntity.image" [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+            <div *ngIf="!selectedEntity.image" class="entity-logo-fallback">
+              {{ selectedEntity.name.charAt(0) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selector de tipo de participación -->
+      <div class="tipo-participacion-selector">
+        <ion-segment [(ngModel)]="tipoParticipacion" (ionChange)="cambiarTipoParticipacion()">
+          <ion-segment-button value="fisicas">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <ion-label>Participaciones Físicas</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="digitales">
+            <ion-icon name="phone-portrait-outline"></ion-icon>
+            <ion-label>Participaciones Digitales</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Información del sorteo seleccionado -->
+      <div class="sorteo-info" *ngIf="selectedLottery">
+        <span class="sorteo-text">Sorteo: {{ selectedLottery.name }}</span>
+      </div>
+
+      <!-- Sección Escáner (solo para físicas) -->
+      <div class="escaner-section" *ngIf="tipoParticipacion === 'fisicas'">
+        <h3 class="section-title">Escaner</h3>
+        <p class="section-subtitle">Lee el código QR y registra la venta</p>
+        <ion-button class="escanear-qr-button" expand="block" (click)="irAVentaQR()">
+          Escanear QR
+        </ion-button>
+      </div>
+
+      <!-- Sección Manual -->
+      <div class="manual-section">
+        <h3 class="section-title">Manual</h3>
+        <p class="section-subtitle">Registra la Venta</p>
+      </div>
+
+      <!-- Participaciones Físicas -->
+      <div class="participaciones-fisicas" *ngIf="tipoParticipacion === 'fisicas'">
+        <!-- Selector de Reserva/Set -->
+        <div class="selector-section" *ngIf="reserves.length > 0 || sets.length > 0">
+          <ion-item *ngIf="reserves.length > 1" class="input-item">
+            <ion-label position="stacked">Sorteo / Reserva</ion-label>
+            <ion-select [(ngModel)]="reserveSeleccionado" (ionChange)="onReserveChange()" name="reserve" placeholder="Selecciona">
+              <ion-select-option *ngFor="let r of reserves" [value]="r">{{ r.lottery?.name || 'Reserva' }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <!-- Selector de Set - siempre mostrar si hay sets -->
+          <ion-item *ngIf="sets.length > 0" class="input-item">
+            <ion-label position="stacked">Set</ion-label>
+            <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="set" placeholder="Selecciona set">
+              <ion-select-option *ngFor="let s of sets" [value]="s">{{ s.set_name || 'Set' }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <!-- Mensaje si no hay sets -->
+          <div *ngIf="sets.length === 0 && reserves.length > 0" class="no-sets-message">
+            <ion-label class="input-label">No hay sets disponibles para esta reserva</ion-label>
+          </div>
+        </div>
+
+        <div class="participacion-unidad">
+          <ion-label class="input-label">Participación Unidad</ion-label>
+          <ion-item class="input-item">
+            <ion-input 
+              [(ngModel)]="participacionUnidad"
+              placeholder="1/0001">
+            </ion-input>
+          </ion-item>
+        </div>
+
+        <div class="participaciones-rango">
+          <ion-label class="input-label">Participaciones Por Rango</ion-label>
+          <div class="rango-inputs">
+            <ion-item class="input-item">
+              <ion-label position="stacked">desde</ion-label>
+              <ion-input 
+                [(ngModel)]="rangoDesde"
+                placeholder="1/0001">
+              </ion-input>
+            </ion-item>
+            <ion-item class="input-item">
+              <ion-label position="stacked">hasta</ion-label>
+              <ion-input 
+                [(ngModel)]="rangoHasta"
+                placeholder="1/0005">
+              </ion-input>
+            </ion-item>
+          </div>
+        </div>
+      </div>
+
+      <!-- Participaciones Digitales -->
+      <div class="participaciones-digitales" *ngIf="tipoParticipacion === 'digitales'">
+        <div class="numero-participaciones-section">
+          <h3 class="counter-title">Número de Participaciones</h3>
+          <div class="counter-controls">
+            <ion-button 
+              class="counter-button" 
+              fill="clear"
+              (click)="disminuirParticipaciones()"
+              [disabled]="numeroParticipaciones <= 1">
+              <ion-icon name="remove-outline"></ion-icon>
+            </ion-button>
+            <div class="counter-value">{{ numeroParticipaciones }}</div>
+            <ion-button 
+              class="counter-button" 
+              fill="clear"
+              (click)="aumentarParticipaciones()"
+              [disabled]="numeroParticipaciones >= disponibilidad">
+              <ion-icon name="add-outline"></ion-icon>
+            </ion-button>
+          </div>
+          <p class="disponibilidad">Disponibilidad: {{ disponibilidad }}</p>
+        </div>
+      </div>
+
+      <!-- Botón Vender -->
+      <ion-button 
+        class="vender-button" 
+        expand="block"
+        [disabled]="!puedeVender()"
+        (click)="mostrarResumen()">
+        Vender
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Vista para Gestor (si no es vendedor) -->
+  <div class="venta-container" *ngIf="!isVendedor">
+    <div class="empty-state">
+      <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
+      <h2>Venta</h2>
+      <p>Esta vista está disponible solo para vendedores</p>
+    </div>
+  </div>
+
 </ion-content>
+
+<!-- Modal de Resumen (Bottom Sheet) -->
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalResumen" (click)="cerrarModalResumen()">
+  <div class="modal-container resumen-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <ion-icon name="home-outline"></ion-icon>
+        <div>
+          <h2 class="modal-title">Resumen</h2>
+          <p class="modal-subtitle">Comprueba los datos</p>
+        </div>
+      </div>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalResumen()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    
+    <div class="modal-content">
+      <div class="resumen-info">
+        <div class="resumen-item">
+          <span class="resumen-label">Participaciones</span>
+          <span class="resumen-value">{{ totalParticipaciones }}</span>
+        </div>
+        <div class="resumen-divider"></div>
+        <div class="resumen-item">
+          <span class="resumen-label">Importe total</span>
+          <span class="resumen-value importe-total">€{{ importeTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="forma-pago-section">
+        <h3 class="forma-pago-title">Forma de Pago</h3>
+        <p class="forma-pago-subtitle">Registra una forma de pago</p>
+        
+        <div class="opciones-pago">
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'efectivo'"
+            (click)="seleccionarFormaPago('efectivo')">
+            <ion-icon name="cash-outline"></ion-icon>
+            <ion-label>Pago En Efectivo</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'bizum'"
+            (click)="seleccionarFormaPago('bizum')">
+            <ion-icon name="phone-portrait-outline"></ion-icon>
+            <ion-label>Pago Por Bizum</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'transferencia'"
+            (click)="seleccionarFormaPago('transferencia')">
+            <ion-icon name="card-outline"></ion-icon>
+            <ion-label>Transferencia</ion-label>
+          </ion-button>
+          
+          <ion-button 
+            class="pago-option" 
+            [class.selected]="formaPago === 'omitir'"
+            (click)="seleccionarFormaPago('omitir')">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <ion-label>Omitir Forma de pago</ion-label>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+    
+    <ion-button 
+      class="registrar-button" 
+      expand="block"
+      (click)="registrarVenta()">
+      Registrar
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div class="modal-overlay" *ngIf="mostrarModalExito" (click)="cerrarModalExito()">
+  <div class="modal-container exito-modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title-exito">Venta registrada con éxito</h2>
+    <div class="modal-content-exito">
+      <p>Puedes consultar el detalle en el historial de ventas o continuar con una nueva venta.</p>
+    </div>
+    <ion-button 
+      class="aceptar-button" 
+      expand="block"
+      (click)="cerrarModalExito()">
+      Aceptar
+    </ion-button>
+  </div>
+</div>

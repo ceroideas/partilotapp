@@ -1,7 +1,13 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button *ngIf="!showEntitySelection"></ion-back-button>
+      <ion-back-button *ngIf="!showEntitySelection && !showTacosList && !showTacoDetail"></ion-back-button>
+      <ion-button *ngIf="showTacosList" fill="clear" (click)="backToEntities()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="showTacoDetail" fill="clear" (click)="backToTacos()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>
       <div class="header-content">
@@ -29,7 +35,7 @@
     <div class="entities-grid">
       <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
         <div class="entity-logo" *ngIf="entity.image">
-          <img [src]="entity.image" [alt]="entity.name">
+          <img [src]="getImageUrl(entity.image)" [alt]="entity.name">
         </div>
         <div class="entity-name">{{ entity.name }}</div>
       </div>
@@ -42,9 +48,19 @@
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
       <div class="entity-logo-small" *ngIf="selectedEntity?.image">
-        <img [src]="selectedEntity.image" [alt]="selectedEntity.name">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
       </div>
     </div>
+    
+    <!-- Botón para volver a entidades -->
+    <ion-button 
+      *ngIf="entities.length > 1"
+      fill="outline" 
+      class="back-button"
+      (click)="backToEntities()">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      Volver a Entidades
+    </ion-button>
 
     <!-- Resumen General -->
     <div class="summary-card" *ngIf="summary">
@@ -87,7 +103,7 @@
     </div>
 
     <!-- Lista de Tacos -->
-    <div class="tacos-list">
+    <div class="tacos-list" *ngIf="tacos.length > 0">
       <div class="taco-card" *ngFor="let taco of tacos" (click)="viewTaco(taco)">
         <div class="taco-header">
           <div class="taco-ticket-icon">
@@ -121,6 +137,13 @@
         </div>
       </div>
     </div>
+    
+    <!-- Mensaje cuando no hay tacos -->
+    <div class="empty-state" *ngIf="showTacosList && tacos.length === 0">
+      <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
+      <h2>No hay participaciones</h2>
+      <p>No tienes participaciones asignadas para esta entidad.</p>
+    </div>
   </div>
 
   <!-- Vista 3: Detalle de Participaciones del Taco -->
@@ -129,9 +152,18 @@
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
       <div class="entity-logo-small" *ngIf="selectedEntity?.image">
-        <img [src]="selectedEntity.image" [alt]="selectedEntity.name">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
       </div>
     </div>
+    
+    <!-- Botón para volver a lista de tacos -->
+    <ion-button 
+      fill="outline" 
+      class="back-button"
+      (click)="backToTacos()">
+      <ion-icon name="arrow-back" slot="start"></ion-icon>
+      Volver a Participaciones
+    </ion-button>
 
     <!-- Detalle del Taco Seleccionado -->
     <div class="taco-detail-card" *ngIf="selectedTaco">

@@ -104,25 +104,38 @@
   }
 }
 
+.loading-spinner {
+  display: block;
+  margin: 24px auto;
+}
+
 .participaciones-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+.participacion-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
 .participacion-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
-  border-radius: 12px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  
+  transition: background 0.2s ease;
+
   &:active {
-    transform: scale(0.98);
     background: #F5F6F7;
+  }
+
+  &.regalada {
+    opacity: 0.72;
   }
 }
 
@@ -164,9 +177,7 @@
 
 .participacion-info {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  min-width: 0;
 }
 
 .participacion-header {
@@ -181,16 +192,33 @@
   }
   
   .numero {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     color: #212529;
   }
 }
 
-.participacion-details {
+// Columna derecha: arriba fecha + badge, debajo precio, chevron al final
+.participacion-right {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.participacion-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.participacion-top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   
   .fecha {
     display: flex;
@@ -204,68 +232,256 @@
     }
   }
   
-  .importe {
-    font-size: 14px;
-    font-weight: 600;
-    
-    &.activa {
-      color: #28a745;
-    }
-    
-    &.cobrada {
-      color: #F49200;
-    }
-    
-    &.caducada {
-      color: #6c757d;
-    }
-  }
-}
-
-.participacion-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
   .status-badge {
-    padding: 4px 12px;
+    padding: 4px 10px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
-    text-transform: capitalize;
-    
-    &.cobrada {
+
+    &.pagada {
       background-color: #FFF3CD;
       color: #F49200;
     }
-    
-    &.donada {
-      background-color: #FFF3CD;
-      color: #F49200;
-    }
-    
+
     &.caducada {
       background-color: #F8D7DA;
       color: #721C24;
     }
+
+    &.regalada {
+      background-color: #CCE5FF;
+      color: #004085;
+    }
   }
-  
-  .chevron-icon {
-    font-size: 20px;
+}
+
+.participacion-meta .importe {
+  font-size: 14px;
+  font-weight: 600;
+
+  &.activa {
+    color: #28a745;
+  }
+
+  &.cobrada {
+    color: #F49200;
+  }
+
+  &.caducada {
     color: #6c757d;
+  }
+
+  &.premio {
+    color: #28a745;
+  }
+}
+
+.participacion-right .chevron-icon {
+  font-size: 20px;
+  color: #6c757d;
+}
+
+.participacion-detalle {
+  border-top: 1px solid #E9ECEF;
+  padding: 12px 12px 16px;
+  background: #F8F9FA;
+}
+
+.detalle-box {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #E9ECEF;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  font-size: 14px;
+
+  .detalle-label {
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .detalle-value {
+    color: #212529;
+    font-weight: 500;
+  }
+}
+
+.regalar-button {
+  margin-top: 16px;
+  --background: #F49200;
+  --color: white;
+  font-weight: 600;
+  text-transform: none;
+
+  ion-icon {
+    margin-right: 8px;
+  }
+}
+
+// Overlay y contenedor: quedan por encima del contenido pero dejan ver el menú de tabs
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  box-sizing: border-box;
+
+  &.bottom-sheet {
+    align-items: flex-end;
+  }
+}
+
+.modal-container {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  animation: slideUpBottom 0.3s ease-out;
+  max-height: calc(100vh - 80px); // no tapa el menú de tabs
+
+  &.bottom-sheet-content {
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+@keyframes slideUpBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Modal regalo (bottom sheet): sin espacio transparente debajo del contenido
+.modal-container.modal-regalo {
+  padding-bottom: 24px;
+
+  .modal-regalo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .modal-regalo-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+  }
+
+  .close-button {
+    --color: #212529;
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  .modal-regalo-texto {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #212529;
+  }
+
+  .modal-regalo-aviso {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #6c757d;
+    line-height: 1.5;
+  }
+
+  .modal-regalo-input {
+    --padding-start: 0;
+    margin-bottom: 16px;
+  }
+
+  .regalar-button-modal {
+    --background: #F49200;
+    --color: white;
+    font-weight: 600;
+    text-transform: none;
+
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Modal éxito: centrado y compacto, por encima del tab bar
+.modal-exito-overlay {
+  align-items: center;
+  padding-bottom: 80px;
+}
+
+.modal-container.modal-exito-regalo {
+  border-radius: 16px;
+  max-height: none;
+  width: 90%;
+  max-width: 400px;
+  margin: 0 auto;
+
+  .modal-exito-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 16px 0;
+    text-align: center;
+  }
+
+  .modal-exito-mensaje {
+    font-size: 14px;
+    color: #495057;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+  }
+
+  .modal-exito-sub {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #6c757d;
+  }
+
+  .aceptar-button {
+    --background: #F49200;
+    --color: white;
+    font-weight: 600;
   }
 }
 
 .empty-state {
   text-align: center;
   padding: 48px 16px;
-  
+
   ion-icon {
     color: #6c757d;
     font-size: 64px;
     margin-bottom: 16px;
   }
-  
+
   p {
     color: #6c757d;
     font-size: 16px;
