@@ -764,12 +764,13 @@ ion-back-button {
     min-height: auto !important;
     padding-bottom: 0 !important;
     margin-bottom: 120px !important; // Espacio para el tab-bar
+    z-index: 1001 !important; // Por encima del backdrop para que el modal se vea bien
   }
   
   &::part(backdrop) {
     background: rgba(0, 0, 0, 0.5) !important;
     opacity: 1 !important;
-    z-index: 999 !important; // Detrás del modal y del tab-bar
+    z-index: 1000 !important; // Por debajo del content (1001)
     clip-path: inset(0 0 103px 0) !important; // Recortar el backdrop para dejar espacio al tab-bar
   }
 }

@@ -29,12 +29,18 @@ export class EscanerPage implements OnInit {
   formaPago: 'efectivo' | 'bizum' | 'transferencia' | 'omitir' | null = null;
   mostrarModalExito: boolean = false;
 
+  // Modo usuario: datos de participación consultada
+  participacion: any = null;
+  status: 'can_link' | 'already_mine' | 'already_other' | 'not_found' | null = null;
+  mensajeError = '';
+
   constructor(
     private router: Router,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private authService: AuthService,
-    private ventasService: VentasService
+    private ventasService: VentasService,
+    private carteraService: CarteraService
   ) { }
 
   ngOnInit() {
@@ -77,25 +83,84 @@ export class EscanerPage implements OnInit {
   }
 
   async iniciarScannerUsuario() {
-    // TODO: Implementar escáner QR real con plugin de Capacitor
-    // Por ahora simulamos el escaneo
-    this.modoEscaneo = false;
-    
-    // Simular datos del ticket escaneado
-    this.ticketEscaneado = {
-      numero: '60089',
-      entidad: 'Peña Rondalosa',
-      fechaSorteo: '22/12/25',
-      importeJugado: 5.00,
-      donativo: 1.00,
-      importeTotal: 6.00,
-      numeroParticipacion: '1/0001',
-      numeroReferencia: '0000000000000000000',
-      premio: 0.00,
-      tipo: 'social'
-    };
-    
-    this.imagenTicket = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+    this.modoEscaneo = true;
+    try {
+      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+        scanText: 'Escanea el código QR de la participación'
+      });
+      const referencia = result?.ScanResult?.trim() || null;
+      if (referencia) {
+        await this.consultarReferencia(referencia);
+      }
+    } catch (err: any) {
+      console.error('Error escáner QR:', err);
+      if (err.message && err.message.includes('User canceled')) {
+        // Usuario canceló, no hacer nada
+        return;
+      }
+      await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner.');
+    } finally {
+      this.modoEscaneo = false;
+    }
+  }
+
+  async consultarReferencia(referencia: string) {
+    const loading = await this.loadingController.create({ message: 'Buscando...' });
+    await loading.present();
+    this.carteraService.checkByReference(referencia).subscribe({
+      next: async (res: any) => {
+        await loading.dismiss();
+        this.participacion = res.participation || null;
+        this.status = res.status || null;
+        this.mensajeError = res.message || '';
+        
+        if (this.status === 'not_found' || this.status === 'already_other') {
+          await this.mostrarAlerta(
+            this.status === 'not_found' ? 'No encontrada' : 'No se puede vincular',
+            this.mensajeError
+          );
+          this.participacion = null;
+          this.status = null;
+          this.modoEscaneo = true;
+        } else {
+          // Preparar datos para mostrar en la vista
+          const p = this.participacion;
+          this.ticketEscaneado = {
+            numero: p?.participation_code || p?.numero || referencia,
+            entidad: p?.entity_name || p?.entidad || p?.set?.reserve?.entity?.name || '—',
+            fechaSorteo: p?.draw_date ? new Date(p.draw_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—',
+            importeJugado: p?.played_amount ?? p?.importeJugado ?? 0,
+            donativo: p?.donation_amount ?? p?.donativo ?? 0,
+            importeTotal: p?.amount ?? p?.importeTotal ?? 0,
+            numeroParticipacion: p?.participation_code || referencia,
+            numeroReferencia: referencia,
+            premio: p?.prize_amount ?? p?.premio ?? 0,
+            tipo: p?.type || 'social'
+          };
+          this.imagenTicket = p?.image || p?.snapshot_path ? this.getImageUrl(p.image || p.snapshot_path) : null;
+        }
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        const msg = err.error?.message || (err.status === 422
+          ? 'La participación no se puede vincular porque ya se encuentra leída por otro usuario.'
+          : 'No se encuentra la participación. Comprueba la referencia o el código QR.');
+        await this.mostrarAlerta(err.status === 422 ? 'No se puede vincular' : 'No encontrada', msg);
+        this.participacion = null;
+        this.status = null;
+        this.modoEscaneo = true;
+      }
+    });
+  }
+
+  getImageUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    if (path.startsWith('storage/')) return `${base}/${path}`;
+    return `${base}/storage/${path}`;
   }
 
   private async procesarQRDigitalizacion(referencia: string) {
@@ -293,6 +358,9 @@ export class EscanerPage implements OnInit {
     this.modoEscaneo = true;
     this.ticketEscaneado = null;
     this.imagenTicket = null;
+    this.participacion = null;
+    this.status = null;
+    this.mensajeError = '';
   }
 
   async mostrarAlerta(header: string, message: string) {

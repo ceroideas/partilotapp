@@ -13,6 +13,7 @@ import { environment } from '../../environments/environment';
 })
 export class GestorParticipacionesPage implements OnInit {
   isVendedor: boolean = false;
+  rolActual: 'usuario' | 'vendedor' | 'gestor' = 'vendedor';
   
   // Vista 1: Selección de entidades
   entities: any[] = [];
@@ -40,8 +41,42 @@ export class GestorParticipacionesPage implements OnInit {
 
   ngOnInit() {
     this.isVendedor = this.authService.isSeller();
+    this.detectarRol();
     if (this.isVendedor) {
       this.loadEntities();
+    }
+  }
+
+  detectarRol() {
+    const rolGuardado = localStorage.getItem('rolActual');
+    const ruta = window.location.pathname;
+    if (rolGuardado) {
+      this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
+    } else if (ruta.includes('vendedor-tab')) {
+      this.rolActual = 'vendedor';
+    } else if (ruta.includes('gestor-tab')) {
+      this.rolActual = 'gestor';
+    } else {
+      this.rolActual = this.isVendedor ? 'vendedor' : 'gestor';
+    }
+  }
+
+  isSeller(): boolean {
+    return this.authService.isSeller();
+  }
+
+  cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
+    this.rolActual = rol;
+    localStorage.setItem('rolActual', rol);
+    if (rol === 'vendedor') {
+      localStorage.setItem('esVendedor', 'true');
+      this.router.navigate(['/tabs/vendedor-tab4']);
+    } else if (rol === 'usuario') {
+      localStorage.setItem('esVendedor', 'false');
+      this.router.navigate(['/tabs/tab3']);
+    } else if (rol === 'gestor') {
+      localStorage.setItem('esVendedor', 'false');
+      this.router.navigate(['/tabs/gestor-tab1']);
     }
   }
 

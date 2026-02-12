@@ -105,16 +105,30 @@
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &.expandido {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  }
 }
 
 .card-content {
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .resultado-icon {
   flex-shrink: 0;
+
+  .lottery-icon {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    display: block;
+  }
 }
 
 .icon-circle {
@@ -200,11 +214,12 @@
     color: #212529;
     font-weight: 500;
     font-family: monospace;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 2px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     
     .premio {
       font-weight: 600;
@@ -212,17 +227,19 @@
     
     .separador {
       color: #6c757d;
-      margin: 0 4px;
+      margin: 0 2px;
     }
     
     .extracciones {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 0;
+      margin-left: 2px;
       
       .r-label {
         font-weight: 600;
         color: #212529;
+        margin-right: 2px;
       }
       
       .r-numeros {
@@ -268,6 +285,128 @@
       margin-right: 8px;
     }
   }
+}
+
+.resultado-detalle {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #E9ECEF;
+  animation: slideDown 0.3s ease;
+}
+
+.detalle-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detalle-separador {
+  height: 1px;
+  background: #E9ECEF;
+  margin: 4px 0;
+}
+
+.detalle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  
+  .detalle-label {
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 0 0 auto;
+  }
+  
+  .detalle-value {
+    color: #212529;
+    font-size: 14px;
+    text-align: right;
+    flex: 1;
+    margin-left: 16px;
+    
+    &.destacado {
+      font-weight: bold;
+      color: #212529;
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+}
+
+.loading-spinner {
+  display: block;
+  margin: 48px auto;
+  color: #F49200;
+}
+
+.pedreas-sorteo {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.pedreas-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pedrea-item {
+  background: #F5F6F7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.pedreas-empty {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+// Modal Pedreas: pantalla completa, bordes redondeados, título centrado
+ion-modal.modal-pedreas {
+  --border-radius: 20px 20px 0 0;
+  --box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  &::part(content) {
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+.pedreas-modal-content {
+  --background: var(--ion-background-color, #fff);
+  height: 100%;
+}
+
+.pedreas-toolbar {
+  ion-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: 600;
+  }
+}
+
+.detalle-row ion-button[size="small"] {
+  --padding-start: 0;
+  --padding-end: 8px;
+  margin: 0;
+  min-height: 28px;
+  font-size: 13px;
 }
 
 .empty-state {

@@ -206,6 +206,40 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+
+    &.pagada {
+      background-color: #D4EDDA;
+      color: #155724;
+    }
+
+    &.donada {
+      background-color: #D4EDDA;
+      color: #155724;
+    }
+
+    &.caducada {
+      background-color: #F8D7DA;
+      color: #721C24;
+    }
+
+    &.regalada {
+      background-color: #CCE5FF;
+      color: #004085;
+    }
+  }
+
+  .status-badge-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 24px;
+  }
 }
 
 .participacion-top-right {
@@ -224,28 +258,6 @@
     
     ion-icon {
       font-size: 14px;
-    }
-  }
-  
-  .status-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-
-    &.pagada {
-      background-color: #FFF3CD;
-      color: #F49200;
-    }
-
-    &.caducada {
-      background-color: #F8D7DA;
-      color: #721C24;
-    }
-
-    &.regalada {
-      background-color: #CCE5FF;
-      color: #004085;
     }
   }
 }

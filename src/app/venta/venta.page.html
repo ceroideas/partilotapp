@@ -23,34 +23,34 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="venta-content">
-  
-  <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
-  <div class="rol-selector">
-    <ion-button 
-      class="rol-button" 
-      fill="clear"
-      (click)="cambiarRol('usuario')">
-      <ion-icon name="person-outline" slot="start"></ion-icon>
-      Usuario
-    </ion-button>
-    <ion-button 
-      class="rol-button active" 
-      fill="clear"
-      [disabled]="true">
-      <ion-icon name="bag-outline" slot="start"></ion-icon>
-      Vendedor
-    </ion-button>
-    <ion-button 
-      class="rol-button" 
-      fill="clear"
-      (click)="cambiarRol('gestor')">
-      <ion-icon name="people-outline" slot="start"></ion-icon>
-      Gestor
-    </ion-button>
-  </div>
+  <div class="venta-page-container">
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <div class="rol-selector">
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('usuario')">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button 
+        class="rol-button active" 
+        fill="clear"
+        [disabled]="true">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button 
+        class="rol-button" 
+        fill="clear"
+        (click)="cambiarRol('gestor')">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
 
-  <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
-  <div class="venta-container" *ngIf="isVendedor && showEntitySelection && !showLotteriesList && !showVentaView">
+    <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
+    <div class="venta-container" *ngIf="isVendedor && showEntitySelection && !showLotteriesList && !showVentaView">
     <div class="section-header">
       <h1 class="section-title">Entidades</h1>
       <p class="section-subtitle">Selecciona la entidad para la venta</p>
@@ -77,14 +77,14 @@
     </div>
     
     <!-- Botón para volver a entidades -->
-    <ion-button 
+    <!-- <ion-button 
       *ngIf="entities.length > 1"
       fill="outline" 
       class="back-button"
       (click)="backToEntities()">
       <ion-icon name="arrow-back" slot="start"></ion-icon>
       Volver a Entidades
-    </ion-button>
+    </ion-button> -->
 
     <!-- Lista de Sorteos -->
     <div class="lotteries-list">
@@ -119,17 +119,17 @@
   <!-- Vista 3: Venta (Física o Digital) -->
   <div class="venta-container" *ngIf="isVendedor && showVentaView">
     <!-- Botón para volver a sorteos -->
-    <ion-button 
+    <!-- <ion-button 
       *ngIf="lotteries.length > 1"
       fill="outline" 
       class="back-button"
       (click)="backToLotteries()">
       <ion-icon name="arrow-back" slot="start"></ion-icon>
       Volver a Sorteos
-    </ion-button>
+    </ion-button> -->
     
     <!-- Card Vender -->
-    <div class="vender-card figma-card">
+    <div class="vender-card figma-card-">
       <div class="vender-header">
         <div class="vender-title-section">
           <h2 class="vender-title">Vender</h2>
@@ -269,15 +269,15 @@
     </div>
   </div>
 
-  <!-- Vista para Gestor (si no es vendedor) -->
-  <div class="venta-container" *ngIf="!isVendedor">
-    <div class="empty-state">
-      <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
-      <h2>Venta</h2>
-      <p>Esta vista está disponible solo para vendedores</p>
+    <!-- Vista para Gestor (si no es vendedor) -->
+    <div class="venta-container" *ngIf="!isVendedor">
+      <div class="empty-state">
+        <ion-icon name="cart-outline" class="empty-icon"></ion-icon>
+        <h2>Venta</h2>
+        <p>Esta vista está disponible solo para vendedores</p>
+      </div>
     </div>
   </div>
-
 </ion-content>
 
 <!-- Modal de Resumen (Bottom Sheet) -->

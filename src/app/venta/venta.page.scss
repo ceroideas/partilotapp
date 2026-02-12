@@ -2,6 +2,11 @@
   --background: #F5F6F7;
 }
 
+.venta-page-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
 .header-content {
   display: flex;
   align-items: center;
@@ -12,7 +17,7 @@
 // Logo ahora es una imagen, estilos en global.scss
 
 .venta-container {
-  padding: 16px;
+  // padding: 16px;
   padding-bottom: 100px;
 }
 

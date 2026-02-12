@@ -47,6 +47,7 @@ export class AppComponent implements OnInit {
   logout(event: Event) {
     event.preventDefault();
     event.stopPropagation();
+    this.menuController.close('main-menu');
     this.authService.logout().subscribe(() => {});
   }
 

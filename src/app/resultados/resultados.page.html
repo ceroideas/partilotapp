@@ -67,21 +67,21 @@
     </div>
 
     <!-- Lista de resultados -->
-    <div class="resultados-list">
+    <ion-spinner *ngIf="loading" name="crescent" class="loading-spinner"></ion-spinner>
+    <div class="resultados-list" *ngIf="!loading">
       <div 
         class="resultado-card" 
-        *ngFor="let resultado of resultados; let i = index">
+        *ngFor="let resultado of resultados; let i = index"
+        [class.expandido]="estaExpandido(resultado)">
         
-        <div class="card-content">
+        <div class="card-content" (click)="toggleDetalle(resultado)">
           <div class="resultado-icon">
-            <div class="icon-circle">
-              <div class="partilot-icon"></div>
-            </div>
+            <img src="assets/lottery.svg" alt="Sorteo" class="lottery-icon" />
           </div>
           
           <div class="resultado-info">
             <div class="resultado-header">
-              <span class="sorteo-text">Sorteo: {{ resultado.numero }}/{{ resultado.total }}</span>
+              <span class="sorteo-text">Sorteo: {{ resultado.nombreCompleto || (resultado.numero + '/' + resultado.anio) }}</span>
             </div>
             
             <div class="resultado-fecha">
@@ -91,43 +91,128 @@
             
             <div class="resultado-numeros">
               <span class="numero-ganador">
-                <span class="premio">1° {{ resultado.primerPremio || '--.--' }}</span>
+                <span class="premio">1º {{ resultado.primerPremio || '--.--' }}</span>
                 <span class="separador">-</span>
-                <span class="premio">2° {{ resultado.segundoPremio || '--.--' }}</span>
-                <span class="extracciones">
+                <span class="premio">2º {{ resultado.segundoPremio || '--.--' }}</span>
+                <span class="separador" *ngIf="resultado.extracciones && resultado.extracciones.length > 0">-</span>
+                <span class="extracciones" *ngIf="resultado.extracciones && resultado.extracciones.length > 0">
                   <span class="r-label">R:</span>
-                  <span class="r-numeros">{{ (resultado.extracciones || []).join(' - ') || '--' }}</span>
+                  <span class="r-numeros">{{ resultado.extracciones.join('-') }}</span>
                 </span>
               </span>
             </div>
           </div>
           
           <div class="resultado-arrow">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
+            <ion-icon [name]="estaExpandido(resultado) ? 'chevron-down-outline' : 'chevron-forward-outline'"></ion-icon>
           </div>
         </div>
 
-        <!-- Botones Escrutinio y Manual (solo para algunos sorteos) -->
-        <div class="resultado-actions" *ngIf="resultado.mostrarAcciones">
-          <ion-button 
-            class="action-button escrutinio-button" 
-            fill="outline">
-            <ion-icon name="search-outline" slot="start"></ion-icon>
-            Escrutinio
-          </ion-button>
-          <ion-button 
-            class="action-button manual-button" 
-            fill="outline">
-            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-            Manual
-          </ion-button>
+        <!-- Detalle desplegable: todos los premios (orden cómodo de lectura) -->
+        <div class="resultado-detalle" *ngIf="estaExpandido(resultado)">
+          <div class="detalle-box">
+            <div class="detalle-row" *ngIf="resultado.tipoSorteo">
+              <span class="detalle-label">Tipo de Sorteo:</span>
+              <span class="detalle-value">{{ resultado.tipoSorteo }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="resultado.fechaCompleta">
+              <span class="detalle-label">Fecha Sorteo:</span>
+              <span class="detalle-value">{{ resultado.fecha }}</span>
+            </div>
+            <div class="detalle-separador"></div>
+            <div class="detalle-row" *ngIf="resultado.primerPremio">
+              <span class="detalle-label">1º Premio:</span>
+              <span class="detalle-value destacado">{{ resultado.primerPremio }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="resultado.segundoPremio">
+              <span class="detalle-label">2º Premio:</span>
+              <span class="detalle-value destacado">{{ resultado.segundoPremio }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="resultado.premioEspecialStr">
+              <span class="detalle-label">Premio Especial:</span>
+              <span class="detalle-value destacado">{{ resultado.premioEspecialStr }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.tercerosPremiosLista?.length">
+              <span class="detalle-label">3º Premios:</span>
+              <span class="detalle-value">{{ resultado.tercerosPremiosLista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.cuartosPremiosLista?.length">
+              <span class="detalle-label">4º Premios:</span>
+              <span class="detalle-value">{{ resultado.cuartosPremiosLista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.quintosPremiosLista?.length">
+              <span class="detalle-label">5º Premios:</span>
+              <span class="detalle-value">{{ resultado.quintosPremiosLista.join(', ') }}</span>
+            </div>
+            <div class="detalle-separador"></div>
+            <div class="detalle-row" *ngIf="resultado.extracciones && resultado.extracciones.length > 0">
+              <span class="detalle-label">Reintegro:</span>
+              <span class="detalle-value">{{ resultado.extracciones.join(' - ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.extracciones5Lista?.length">
+              <span class="detalle-label">Extracc. 5 cifras:</span>
+              <span class="detalle-value">{{ resultado.extracciones5Lista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.extracciones4Lista?.length">
+              <span class="detalle-label">Extracc. 4 cifras:</span>
+              <span class="detalle-value">{{ resultado.extracciones4Lista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.extracciones3Lista?.length">
+              <span class="detalle-label">Extracc. 3 cifras:</span>
+              <span class="detalle-value">{{ resultado.extracciones3Lista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row detalle-row-list" *ngIf="resultado.extracciones2Lista?.length">
+              <span class="detalle-label">Extracc. 2 cifras:</span>
+              <span class="detalle-value">{{ resultado.extracciones2Lista.join(', ') }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="resultado.pedreasLista?.length">
+              <span class="detalle-label">Pedreas:</span>
+              <span class="detalle-value">
+                <ion-button fill="clear" size="small" (click)="abrirModalPedreas(resultado); $event.stopPropagation()">
+                  Ver pedreas ({{ resultado.pedreasLista.length }})
+                </ion-button>
+              </span>
+            </div>
+            <div class="detalle-separador" *ngIf="resultado.fraccion || resultado.serie"></div>
+            <div class="detalle-row" *ngIf="resultado.fraccion">
+              <span class="detalle-label">Fracción:</span>
+              <span class="detalle-value">{{ resultado.fraccion }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="resultado.serie">
+              <span class="detalle-label">Serie:</span>
+              <span class="detalle-value">{{ resultado.serie }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="resultados.length === 0">
+      <div class="empty-state" *ngIf="resultados.length === 0 && !loading">
         <ion-icon name="trophy-outline"></ion-icon>
         <p>No hay resultados disponibles</p>
       </div>
     </div>
   </div>
 </ion-content>
+
+<!-- Modal Pedreas -->
+<ion-modal class="modal-pedreas" [isOpen]="mostrarModalPedreas" (didDismiss)="cerrarModalPedreas()" [initialBreakpoint]="1" [breakpoints]="[0, 1]">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar class="pedreas-toolbar">
+        <ion-title>Pedreas</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModalPedreas()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding pedreas-modal-content">
+      <p class="pedreas-sorteo" *ngIf="nombreSorteoPedreas">{{ nombreSorteoPedreas }}</p>
+      <div class="pedreas-list" *ngIf="pedreasParaModal?.length">
+        <div class="pedrea-item" *ngFor="let p of pedreasParaModal">{{ p }}</div>
+      </div>
+      <p class="pedreas-empty" *ngIf="pedreasParaModal && !pedreasParaModal.length">No hay pedreas para este sorteo.</p>
+    </ion-content>
+  </ng-template>
+</ion-modal>

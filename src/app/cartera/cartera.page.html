@@ -109,9 +109,15 @@
                   <ion-icon name="calendar-outline"></ion-icon>
                   {{ participacion.fechaSorteo || '—' }}
                 </span>
+              </div>
+              <span class="importe premio" *ngIf="participacion.estado !== 'regalada' && participacion.premio != null && participacion.premio > 0">€{{ (participacion.premio ?? 0) | number:'1.2-2' }}</span>
+              <div class="status-badge-row">
                 <span 
                   class="status-badge pagada"
                   *ngIf="participacion.estado === 'cobrada'">Pagada</span>
+                <span 
+                  class="status-badge donada"
+                  *ngIf="participacion.estado === 'donada'">Donada</span>
                 <span 
                   class="status-badge caducada"
                   *ngIf="participacion.estado === 'caducada'">Caducada</span>
@@ -119,7 +125,6 @@
                   class="status-badge regalada"
                   *ngIf="participacion.estado === 'regalada'">Regalada</span>
               </div>
-              <span class="importe premio" *ngIf="participacion.estado !== 'regalada' && participacion.premio != null && participacion.premio > 0">€{{ (participacion.premio ?? 0) | number:'1.2-2' }}</span>
             </div>
             <ion-icon 
               [name]="estaExpandida(participacion) ? 'chevron-down-outline' : 'chevron-forward-outline'" 

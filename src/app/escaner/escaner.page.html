@@ -167,17 +167,23 @@
         </p>
       </div>
 
+      <!-- Mensaje de estado -->
+      <div class="status-message" *ngIf="status === 'already_mine'">
+        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+        <p>Esta participación ya está en tu cartera.</p>
+      </div>
+
       <!-- Botones de acción -->
       <div class="actions-section">
         <ion-button 
-          *ngIf="!ticketEscaneado.premio || ticketEscaneado.premio === 0"
+          *ngIf="status === 'can_link' && (!ticketEscaneado.premio || ticketEscaneado.premio === 0)"
           class="figma-button digitalizar-button" 
           expand="block"
           (click)="digitalizar()">
           Digitalizar
         </ion-button>
         <ion-button 
-          *ngIf="ticketEscaneado.premio && ticketEscaneado.premio > 0"
+          *ngIf="status === 'can_link' && ticketEscaneado.premio && ticketEscaneado.premio > 0"
           class="figma-button-accent gestionar-button" 
           expand="block"
           (click)="gestionarPremio()">
