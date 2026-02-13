@@ -68,7 +68,8 @@ export class EscanerPage implements OnInit {
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación'
       });
-      const referencia = result?.ScanResult?.trim() || null;
+      const qrText = result?.ScanResult?.trim() || null;
+      const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
         await this.procesarQRDigitalizacion(referencia);
       }
@@ -92,7 +93,8 @@ export class EscanerPage implements OnInit {
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación'
       });
-      const referencia = result?.ScanResult?.trim() || null;
+      const qrText = result?.ScanResult?.trim() || null;
+      const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
         await this.consultarReferencia(referencia);
       }
@@ -369,6 +371,27 @@ export class EscanerPage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  /**
+   * Extrae la referencia de una URL de QR o devuelve el texto si ya es una referencia
+   * Formato esperado: https://panel.partilot.es/comprobar-participacion?ref=0000000000000
+   */
+  private extraerReferenciaDeQR(qrText: string | null): string | null {
+    if (!qrText) return null;
+    
+    // Si contiene "ref=", extraer la referencia de la URL
+    if (qrText.includes('ref=')) {
+      const parts = qrText.split('ref=');
+      if (parts.length > 1) {
+        // Tomar la parte después de "ref=" y limpiar posibles parámetros adicionales
+        const referencia = parts[1].split('&')[0].split('#')[0].trim();
+        return referencia || null;
+      }
+    }
+    
+    // Si no contiene "ref=", asumir que es la referencia directamente
+    return qrText.trim() || null;
   }
 
 }

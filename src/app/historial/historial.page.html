@@ -248,6 +248,42 @@
             </div>
           </div>
         </div>
+
+        <!-- Detalle expandible: Donación -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'donacion'" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-info vendedor-detail-info-full">
+              <div class="vendedor-detail-row" *ngIf="item.participaciones && item.participaciones.length > 0">
+                <span class="vendedor-detail-label">Número de participaciones:</span>
+                <span class="vendedor-detail-value">{{ item.participaciones.length }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="item.importeDonacion">
+                <span class="vendedor-detail-label">Importe donado:</span>
+                <span class="vendedor-detail-value destacado">€{{ item.importeDonacion | number:'1.2-2' }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="item.importeCodigo">
+                <span class="vendedor-detail-label">Importe código:</span>
+                <span class="vendedor-detail-value">€{{ item.importeCodigo | number:'1.2-2' }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="item.codigoRecarga">
+                <span class="vendedor-detail-label">Código de recarga:</span>
+                <span class="vendedor-detail-value codigo">{{ item.codigoRecarga }}</span>
+              </div>
+              <div class="vendedor-detail-row">
+                <span class="vendedor-detail-label">Fecha de donación:</span>
+                <span class="vendedor-detail-value">{{ formatearFecha(item.fecha) }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="item.anonima === false && item.datosPersonales">
+                <span class="vendedor-detail-label">Donante:</span>
+                <span class="vendedor-detail-value">{{ item.datosPersonales.nombre }} {{ item.datosPersonales.apellidos }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="item.anonima === true">
+                <span class="vendedor-detail-label">Donación:</span>
+                <span class="vendedor-detail-value">Anónima</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

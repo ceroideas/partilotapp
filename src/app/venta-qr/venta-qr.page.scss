@@ -92,6 +92,66 @@
     }
   }
   
+  .modo-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #F5F6F7;
+    border-radius: 12px;
+    padding: 4px;
+    
+    .modo-button {
+      flex: 1;
+      --color: #6c757d;
+      --border-radius: 8px;
+      margin: 0;
+      height: 44px;
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: none;
+      
+      &.selected {
+        --background: #212529;
+        --color: #ffffff;
+      }
+      
+      ion-icon {
+        font-size: 18px;
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .set-info {
+    background: #F5F6F7;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .info-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6c757d;
+      }
+      
+      .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #212529;
+      }
+    }
+  }
+  
   .nueva-digitalizacion-button {
     --background: #F5F6F7;
     --color: #212529;

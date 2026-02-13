@@ -79,13 +79,57 @@
         </ion-button>
       </div>
 
+      <!-- Selector de modo: Unidad o Rango -->
+      <div class="modo-selector">
+        <ion-button 
+          class="modo-button" 
+          [class.selected]="modoVenta === 'unidad'"
+          fill="clear"
+          (click)="cambiarModo('unidad')">
+          <ion-icon name="document-outline" slot="start"></ion-icon>
+          Participación Unidad
+        </ion-button>
+        <ion-button 
+          class="modo-button" 
+          [class.selected]="modoVenta === 'rango'"
+          fill="clear"
+          (click)="cambiarModo('rango')">
+          <ion-icon name="list-outline" slot="start"></ion-icon>
+          Participaciones Por Rango
+        </ion-button>
+      </div>
+
+      <!-- Información del Set/Sorteo (cuando se lee QR) -->
+      <div class="set-info" *ngIf="infoSet">
+        <div class="info-item">
+          <span class="info-label">Set:</span>
+          <span class="info-value">{{ infoSet.setName }}</span>
+        </div>
+        <div class="info-item" *ngIf="infoSet.lotteryName">
+          <span class="info-label">Sorteo:</span>
+          <span class="info-value">{{ infoSet.lotteryName }}</span>
+        </div>
+        <div class="info-item" *ngIf="modoVenta === 'rango' && infoSet.desde">
+          <span class="info-label">Desde:</span>
+          <span class="info-value">Participación {{ infoSet.desde }}</span>
+        </div>
+        <div class="info-item" *ngIf="modoVenta === 'rango' && infoSet.hasta">
+          <span class="info-label">Hasta:</span>
+          <span class="info-value">Participación {{ infoSet.hasta }}</span>
+        </div>
+        <div class="info-item" *ngIf="modoVenta === 'unidad' && infoSet.participationNumber">
+          <span class="info-label">Participación:</span>
+          <span class="info-value">{{ infoSet.participationNumber }}</span>
+        </div>
+      </div>
+
       <!-- Botón Escanear QR -->
       <ion-button 
         class="nueva-digitalizacion-button" 
         expand="block"
         (click)="iniciarScanner()">
         <ion-icon name="qr-code-outline" slot="start"></ion-icon>
-        Escanear QR
+        {{ getTextoBotonEscanear() }}
       </ion-button>
 
       <!-- Lista de Participaciones vendidas -->

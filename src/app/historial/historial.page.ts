@@ -72,11 +72,11 @@ export class HistorialPage implements OnInit {
     }
   }
 
-  /** Para usuario: solo digitalizaciones, regalos y cobros. Para vendedor/gestor: todo el historial. */
+  /** Para usuario: solo digitalizaciones, regalos, cobros y donaciones. Para vendedor/gestor: todo el historial. */
   get historialParaLista(): any[] {
     if (this.rolActual === 'usuario') {
       return this.historial.filter((i: any) =>
-        ['digitalizacion', 'regalo', 'recibido-regalo', 'cobro'].includes(i.tipo)
+        ['digitalizacion', 'regalo', 'recibido-regalo', 'cobro', 'donacion'].includes(i.tipo)
       );
     }
     return this.historial;
