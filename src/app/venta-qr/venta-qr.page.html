@@ -171,11 +171,11 @@
       <div class="resumen-info">
         <div class="resumen-item">
           <span>Participaciones:</span>
-          <span>{{ participaciones.length }}</span>
+          <span>{{ getCantidadResumen() }}</span>
         </div>
         <div class="resumen-item total">
           <span>Importe total:</span>
-          <span class="importe-total">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
+          <span class="importe-total">€{{ getImporteTotalResumen() | number:'1.2-2' }}</span>
         </div>
       </div>
 
@@ -222,6 +222,7 @@
     <ion-button 
       class="registrar-button" 
       expand="block"
+      [disabled]="!formaPago"
       (click)="registrarVenta()">
       Registrar
     </ion-button>

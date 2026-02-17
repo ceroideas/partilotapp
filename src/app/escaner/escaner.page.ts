@@ -71,12 +71,12 @@ export class EscanerPage implements OnInit {
       const qrText = result?.ScanResult?.trim() || null;
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
-        await this.procesarQRDigitalizacion(referencia);
+        // Navegar a venta-qr en modo unidad: mismo flujo que venta individual (set, validación, método de pago)
+        this.router.navigate(['/venta-qr'], { queryParams: { ref: referencia } });
       }
     } catch (err: any) {
       console.error('Error escáner QR:', err);
       if (err.message && err.message.includes('User canceled')) {
-        // Usuario canceló, no hacer nada
         return;
       }
       await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner.');
@@ -300,10 +300,11 @@ export class EscanerPage implements OnInit {
 
     if (ventas.length > 0) {
       // Guardar en historial
+      const formaPagoUsada = this.formaPago === 'omitir' ? null : this.formaPago;
       ventas.forEach((res, index) => {
         const p = res.participation || res;
         const participacion = this.participacionesDigitalizadas[index];
-        this.guardarVentaDigitalEnHistorial(res, participacion.referencia);
+        this.guardarVentaDigitalEnHistorial(res, participacion.referencia, formaPagoUsada);
       });
 
       this.cerrarModalResumen();
@@ -313,7 +314,7 @@ export class EscanerPage implements OnInit {
     }
   }
 
-  guardarVentaDigitalEnHistorial(res: any, referencia: string): void {
+  guardarVentaDigitalEnHistorial(res: any, referencia: string, formaPagoUsada?: string | null): void {
     const p = res.participation || res;
     const entidad = p.entity_name || p.entidad || '—';
     const drawDate = p.draw_date
@@ -324,7 +325,7 @@ export class EscanerPage implements OnInit {
       id: Date.now(),
       tipo: 'venta-digital',
       fecha: new Date().toISOString(),
-      formaPago: this.formaPago || null,
+      formaPago: formaPagoUsada ?? this.formaPago ?? null,
       descripcion: `Participación ${entidad}`,
       participacion: {
         entidad,

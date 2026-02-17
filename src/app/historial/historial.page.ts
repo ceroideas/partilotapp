@@ -92,7 +92,7 @@ export class HistorialPage implements OnInit {
         next: (res) => {
           this.loadingHistorial = false;
           if (res.success && Array.isArray(res.historial)) {
-            this.historial = res.historial.sort((a: any, b: any) =>
+            this.historial = this.normalizarFormaPagoEnHistorial(res.historial).sort((a: any, b: any) =>
               new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
             );
             return;
@@ -140,7 +140,7 @@ export class HistorialPage implements OnInit {
       const historialGuardado = JSON.parse(localStorage.getItem('historial') || '[]');
       
       if (historialGuardado.length > 0) {
-        this.historial = historialGuardado.sort((a: any, b: any) => {
+        this.historial = this.normalizarFormaPagoEnHistorial(historialGuardado).sort((a: any, b: any) => {
           return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
         });
       } else {
@@ -318,6 +318,14 @@ export class HistorialPage implements OnInit {
     const h = date.getHours().toString().padStart(2, '0');
     const m = date.getMinutes().toString().padStart(2, '0');
     return `${dia}/${mes}/${anio} - ${h}:${m}h`;
+  }
+
+  /** Asegura que cada item tenga formaPago (la API puede devolver payment_method) */
+  private normalizarFormaPagoEnHistorial(historial: any[]): any[] {
+    return historial.map(item => ({
+      ...item,
+      formaPago: item.formaPago ?? item.payment_method ?? null
+    }));
   }
 
   getFormaPagoTexto(forma: string | null | undefined): string {

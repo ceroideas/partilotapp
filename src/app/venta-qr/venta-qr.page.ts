@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 import { CarteraService } from '../core/services/cartera.service';
@@ -36,6 +36,7 @@ export class VentaQRPage implements OnInit {
     setId?: number;
     desde?: number;
     hasta?: number;
+    importePorParticipacion?: number;
   } | null = null;
 
   // Datos temporales para modo rango
@@ -43,14 +44,27 @@ export class VentaQRPage implements OnInit {
   primeraParticipationNumber: number | null = null;
   primeraSetId: number | null = null;
 
+  // Venta pendiente de confirmar (antes de abrir modal de pago)
+  ventaPendienteUnidad: { referencia: string; importe: number } | null = null;
+  ventaPendienteRango: { referencia: string; desde: number; hasta: number } | null = null;
+
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private alertController: AlertController,
     private ventasService: VentasService,
     private carteraService: CarteraService
   ) { }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const ref = params['ref'];
+      if (ref) {
+        this.modoVenta = 'unidad';
+        this.consultarParticipacionUnidad(ref);
+        this.router.navigate(['/venta-qr'], { queryParams: {}, replaceUrl: true });
+      }
+    });
   }
 
   cambiarRol(rol: string) {
@@ -114,19 +128,53 @@ export class VentaQRPage implements OnInit {
     this.loading = true;
     
     if (this.modoVenta === 'unidad') {
-      // Modo unidad: vender directamente (el backend valida asignación)
-      await this.venderUnidad(referencia);
+      // Modo unidad: consultar participación, mostrar set y abrir modal de pago
+      await this.consultarParticipacionUnidad(referencia);
     } else {
       // Modo rango: primero obtener info y validar asignación
       await this.procesarRango(referencia);
     }
   }
 
+  private consultarParticipacionUnidad(referencia: string) {
+    this.carteraService.checkByReference(referencia).subscribe({
+      next: (checkRes: any) => {
+        this.loading = false;
+        if (checkRes.status === 'not_found' || !checkRes.participation) {
+          this.mostrarAlerta('Error', checkRes.message || 'No se encontró la participación con esa referencia.');
+          return;
+        }
+
+        const participation = checkRes.participation;
+        const set = participation?.set;
+        const lottery = set?.reserve?.lottery;
+        const participationNumber = participation?.participation_number ?? participation?.numero;
+        const importe = participation?.amount ?? participation?.played_amount ?? participation?.importeTotal ?? 0;
+
+        this.infoSet = {
+          setName: set?.set_name || `Set #${set?.set_number || ''}`,
+          lotteryName: lottery?.name || '',
+          participationNumber: participationNumber,
+          setId: set?.id,
+          importePorParticipacion: importe
+        };
+
+        this.ventaPendienteUnidad = { referencia, importe };
+        this.ventaPendienteRango = null;
+        this.mostrarResumen();
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err.error?.message || 'Error al buscar la participación.');
+      }
+    });
+  }
+
   private async procesarRango(referencia: string) {
     // Primero obtener información de la participación
     this.carteraService.checkByReference(referencia).subscribe({
       next: async (checkRes: any) => {
-        if (!checkRes.success || checkRes.status === 'not_found') {
+        if (checkRes.status === 'not_found' || !checkRes.participation) {
           this.loading = false;
           await this.mostrarAlerta('Error', checkRes.message || 'No se encontró la participación con esa referencia.');
           return;
@@ -137,12 +185,9 @@ export class VentaQRPage implements OnInit {
         const lottery = set?.reserve?.lottery;
         const participationNumber = participation?.participation_number || participation?.numero;
         const setId = set?.id;
+        const importePorParticipacion = participation?.amount ?? participation?.played_amount ?? parseFloat(set?.played_amount) ?? 0;
 
-        // Validar que la participación esté asignada al vendedor
-        // Hacer una llamada al backend para validar asignación
-        // Usamos sellByQr solo para validar (sin payment_method), pero esto vendería la participación
-        // Mejor: validar directamente consultando si está asignada
-        await this.validarAsignacionYProcesarRango(referencia, participationNumber, setId, set, lottery);
+        await this.validarAsignacionYProcesarRango(referencia, participationNumber, setId, set, lottery, importePorParticipacion);
       },
       error: async (err) => {
         this.loading = false;
@@ -151,11 +196,9 @@ export class VentaQRPage implements OnInit {
     });
   }
 
-  private async validarAsignacionYProcesarRango(referencia: string, participationNumber: number, setId: number, set: any, lottery: any) {
+  private async validarAsignacionYProcesarRango(referencia: string, participationNumber: number, setId: number, set: any, lottery: any, importePorParticipacion: number) {
     if (!this.primeraReferencia) {
       // Primera lectura (desde) - guardar información
-      // La validación real se hará cuando se intente vender el rango completo
-      // Por ahora, solo guardamos la info y mostramos
       this.primeraReferencia = referencia;
       this.primeraParticipationNumber = participationNumber;
       this.primeraSetId = setId;
@@ -165,13 +208,14 @@ export class VentaQRPage implements OnInit {
         lotteryName: lottery?.name || '',
         participationNumber: participationNumber,
         setId: setId,
-        desde: participationNumber
+        desde: participationNumber,
+        importePorParticipacion
       };
       
       this.loading = false;
       await this.mostrarAlerta('Éxito', `Primera participación escaneada: Participación ${participationNumber} del Set "${this.infoSet.setName}". Ahora escanea la última participación (Hasta).`);
     } else {
-      // Segunda lectura (hasta) - validar mismo set y vender rango completo
+      // Segunda lectura (hasta) - validar mismo set y mostrar modal de pago
       if (setId !== this.primeraSetId) {
         this.loading = false;
         await this.mostrarAlerta('Error', 'Las participaciones deben pertenecer al mismo set. Por favor, escanea participaciones del mismo set.');
@@ -190,13 +234,19 @@ export class VentaQRPage implements OnInit {
         hasta: participationNumber
       };
 
-      // Vender el rango completo (el backend validará que todas estén asignadas)
-      await this.venderRango(this.primeraReferencia, this.primeraParticipationNumber!, participationNumber);
+      this.loading = false;
+      this.ventaPendienteRango = {
+        referencia: this.primeraReferencia,
+        desde: this.primeraParticipationNumber!,
+        hasta: participationNumber
+      };
+      this.ventaPendienteUnidad = null;
+      this.mostrarResumen();
     }
   }
 
-  private async venderUnidad(referencia: string) {
-    this.ventasService.sellByQr(referencia).subscribe({
+  private venderUnidad(referencia: string, paymentMethod?: string | null) {
+    this.ventasService.sellByQr(referencia, undefined, undefined, paymentMethod).subscribe({
       next: async (res: any) => {
         this.loading = false;
         if (res.success) {
@@ -207,7 +257,10 @@ export class VentaQRPage implements OnInit {
             entidad: p.entity_name || p.entidad || '',
             precio: p.amount || p.importeTotal || 0
           });
-          this.guardarVentaDigitalEnHistorial(res, referencia);
+          this.guardarVentaDigitalEnHistorial(res, referencia, paymentMethod);
+          this.ventaPendienteUnidad = null;
+          this.infoSet = null;
+          this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {
           await this.mostrarAlerta('Error', res.message || 'Esta participación no está asignada a ti o ya está vendida.');
@@ -220,12 +273,11 @@ export class VentaQRPage implements OnInit {
     });
   }
 
-  private async venderRango(referenciaDesde: string, desde: number, hasta: number) {
-    this.ventasService.sellByQr(referenciaDesde, desde, hasta, this.formaPago || undefined).subscribe({
+  private venderRango(referenciaDesde: string, desde: number, hasta: number, paymentMethod?: string | null) {
+    this.ventasService.sellByQr(referenciaDesde, desde, hasta, paymentMethod || undefined).subscribe({
       next: async (res: any) => {
         this.loading = false;
         if (res.success) {
-          // El backend devuelve count, crear entradas para el rango
           const cantidad = res.count || (hasta - desde + 1);
           const nuevasParticipaciones = [];
           for (let i = desde; i <= hasta; i++) {
@@ -238,14 +290,14 @@ export class VentaQRPage implements OnInit {
           }
           this.participaciones = [...this.participaciones, ...nuevasParticipaciones];
           
-          this.guardarVentaRangoEnHistorial(res, desde, hasta, cantidad);
-          this.mostrarModalExito = true;
-          
-          // Limpiar datos del rango
+          this.guardarVentaRangoEnHistorial(res, desde, hasta, cantidad, paymentMethod);
+          this.ventaPendienteRango = null;
           this.infoSet = null;
           this.primeraReferencia = null;
           this.primeraParticipationNumber = null;
           this.primeraSetId = null;
+          this.cerrarModalResumen();
+          this.mostrarModalExito = true;
         } else {
           await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta del rango.');
         }
@@ -261,7 +313,7 @@ export class VentaQRPage implements OnInit {
     this.mostrandoScanner = false;
   }
 
-  guardarVentaDigitalEnHistorial(res: any, referencia: string): void {
+  guardarVentaDigitalEnHistorial(res: any, referencia: string, formaPagoUsada?: string | null): void {
     const p = res.participation || res;
     const entidad = p.entity_name || p.entidad || '—';
     const drawDate = p.draw_date
@@ -272,7 +324,7 @@ export class VentaQRPage implements OnInit {
       id: Date.now(),
       tipo: 'venta-digital',
       fecha: new Date().toISOString(),
-      formaPago: this.formaPago || null,
+      formaPago: formaPagoUsada ?? this.formaPago ?? null,
       descripcion: `Participación ${entidad}`,
       participacion: {
         entidad,
@@ -289,14 +341,14 @@ export class VentaQRPage implements OnInit {
     localStorage.setItem('historial', JSON.stringify(historial));
   }
 
-  guardarVentaRangoEnHistorial(res: any, desde: number, hasta: number, cantidad: number): void {
+  guardarVentaRangoEnHistorial(res: any, desde: number, hasta: number, cantidad: number, formaPagoUsada?: string | null): void {
     const entidad = this.infoSet?.lotteryName || '—';
     const historial = JSON.parse(localStorage.getItem('historial') || '[]');
     historial.unshift({
       id: Date.now(),
       tipo: 'venta-digital-rango',
       fecha: new Date().toISOString(),
-      formaPago: this.formaPago || null,
+      formaPago: formaPagoUsada ?? this.formaPago ?? null,
       descripcion: `Rango de participaciones ${desde}-${hasta} del Set "${this.infoSet?.setName || ''}" - ${entidad}`,
       desde: desde,
       hasta: hasta,
@@ -316,6 +368,24 @@ export class VentaQRPage implements OnInit {
     return this.participaciones.reduce((total, p) => total + p.precio, 0);
   }
 
+  /** Cantidad y total para el modal de resumen (incluye venta pendiente) */
+  getCantidadResumen(): number {
+    if (this.ventaPendienteUnidad) return 1;
+    if (this.ventaPendienteRango) {
+      return this.ventaPendienteRango.hasta - this.ventaPendienteRango.desde + 1;
+    }
+    return this.participaciones.length;
+  }
+
+  getImporteTotalResumen(): number {
+    if (this.ventaPendienteUnidad) return this.ventaPendienteUnidad.importe;
+    if (this.ventaPendienteRango) {
+      const cantidad = this.ventaPendienteRango.hasta - this.ventaPendienteRango.desde + 1;
+      return cantidad * (this.infoSet?.importePorParticipacion ?? 0);
+    }
+    return this.calcularImporteTotal();
+  }
+
   mostrarResumen() {
     this.formaPago = null;
     this.mostrarModalResumen = true;
@@ -323,6 +393,18 @@ export class VentaQRPage implements OnInit {
 
   cerrarModalResumen() {
     this.mostrarModalResumen = false;
+    this.formaPago = null;
+    if (this.ventaPendienteUnidad) {
+      this.ventaPendienteUnidad = null;
+      this.infoSet = null;
+    }
+    if (this.ventaPendienteRango) {
+      this.ventaPendienteRango = null;
+      this.infoSet = null;
+      this.primeraReferencia = null;
+      this.primeraParticipationNumber = null;
+      this.primeraSetId = null;
+    }
   }
 
   seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {
@@ -330,8 +412,25 @@ export class VentaQRPage implements OnInit {
   }
 
   async registrarVenta() {
-    await this.cerrarModalResumen();
-    this.cerrarModalExito();
+    if (!this.formaPago) {
+      await this.mostrarAlerta('Atención', 'Por favor selecciona una forma de pago.');
+      return;
+    }
+
+    const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
+
+    if (this.ventaPendienteUnidad) {
+      this.loading = true;
+      this.venderUnidad(this.ventaPendienteUnidad.referencia, paymentMethod);
+    } else if (this.ventaPendienteRango) {
+      this.loading = true;
+      this.venderRango(
+        this.ventaPendienteRango.referencia,
+        this.ventaPendienteRango.desde,
+        this.ventaPendienteRango.hasta,
+        paymentMethod
+      );
+    }
   }
 
   cerrarModalExito() {
