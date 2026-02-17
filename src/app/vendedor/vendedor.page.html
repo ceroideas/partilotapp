@@ -16,9 +16,10 @@
 <ion-content [fullscreen]="true" class="vendedor-content">
   <div class="vendedor-container">
     
-    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
     <div class="rol-selector">
       <ion-button 
+        *ngIf="authService.canViewUsuario()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('usuario')">
@@ -26,6 +27,7 @@
         Usuario
       </ion-button>
       <ion-button 
+        *ngIf="authService.canViewVendedor()"
         class="rol-button active" 
         fill="clear"
         [disabled]="true">
@@ -33,6 +35,7 @@
         Vendedor
       </ion-button>
       <ion-button 
+        *ngIf="authService.canViewGestor()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('gestor')">

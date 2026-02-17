@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 import { CarteraService } from '../core/services/cartera.service';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-venta-qr',
@@ -47,8 +48,13 @@ export class VentaQRPage implements OnInit {
     private router: Router,
     private alertController: AlertController,
     private ventasService: VentasService,
-    private carteraService: CarteraService
+    private carteraService: CarteraService,
+    private authService: AuthService
   ) { }
+
+  canViewUsuario(): boolean { return this.authService.canViewUsuario(); }
+  canViewVendedor(): boolean { return this.authService.canViewVendedor(); }
+  canViewGestor(): boolean { return this.authService.canViewGestor(); }
 
   ngOnInit() {
   }

@@ -62,6 +62,10 @@ export class VentaPage implements OnInit {
     private alertController: AlertController
   ) { }
 
+  canViewUsuario(): boolean { return this.authService.canViewUsuario(); }
+  canViewVendedor(): boolean { return this.authService.canViewVendedor(); }
+  canViewGestor(): boolean { return this.authService.canViewGestor(); }
+
   ngOnInit() {
     this.isVendedor = this.authService.isSeller();
     if (this.isVendedor) {
@@ -111,9 +115,11 @@ export class VentaPage implements OnInit {
         this.loading = false;
         if (res.success) {
           this.lotteries = res.lotteries || [];
+          // Siempre mostrar el paso de selección de sorteo (aunque haya solo 1)
+          // para que selectLottery() llame a loadReservesAndSets() correctamente
           if (this.lotteries.length === 1) {
             this.selectedLottery = this.lotteries[0];
-            this.showVentaView = true;
+            this.showLotteriesList = true;
           } else if (this.lotteries.length > 1) {
             this.showLotteriesList = true;
           } else {

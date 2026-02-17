@@ -6,16 +6,6 @@
       <p class="welcome-subtitle">de nuevo a <strong>PARTILOT</strong></p>
     </div>
 
-    <div class="tipo-acceso-row">
-      <button type="button" class="tipo-acceso-link" [class.active]="tipoAcceso === 'usuario'" (click)="setTipoAccesoValue('usuario')">
-        Usuario
-      </button>
-      <span class="tipo-acceso-sep">|</span>
-      <button type="button" class="tipo-acceso-link" [class.active]="tipoAcceso === 'vendedor'" (click)="setTipoAccesoValue('vendedor')">
-        Vendedor
-      </button>
-    </div>
-
     <form (ngSubmit)="onSubmit()">
       <div class="input-wrap">
         <ion-icon name="mail-outline" class="input-icon"></ion-icon>

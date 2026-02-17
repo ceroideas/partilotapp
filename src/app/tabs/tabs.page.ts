@@ -151,4 +151,14 @@ export class TabsPage implements OnInit, OnDestroy {
     return this.rolActual === 'gestor';
   }
 
+  /** Solo mostrar opción Vendedor si está asignado como vendedor. */
+  puedeVerVendedor(): boolean {
+    return this.authService.canViewVendedor();
+  }
+
+  /** Solo mostrar opción Gestor si es gestor. */
+  puedeVerGestor(): boolean {
+    return this.authService.canViewGestor();
+  }
+
 }
