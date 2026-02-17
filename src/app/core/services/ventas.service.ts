@@ -60,6 +60,16 @@ export class VentasService {
   }
 
   /**
+   * Resolver QR del taco (portada): devuelve rangos disponibles para el vendedor.
+   * Solo vendedores. GET /api/sellers/me/taco-by-qr?taco_ref=...
+   */
+  getTacoByQr(tacoRef: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/sellers/me/taco-by-qr`, {
+      params: { taco_ref: tacoRef }
+    });
+  }
+
+  /**
    * Obtener historial de ventas del vendedor autenticado desde la API Partilot.
    */
   getHistorial(): Observable<{ success: boolean; historial: any[] }> {

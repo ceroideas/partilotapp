@@ -24,11 +24,25 @@ export class EscanerPage implements OnInit {
   participacionesDigitalizadas: any[] = [];
   mostrarInfoDigitalizacion: boolean = false;
 
-  /** Venta individual desde escáner (Tarea 2): escanear → consultar → detalle y set → modal pago → vender */
+  /** Venta individual desde escáner (participación): escanear → consultar → detalle y set → modal pago → vender */
   ventaPendienteVendedor: {
     referencia: string;
     participacion: any;
     infoSet: { setName: string; lotteryName: string; participationNumber: number; importePorParticipacion: number };
+  } | null = null;
+
+  /** Venta por taco (QR portada): escanear taco_ref → taco-by-qr → rangos → modal pago → vender por rangos */
+  ventaPendienteTaco: {
+    tacoRef: string;
+    set_name: string;
+    lottery_name: string;
+    lottery_date: string | null;
+    book_number: number;
+    rangos_disponibles: Array<{ desde: number; hasta: number }>;
+    total_disponibles: number;
+    importe_por_participacion: number;
+    importe_total: number;
+    primera_referencia: string | null;
   } | null = null;
   
   // Modal de resumen y pago
@@ -73,12 +87,19 @@ export class EscanerPage implements OnInit {
       const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
       const result = await CapacitorBarcodeScanner.scanBarcode({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
-        scanText: 'Escanea el código QR de la participación'
+        scanText: 'Escanea el QR del taco o de la participación'
       });
       const qrText = result?.ScanResult?.trim() || null;
+      if (!qrText) return;
+
+      // Diferenciar: QR de taco (portada) vs QR de participación
+      const tacoRef = this.extraerTacoRefDeQR(qrText);
+      if (tacoRef) {
+        await this.consultarTacoPorQr(tacoRef);
+        return;
+      }
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
-        // Tarea 2 opción B: flujo completo en EscanerPage: consultar → mostrar detalle y set → modal pago → vender
         await this.consultarYMostrarVentaIndividual(referencia);
       }
     } catch (err: any) {
@@ -90,6 +111,62 @@ export class EscanerPage implements OnInit {
     } finally {
       this.modoEscaneo = false;
     }
+  }
+
+  /**
+   * Detecta si el contenido del QR es un taco_ref (QR de la portada del taco).
+   * Formato backend: TACO-{entity_id}-{set_id}-{set_number}-B{book_number}-{signature}
+   */
+  private extraerTacoRefDeQR(qrText: string | null): string | null {
+    if (!qrText) return null;
+    let value = qrText.trim();
+    // Si viene en URL: ?taco_ref=TACO-... o similar
+    if (value.includes('taco_ref=')) {
+      const match = value.match(/taco_ref=([^&\s#]+)/);
+      if (match) value = decodeURIComponent(match[1]).trim();
+    }
+    if (/^TACO-\d+-\d+-\d+-B\d+-[a-f0-9]{8}$/.test(value)) return value;
+    return null;
+  }
+
+  /** Consultar taco por QR (portada): GET taco-by-qr → mostrar rangos e importe para venta por taco */
+  private consultarTacoPorQr(tacoRef: string) {
+    this.loading = true;
+    this.loadingMessage = 'Consultando taco...';
+    this.ventasService.getTacoByQr(tacoRef).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (!res?.success) {
+          this.mostrarAlerta('Error', res?.message || 'No se pudo obtener la información del taco.');
+          return;
+        }
+        if (res.total_disponibles === 0) {
+          this.mostrarAlerta('Sin participaciones', res.message || 'No tienes participaciones disponibles en este taco.');
+          return;
+        }
+        this.ventaPendienteTaco = {
+          tacoRef,
+          set_name: res.set_name || '',
+          lottery_name: res.lottery_name || '',
+          lottery_date: res.lottery_date ?? null,
+          book_number: res.book_number ?? 0,
+          rangos_disponibles: res.rangos_disponibles || [],
+          total_disponibles: res.total_disponibles ?? 0,
+          importe_por_participacion: res.importe_por_participacion ?? 0,
+          importe_total: res.importe_total ?? 0,
+          primera_referencia: res.primera_referencia ?? null
+        };
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err.error?.message || 'Error al consultar el taco.');
+      }
+    });
+  }
+
+  cancelarVentaTaco() {
+    this.ventaPendienteTaco = null;
+    this.modoEscaneo = true;
   }
 
   /** Tarea 2: consultar participación por referencia, validar y mostrar detalle + set para venta individual */
@@ -138,9 +215,10 @@ export class EscanerPage implements OnInit {
     this.modoEscaneo = true;
   }
 
-  /** Cantidad e importe en el modal: venta individual (1) o múltiple (participacionesDigitalizadas) */
+  /** Cantidad e importe en el modal: venta individual (1), taco (N rangos) o múltiple (participacionesDigitalizadas) */
   getCantidadResumenVendedor(): number {
     if (this.ventaPendienteVendedor) return 1;
+    if (this.ventaPendienteTaco) return this.ventaPendienteTaco.total_disponibles;
     return this.participacionesDigitalizadas.length;
   }
 
@@ -148,20 +226,90 @@ export class EscanerPage implements OnInit {
     if (this.ventaPendienteVendedor) {
       return this.ventaPendienteVendedor.infoSet.importePorParticipacion ?? 0;
     }
+    if (this.ventaPendienteTaco) return this.ventaPendienteTaco.importe_total ?? 0;
     return this.calcularImporteTotal();
   }
 
-  /** Registrar venta: desde modal, puede ser venta individual o múltiple */
+  /** Registrar venta: desde modal, puede ser venta individual, taco (por rangos) o múltiple */
   async registrarVentaDesdeModal() {
     if (!this.formaPago) {
       await this.mostrarAlerta('Atención', 'Por favor selecciona una forma de pago.');
       return;
     }
-    if (this.ventaPendienteVendedor) {
+    if (this.ventaPendienteTaco) {
+      this.registrarVentaTaco();
+    } else if (this.ventaPendienteVendedor) {
       this.registrarVentaIndividual();
     } else {
       await this.venderDigitalizaciones();
     }
+  }
+
+  /** Vender taco: una llamada sellByQr(primera_referencia, desde, hasta) por cada rango */
+  private registrarVentaTaco() {
+    if (!this.ventaPendienteTaco || !this.ventaPendienteTaco.primera_referencia) {
+      this.mostrarAlerta('Error', 'Falta referencia para registrar la venta del taco.');
+      return;
+    }
+    const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
+    this.loading = true;
+    this.loadingMessage = 'Registrando venta del taco...';
+    const ref = this.ventaPendienteTaco.primera_referencia!;
+    const rangos = this.ventaPendienteTaco.rangos_disponibles;
+    let completed = 0;
+    let totalCount = 0;
+    const totalCalls = rangos.length;
+    rangos.forEach((rango, index) => {
+      this.ventasService.sellByQr(ref, rango.desde, rango.hasta, paymentMethod ?? undefined).subscribe({
+        next: (res: any) => {
+          if (res?.success && res?.count) totalCount += res.count;
+          completed++;
+          if (completed === totalCalls) {
+            this.loading = false;
+            this.finalizarVentaTaco(totalCount);
+          }
+        },
+        error: async (err) => {
+          completed++;
+          if (completed === totalCalls) this.loading = false;
+          await this.mostrarAlerta('Error', err.error?.message || 'Error al vender un rango del taco.');
+          if (completed === totalCalls) this.cerrarModalResumen();
+        }
+      });
+    });
+    if (totalCalls === 0) {
+      this.loading = false;
+      this.cerrarModalResumen();
+    }
+  }
+
+  private finalizarVentaTaco(count: number) {
+    const formaPagoUsada = this.formaPago === 'omitir' ? null : this.formaPago;
+    const taco = this.ventaPendienteTaco;
+    this.ventaPendienteTaco = null;
+    this.cerrarModalResumen();
+    if (taco) this.guardarVentaTacoEnHistorial(taco, count, formaPagoUsada);
+    this.mostrarModalExito = true;
+  }
+
+  private guardarVentaTacoEnHistorial(t: NonNullable<typeof this.ventaPendienteTaco>, count: number, formaPagoUsada?: string | null): void {
+    if (!t) return;
+    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+    historial.unshift({
+      id: Date.now(),
+      tipo: 'venta-taco',
+      fecha: new Date().toISOString(),
+      formaPago: formaPagoUsada ?? null,
+      descripcion: `Taco ${t.set_name} (${t.lottery_name}) – ${count} participaciones`,
+      taco: {
+        set_name: t.set_name,
+        lottery_name: t.lottery_name,
+        book_number: t.book_number,
+        cantidad: count,
+        importe_total: t.importe_total
+      }
+    });
+    localStorage.setItem('historial', JSON.stringify(historial));
   }
 
   /** Vender una sola participación (flujo escáner vendedor - Tarea 2) */
@@ -357,6 +505,15 @@ export class EscanerPage implements OnInit {
       this.ventaPendienteVendedor = null;
       this.modoEscaneo = true;
     }
+    if (this.ventaPendienteTaco) {
+      this.ventaPendienteTaco = null;
+      this.modoEscaneo = true;
+    }
+  }
+
+  mostrarResumenVentaTaco() {
+    this.formaPago = null;
+    this.mostrarModalResumen = true;
   }
 
   seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {
