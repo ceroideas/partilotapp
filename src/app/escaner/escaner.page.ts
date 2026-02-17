@@ -303,57 +303,36 @@ export class EscanerPage implements OnInit {
     });
   }
 
-  async digitalizar() {
+  /**
+   * Tarea 4: Digitalizar usando API (linkToWallet). Flujo: checkByReference → detalle → linkToWallet → notifyParticipacionesChanged → Cartera.
+   * Sin localStorage para participaciones en este flujo.
+   */
+  digitalizar() {
     if (!this.ticketEscaneado) return;
-
-    try {
-      // Guardar participación
-      const participacion = {
-        id: Date.now(),
-        numero: this.ticketEscaneado.numero,
-        entidad: this.ticketEscaneado.entidad,
-        fechaSorteo: this.ticketEscaneado.fechaSorteo,
-        importeJugado: this.ticketEscaneado.importeJugado,
-        donativo: this.ticketEscaneado.donativo,
-        importeTotal: this.ticketEscaneado.importeTotal,
-        numeroParticipacion: this.ticketEscaneado.numeroParticipacion,
-        numeroReferencia: this.ticketEscaneado.numeroReferencia,
-        imagen: this.imagenTicket,
-        estado: 'activa',
-        fechaDigitalizacion: new Date().toISOString()
-      };
-
-      const participaciones = JSON.parse(localStorage.getItem('participaciones') || '[]');
-      participaciones.push(participacion);
-      localStorage.setItem('participaciones', JSON.stringify(participaciones));
-
-      // Guardar en historial
-      const historial = JSON.parse(localStorage.getItem('historial') || '[]');
-      historial.unshift({
-        id: Date.now(),
-        tipo: 'digitalizacion',
-        fecha: new Date().toISOString(),
-        participacion: participacion
-      });
-      localStorage.setItem('historial', JSON.stringify(historial));
-
-      const alert = await this.alertController.create({
-        header: 'Digitalización exitosa',
-        message: 'La participación ha sido guardada en tu cartera.',
-        buttons: [
-          {
-            text: 'OK',
-            handler: () => {
-              this.router.navigate(['/tabs/tab1']); // Ir a cartera
-            }
-          }
-        ]
-      });
-      await alert.present();
-    } catch (error) {
-      console.error('Error digitalizando:', error);
-      this.mostrarAlerta('Error', 'No se pudo digitalizar la participación.');
+    const referencia = this.ticketEscaneado.numeroReferencia;
+    if (!referencia) {
+      this.mostrarAlerta('Error', 'No hay referencia de participación.');
+      return;
     }
+
+    this.loading = true;
+    this.loadingMessage = 'Vinculando a tu cartera...';
+    this.carteraService.linkToWallet(referencia).subscribe({
+      next: async () => {
+        this.loading = false;
+        this.carteraService.notifyParticipacionesChanged();
+        const alert = await this.alertController.create({
+          header: 'Digitalización exitosa',
+          message: 'La participación ha sido guardada en tu cartera.',
+          buttons: [{ text: 'OK', handler: () => this.router.navigate(['/tabs/tab1']) }]
+        });
+        await alert.present();
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err.error?.message || 'No se pudo vincular la participación a tu cartera.');
+      }
+    });
   }
 
   nuevaDigitalizacion() {
