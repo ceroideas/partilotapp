@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { CarteraService } from '../core/services/cartera.service';
+import { AuthService } from '../core/services/auth.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -21,7 +22,8 @@ export class HistorialPage implements OnInit {
   constructor(
     private router: Router,
     private ventasService: VentasService,
-    private carteraService: CarteraService
+    private carteraService: CarteraService,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -52,6 +54,10 @@ export class HistorialPage implements OnInit {
       }
     }
   }
+
+  canViewUsuario(): boolean { return this.authService.canViewUsuario(); }
+  canViewVendedor(): boolean { return this.authService.canViewVendedor(); }
+  canViewGestor(): boolean { return this.authService.canViewGestor(); }
 
   cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
     this.rolActual = rol;

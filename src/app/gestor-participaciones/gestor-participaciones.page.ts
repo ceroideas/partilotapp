@@ -36,7 +36,7 @@ export class GestorParticipacionesPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private ventasService: VentasService,
-    private authService: AuthService,
+    public authService: AuthService,
     private alertController: AlertController
   ) { }
 
@@ -48,17 +48,37 @@ export class GestorParticipacionesPage implements OnInit {
     }
   }
 
+  ionViewWillEnter() {
+    this.detectarRol();
+  }
+
   detectarRol() {
-    const rolGuardado = localStorage.getItem('rolActual');
     const ruta = window.location.pathname;
+    const tieneSeller = this.authService.isSeller();
+    const esGestor = this.authService.isGestor();
+
+    // La ruta tiene prioridad: si estamos en tabs de vendedor/gestor, usar ese rol
+    if (ruta.includes('/vendedor-tab') && tieneSeller) {
+      this.rolActual = 'vendedor';
+      localStorage.setItem('rolActual', 'vendedor');
+      localStorage.setItem('esVendedor', 'true');
+      return;
+    }
+    if (ruta.includes('/gestor-tab') && esGestor) {
+      this.rolActual = 'gestor';
+      localStorage.setItem('rolActual', 'gestor');
+      localStorage.setItem('esVendedor', 'false');
+      return;
+    }
+
+    const rolGuardado = localStorage.getItem('rolActual');
     if (rolGuardado) {
       this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
-    } else if (ruta.includes('vendedor-tab')) {
-      this.rolActual = 'vendedor';
-    } else if (ruta.includes('gestor-tab')) {
-      this.rolActual = 'gestor';
+      if (this.rolActual === 'vendedor' && !tieneSeller) this.rolActual = 'usuario';
+      if (this.rolActual === 'gestor' && !esGestor) this.rolActual = tieneSeller ? 'vendedor' : 'usuario';
     } else {
-      this.rolActual = this.isVendedor ? 'vendedor' : 'gestor';
+      this.rolActual = tieneSeller ? 'vendedor' : (esGestor ? 'gestor' : 'usuario');
+      localStorage.setItem('rolActual', this.rolActual);
     }
   }
 

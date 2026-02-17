@@ -37,9 +37,10 @@
   <!-- Vista Principal de Venta QR -->
   <div *ngIf="!mostrandoScanner" class="venta-qr-container">
     
-    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
-    <div class="rol-selector">
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
+    <div class="rol-selector" *ngIf="canViewUsuario() || canViewVendedor() || canViewGestor()">
       <ion-button 
+        *ngIf="canViewUsuario()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('usuario')">
@@ -47,6 +48,7 @@
         Usuario
       </ion-button>
       <ion-button 
+        *ngIf="canViewVendedor()"
         class="rol-button active" 
         fill="clear"
         [disabled]="true">
@@ -54,6 +56,7 @@
         Vendedor
       </ion-button>
       <ion-button 
+        *ngIf="canViewGestor()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('gestor')">

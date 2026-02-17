@@ -3,8 +3,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { AlertController } from '@ionic/angular';
 
-type TipoAcceso = 'usuario' | 'vendedor';
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -14,7 +12,6 @@ type TipoAcceso = 'usuario' | 'vendedor';
 export class LoginPage {
   email = '';
   password = '';
-  tipoAcceso: TipoAcceso = 'usuario';
   returnUrl = '/tabs';
   loading = false;
   showPassword = false;
@@ -31,22 +28,19 @@ export class LoginPage {
 
   ionViewDidEnter() {
     if (!this.authService.isLoggedIn()) return;
-    if (this.authService.isSeller()) {
+    // Redirigir según el rol del usuario
+    this.navigateByRole();
+  }
+
+  private navigateByRole() {
+    if (this.authService.isGestor()) {
+      // Usar gestor-tab3 que parece ser la ruta estándar según otros componentes
+      this.router.navigateByUrl(this.returnUrl || '/tabs/gestor-tab3');
+    } else if (this.authService.isSeller()) {
       this.router.navigateByUrl(this.returnUrl || '/tabs/vendedor-tab3');
     } else {
       this.router.navigateByUrl(this.returnUrl || '/tabs');
     }
-  }
-
-  setTipoAcceso(event: any) {
-    const value = event?.detail?.value;
-    if (value === 'usuario' || value === 'vendedor') {
-      this.tipoAcceso = value;
-    }
-  }
-
-  setTipoAccesoValue(value: TipoAcceso) {
-    this.tipoAcceso = value;
   }
 
   togglePassword() {
@@ -73,19 +67,13 @@ export class LoginPage {
     }
 
     this.loading = true;
-    const request$ = this.tipoAcceso === 'usuario'
-      ? this.authService.loginUsuario(this.email, this.password)
-      : this.authService.login(this.email, this.password);
-
-    request$.subscribe({
+    // Usar loginUsuario que determina automáticamente el rol del usuario
+    this.authService.loginUsuario(this.email, this.password).subscribe({
       next: async (response) => {
         this.loading = false;
         if (response.success) {
-          if (this.tipoAcceso === 'usuario') {
-            this.router.navigateByUrl('/tabs');
-          } else {
-            this.router.navigateByUrl(this.returnUrl || '/tabs/vendedor-tab3');
-          }
+          // Navegar según el rol detectado automáticamente
+          this.navigateByRole();
         } else {
           await this.mostrarAlerta('Error', response.message || 'No se pudo iniciar sesión');
         }

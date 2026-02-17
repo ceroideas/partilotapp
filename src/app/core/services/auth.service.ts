@@ -64,8 +64,8 @@ export class AuthService {
     );
   }
 
-  /** Login perfil Usuario (permite tanto client como seller). 
-   * Si el usuario es vendedor, guarda también el seller para permitir cambio de roles. */
+  /** Login único que determina automáticamente el rol del usuario. 
+   * Si el usuario es gestor, vendedor o usuario normal, se establece el rol correspondiente. */
   loginUsuario(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login-usuario`, { email, password }).pipe(
       tap(response => {
@@ -80,9 +80,23 @@ export class AuthService {
           } else {
             localStorage.removeItem('seller');
           }
-          localStorage.setItem('rolActual', 'usuario');
-          // Si tiene seller, puede cambiar a vendedor, pero por defecto entra como usuario
-          localStorage.setItem('esVendedor', response.seller ? 'true' : 'false');
+          
+          // Determinar el rol inicial según las capacidades del usuario
+          const user = response.user;
+          const isGestor = user?.role === 'entity' || user?.role === 'administration' || user?.role === 'super_admin';
+          const isVendedor = !!response.seller;
+          
+          // Establecer el rol inicial: gestor tiene prioridad, luego vendedor, luego usuario
+          if (isGestor) {
+            localStorage.setItem('rolActual', 'gestor');
+            localStorage.setItem('esVendedor', 'false');
+          } else if (isVendedor) {
+            localStorage.setItem('rolActual', 'vendedor');
+            localStorage.setItem('esVendedor', 'true');
+          } else {
+            localStorage.setItem('rolActual', 'usuario');
+            localStorage.setItem('esVendedor', 'false');
+          }
         }
       })
     );
@@ -117,6 +131,27 @@ export class AuthService {
 
   isSeller(): boolean {
     return !!localStorage.getItem('seller');
+  }
+
+  /** Usuario es gestor (rol entity). */
+  isGestor(): boolean {
+    const user = this.getUser();
+    return user?.role === 'entity' || user?.role === 'administration' || user?.role === 'super_admin';
+  }
+
+  /** Puede ver pestaña Usuario (todos los usuarios logueados). */
+  canViewUsuario(): boolean {
+    return this.isLoggedIn();
+  }
+
+  /** Puede ver pestaña Vendedor (solo si está asignado como vendedor). */
+  canViewVendedor(): boolean {
+    return this.isLoggedIn() && this.isSeller();
+  }
+
+  /** Puede ver pestaña Gestor (solo si es gestor/entity/administration). */
+  canViewGestor(): boolean {
+    return this.isLoggedIn() && this.isGestor();
   }
 
   getToken(): string | null {
