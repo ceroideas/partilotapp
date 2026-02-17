@@ -19,10 +19,17 @@ export class EscanerPage implements OnInit {
   ticketEscaneado: any = null;
   imagenTicket: string | null = null;
   
-  // Modo vendedor (digitalización múltiple)
+  // Modo vendedor: venta individual por QR (Tarea 2) o digitalización múltiple
   isVendedor: boolean = false;
   participacionesDigitalizadas: any[] = [];
   mostrarInfoDigitalizacion: boolean = false;
+
+  /** Venta individual desde escáner (Tarea 2): escanear → consultar → detalle y set → modal pago → vender */
+  ventaPendienteVendedor: {
+    referencia: string;
+    participacion: any;
+    infoSet: { setName: string; lotteryName: string; participationNumber: number; importePorParticipacion: number };
+  } | null = null;
   
   // Modal de resumen y pago
   mostrarModalResumen: boolean = false;
@@ -71,8 +78,8 @@ export class EscanerPage implements OnInit {
       const qrText = result?.ScanResult?.trim() || null;
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
-        // Navegar a venta-qr en modo unidad: mismo flujo que venta individual (set, validación, método de pago)
-        this.router.navigate(['/venta-qr'], { queryParams: { ref: referencia } });
+        // Tarea 2 opción B: flujo completo en EscanerPage: consultar → mostrar detalle y set → modal pago → vender
+        await this.consultarYMostrarVentaIndividual(referencia);
       }
     } catch (err: any) {
       console.error('Error escáner QR:', err);
@@ -83,6 +90,104 @@ export class EscanerPage implements OnInit {
     } finally {
       this.modoEscaneo = false;
     }
+  }
+
+  /** Tarea 2: consultar participación por referencia, validar y mostrar detalle + set para venta individual */
+  private consultarYMostrarVentaIndividual(referencia: string) {
+    this.loading = true;
+    this.loadingMessage = 'Buscando participación...';
+    this.carteraService.checkByReference(referencia).subscribe({
+      next: (checkRes: any) => {
+        this.loading = false;
+        if (checkRes.status === 'not_found' || !checkRes.participation) {
+          this.mostrarAlerta('Error', checkRes.message || 'No se encontró la participación con esa referencia.');
+          return;
+        }
+        const participation = checkRes.participation;
+        const set = participation?.set;
+        const lottery = set?.reserve?.lottery;
+        const participationNumber = participation?.participation_number ?? participation?.numero;
+        const importe = participation?.amount ?? participation?.played_amount ?? participation?.importeTotal ?? 0;
+        this.ventaPendienteVendedor = {
+          referencia,
+          participacion: participation,
+          infoSet: {
+            setName: set?.set_name || `Set #${set?.set_number ?? ''}`,
+            lotteryName: lottery?.name || '',
+            participationNumber,
+            importePorParticipacion: importe
+          }
+        };
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err.error?.message || 'Error al buscar la participación.');
+      }
+    });
+  }
+
+  /** Abre el modal de resumen para venta individual (1 participación) */
+  mostrarResumenVentaIndividual() {
+    this.formaPago = null;
+    this.mostrarModalResumen = true;
+  }
+
+  /** Cancela la venta individual y vuelve al escáner */
+  cancelarVentaIndividual() {
+    this.ventaPendienteVendedor = null;
+    this.modoEscaneo = true;
+  }
+
+  /** Cantidad e importe en el modal: venta individual (1) o múltiple (participacionesDigitalizadas) */
+  getCantidadResumenVendedor(): number {
+    if (this.ventaPendienteVendedor) return 1;
+    return this.participacionesDigitalizadas.length;
+  }
+
+  getImporteTotalResumenVendedor(): number {
+    if (this.ventaPendienteVendedor) {
+      return this.ventaPendienteVendedor.infoSet.importePorParticipacion ?? 0;
+    }
+    return this.calcularImporteTotal();
+  }
+
+  /** Registrar venta: desde modal, puede ser venta individual o múltiple */
+  async registrarVentaDesdeModal() {
+    if (!this.formaPago) {
+      await this.mostrarAlerta('Atención', 'Por favor selecciona una forma de pago.');
+      return;
+    }
+    if (this.ventaPendienteVendedor) {
+      this.registrarVentaIndividual();
+    } else {
+      await this.venderDigitalizaciones();
+    }
+  }
+
+  /** Vender una sola participación (flujo escáner vendedor - Tarea 2) */
+  private registrarVentaIndividual() {
+    if (!this.ventaPendienteVendedor) return;
+    const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
+    this.loading = true;
+    this.loadingMessage = 'Registrando venta...';
+    this.ventasService.sellByQr(this.ventaPendienteVendedor.referencia, undefined, undefined, paymentMethod ?? undefined).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (res?.success) {
+          const formaPagoUsada = this.formaPago === 'omitir' ? null : this.formaPago;
+          this.guardarVentaDigitalEnHistorial(res, this.ventaPendienteVendedor!.referencia, formaPagoUsada);
+          this.ventaPendienteVendedor = null;
+          this.cerrarModalResumen();
+          this.mostrarModalExito = true;
+        } else {
+          this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
+        }
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err.error?.message || 'Esta participación no está asignada a ti o ya está vendida.');
+      }
+    });
   }
 
   async iniciarScannerUsuario() {
@@ -268,6 +373,11 @@ export class EscanerPage implements OnInit {
 
   cerrarModalResumen() {
     this.mostrarModalResumen = false;
+    this.formaPago = null;
+    if (this.ventaPendienteVendedor) {
+      this.ventaPendienteVendedor = null;
+      this.modoEscaneo = true;
+    }
   }
 
   seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {

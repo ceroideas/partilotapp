@@ -116,6 +116,37 @@
   min-height: 100%;
 }
 
+/* Venta individual vendedor (Tarea 2): set info */
+.venta-individual-vendedor .set-info {
+  background: #F5F6F7;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6c757d;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+    }
+  }
+}
+
 .header-content {
   display: flex;
   align-items: center;

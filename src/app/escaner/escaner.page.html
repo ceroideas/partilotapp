@@ -27,7 +27,7 @@
   </div>
   
   <!-- Vista de escáner -->
-  <div class="scanner-view" *ngIf="modoEscaneo && !mostrarInfoDigitalizacion">
+  <div class="scanner-view" *ngIf="modoEscaneo && !mostrarInfoDigitalizacion && !ventaPendienteVendedor">
     <div class="escaner-container">
       <div class="scanner-area">
         <div class="scanner-frame">
@@ -48,8 +48,50 @@
     </div>
   </div>
 
-  <!-- Vista Info Digitalización (Modo Vendedor) -->
-  <div class="info-digitalizacion-view" *ngIf="isVendedor && mostrarInfoDigitalizacion && !modoEscaneo">
+  <!-- Vista Venta individual (Modo Vendedor - Tarea 2): detalle y set → modal pago → vender -->
+  <div class="comprobacion-view venta-individual-vendedor" *ngIf="isVendedor && ventaPendienteVendedor && !mostrarModalResumen">
+    <div class="comprobacion-container">
+      <div class="comprobacion-header">
+        <div class="header-title-text">
+          <h2 class="comprobacion-title">Venta por QR</h2>
+          <p class="comprobacion-subtitle">Comprueba los datos y elige forma de pago</p>
+        </div>
+        <ion-button fill="clear" class="close-button" (click)="cancelarVentaIndividual()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </div>
+      <div class="set-info" *ngIf="ventaPendienteVendedor">
+        <div class="info-item">
+          <span class="info-label">Set:</span>
+          <span class="info-value">{{ ventaPendienteVendedor.infoSet.setName }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Sorteo:</span>
+          <span class="info-value">{{ ventaPendienteVendedor.infoSet.lotteryName }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Participación:</span>
+          <span class="info-value">{{ ventaPendienteVendedor.infoSet.participationNumber }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Importe:</span>
+          <span class="info-value">€{{ ventaPendienteVendedor.infoSet.importePorParticipacion | number:'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="actions-section">
+        <ion-button class="figma-button" expand="block" (click)="mostrarResumenVentaIndividual()">
+          <ion-icon name="card-outline" slot="start"></ion-icon>
+          Vender – Elegir forma de pago
+        </ion-button>
+        <ion-button fill="outline" expand="block" (click)="cancelarVentaIndividual()">
+          Cancelar
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista Info Digitalización (Modo Vendedor - múltiple) -->
+  <div class="info-digitalizacion-view" *ngIf="isVendedor && mostrarInfoDigitalizacion && !modoEscaneo && !ventaPendienteVendedor">
     <div class="info-digitalizacion-container">
       <!-- Header -->
       <div class="info-digitalizacion-header">
@@ -218,11 +260,11 @@
       <div class="resumen-info">
         <div class="resumen-item">
           <span>Participaciones:</span>
-          <span>{{ participacionesDigitalizadas.length }}</span>
+          <span>{{ getCantidadResumenVendedor() }}</span>
         </div>
         <div class="resumen-item total">
           <span>Importe total:</span>
-          <span class="importe-total">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
+          <span class="importe-total">€{{ getImporteTotalResumenVendedor() | number:'1.2-2' }}</span>
         </div>
       </div>
 
@@ -270,7 +312,7 @@
       class="registrar-button" 
       expand="block"
       [disabled]="!formaPago"
-      (click)="venderDigitalizaciones()">
+      (click)="registrarVentaDesdeModal()">
       Registrar
     </ion-button>
   </div>
