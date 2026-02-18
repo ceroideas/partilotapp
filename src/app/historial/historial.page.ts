@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
+import { Subscription } from 'rxjs';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
 import { environment } from '../../environments/environment';
@@ -11,9 +12,10 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./historial.page.scss'],
   standalone: false,
 })
-export class HistorialPage implements OnInit {
+export class HistorialPage implements OnInit, OnDestroy {
 
   historial: any[] = [];
+  private ventasChangedSub?: Subscription;
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
   loadingHistorial = false;
   errorHistorial: string | null = null;
@@ -29,6 +31,11 @@ export class HistorialPage implements OnInit {
   ngOnInit() {
     this.detectarRol();
     this.loadHistorial();
+    this.ventasChangedSub = this.ventasService.getVentasChanged().subscribe(() => this.loadHistorial());
+  }
+
+  ngOnDestroy() {
+    this.ventasChangedSub?.unsubscribe();
   }
 
   ionViewWillEnter() {

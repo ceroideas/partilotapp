@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
 import { AlertController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -11,7 +12,7 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./gestor-participaciones.page.scss'],
   standalone: false,
 })
-export class GestorParticipacionesPage implements OnInit {
+export class GestorParticipacionesPage implements OnInit, OnDestroy {
   isVendedor: boolean = false;
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'vendedor';
   
@@ -31,6 +32,7 @@ export class GestorParticipacionesPage implements OnInit {
   showTacoDetail: boolean = false;
 
   loading = false;
+  private ventasChangedSub?: Subscription;
 
   constructor(
     private router: Router,
@@ -46,10 +48,33 @@ export class GestorParticipacionesPage implements OnInit {
     if (this.isVendedor) {
       this.loadEntities();
     }
+    this.ventasChangedSub = this.ventasService.getVentasChanged().subscribe(() => this.recargarVistaActual());
+  }
+
+  ngOnDestroy() {
+    this.ventasChangedSub?.unsubscribe();
   }
 
   ionViewWillEnter() {
     this.detectarRol();
+    if (this.isVendedor) {
+      this.recargarVistaActual();
+    }
+  }
+
+  /** Recarga la vista actual (entidades, tacos o detalle taco) para reflejar ventas recientes */
+  private recargarVistaActual() {
+    if (this.showTacoDetail && this.selectedTaco) {
+      const setId = this.selectedTaco.set_id ?? this.selectedTaco.setId;
+      const bookNumber = this.selectedTaco.book_number ?? this.selectedTaco.bookNumber;
+      if (setId != null && bookNumber != null) {
+        this.viewTaco({ set_id: setId, book_number: bookNumber });
+      }
+    } else if (this.showTacosList && this.selectedEntity) {
+      this.loadTacos();
+    } else if (this.isVendedor) {
+      this.loadEntities();
+    }
   }
 
   detectarRol() {

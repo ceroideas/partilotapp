@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button *ngIf="!showEntitySelection && !showTacosList && !showTacoDetail"></ion-back-button>
-      <ion-button *ngIf="showTacosList && !showTacoDetail" fill="clear" (click)="backToEntities()">
+      <ion-button *ngIf="showTacosList && !showTacoDetail && entities.length > 1" fill="clear" (click)="backToEntities()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
       <ion-button *ngIf="showTacoDetail" fill="clear" (click)="backToTacos()">
@@ -151,6 +151,7 @@
           <div class="taco-info">
             <div class="taco-title">Taco: {{ taco.set_number }}/{{ padNumber(taco.book_number, 3) }}</div>
             <div class="taco-subtitle">Particip.: {{ taco.participations_range }}</div>
+            <div class="taco-reservation" *ngIf="taco.reservation_numbers_display">Reserva: {{ taco.reservation_numbers_display }}</div>
             <div class="taco-lottery">Sorteo: {{ taco.lottery_name }} - Fecha: {{ formatDate(taco.lottery_date) }}</div>
           </div>
         </div>
@@ -214,6 +215,7 @@
           <div class="taco-detail-title">N-{{ selectedTaco.set_number }}</div>
           <div class="taco-detail-price">Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</div>
           <div class="taco-detail-range">Taco: {{ selectedTaco.set_number }}/{{ padNumber(selectedTaco.book_number, 3) }} Particip.: {{ selectedTaco.participations_range }}</div>
+          <div class="taco-detail-reservation" *ngIf="selectedTaco.reservation_numbers_display">Reserva: {{ selectedTaco.reservation_numbers_display }}</div>
           <div class="taco-detail-lottery">Sorteo: {{ selectedTaco.lottery_name }} - Fecha: {{ selectedTaco.lottery_date }}</div>
         </div>
       </div>

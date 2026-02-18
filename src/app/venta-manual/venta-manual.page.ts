@@ -214,6 +214,7 @@ export class VentaManualPage implements OnInit {
         this.loading = false;
         if (res.success) {
           this.guardarVentaEnHistorial(res, desde, hasta);
+          this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {

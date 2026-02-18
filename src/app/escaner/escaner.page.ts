@@ -67,8 +67,18 @@ export class EscanerPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.isVendedor = this.authService.isSeller();
+    this.detectarModoDesdeRuta();
     this.modoEscaneo = true;
+  }
+
+  ionViewWillEnter() {
+    this.detectarModoDesdeRuta();
+  }
+
+  /** Modo según la pestaña actual: tab5 = usuario (digitalizar), vendedor-tab5 = vendedor (vender) */
+  private detectarModoDesdeRuta() {
+    const ruta = this.router.url;
+    this.isVendedor = ruta.includes('vendedor-tab5');
   }
 
   async scanQR() {
@@ -83,6 +93,7 @@ export class EscanerPage implements OnInit {
 
   async iniciarScannerVendedor() {
     this.modoEscaneo = true;
+    let mostrarVistaEscaneo = false; // true = volver a mostrar escáner tras error/QR inválido
     try {
       const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
       const result = await CapacitorBarcodeScanner.scanBarcode({
@@ -95,21 +106,25 @@ export class EscanerPage implements OnInit {
       // Diferenciar: QR de taco (portada) vs QR de participación
       const tacoRef = this.extraerTacoRefDeQR(qrText);
       if (tacoRef) {
-        await this.consultarTacoPorQr(tacoRef);
+        this.consultarTacoPorQr(tacoRef);
         return;
       }
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
-        await this.consultarYMostrarVentaIndividual(referencia);
+        this.consultarYMostrarVentaIndividual(referencia);
+      } else {
+        mostrarVistaEscaneo = true;
+        await this.mostrarAlerta('QR no reconocido', 'El código QR no corresponde a un taco ni a una participación válida.');
       }
     } catch (err: any) {
       console.error('Error escáner QR:', err);
       if (err.message && err.message.includes('User canceled')) {
         return;
       }
+      mostrarVistaEscaneo = true;
       await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner.');
     } finally {
-      this.modoEscaneo = false;
+      this.modoEscaneo = mostrarVistaEscaneo;
     }
   }
 
@@ -137,10 +152,12 @@ export class EscanerPage implements OnInit {
       next: (res: any) => {
         this.loading = false;
         if (!res?.success) {
+          this.modoEscaneo = true;
           this.mostrarAlerta('Error', res?.message || 'No se pudo obtener la información del taco.');
           return;
         }
         if (res.total_disponibles === 0) {
+          this.modoEscaneo = true;
           this.mostrarAlerta('Sin participaciones', res.message || 'No tienes participaciones disponibles en este taco.');
           return;
         }
@@ -159,6 +176,7 @@ export class EscanerPage implements OnInit {
       },
       error: async (err) => {
         this.loading = false;
+        this.modoEscaneo = true;
         await this.mostrarAlerta('Error', err.error?.message || 'Error al consultar el taco.');
       }
     });
@@ -177,6 +195,7 @@ export class EscanerPage implements OnInit {
       next: (checkRes: any) => {
         this.loading = false;
         if (checkRes.status === 'not_found' || !checkRes.participation) {
+          this.modoEscaneo = true;
           this.mostrarAlerta('Error', checkRes.message || 'No se encontró la participación con esa referencia.');
           return;
         }
@@ -198,6 +217,7 @@ export class EscanerPage implements OnInit {
       },
       error: async (err) => {
         this.loading = false;
+        this.modoEscaneo = true;
         await this.mostrarAlerta('Error', err.error?.message || 'Error al buscar la participación.');
       }
     });
@@ -213,6 +233,64 @@ export class EscanerPage implements OnInit {
   cancelarVentaIndividual() {
     this.ventaPendienteVendedor = null;
     this.modoEscaneo = true;
+  }
+
+  /** Getters para la vista de venta individual (mismo diseño que digitalizar-participacion) */
+  getEntidadVentaIndividual(): string {
+    if (!this.ventaPendienteVendedor?.participacion) return '—';
+    const p = this.ventaPendienteVendedor.participacion;
+    return p.entity_name || p.entidad || p.set?.reserve?.entity?.name || '—';
+  }
+
+  getImagenVentaIndividual(): string | null {
+    if (!this.ventaPendienteVendedor?.participacion) return null;
+    const p = this.ventaPendienteVendedor.participacion;
+    const path = p.snapshot_path || p.snapshotPath || p.image;
+    return path ? this.getImageUrl(path) : null;
+  }
+
+  getNumeroVentaIndividual(): string {
+    if (!this.ventaPendienteVendedor) return '—';
+    const p = this.ventaPendienteVendedor.participacion;
+    return p?.numeroReservado || p?.participation_code || p?.numero || this.ventaPendienteVendedor.infoSet?.participationNumber?.toString() || '—';
+  }
+
+  getFechaSorteoVentaIndividual(): string {
+    if (!this.ventaPendienteVendedor?.participacion) return '—';
+    const d = this.ventaPendienteVendedor.participacion.draw_date || this.ventaPendienteVendedor.participacion.fechaSorteo;
+    return d ? (typeof d === 'string' && d.includes('/') ? d : new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })) : '—';
+  }
+
+  getImporteJugadoVentaIndividual(): number {
+    if (!this.ventaPendienteVendedor?.participacion) return 0;
+    const p = this.ventaPendienteVendedor.participacion;
+    return p.played_amount ?? p.importeJugado ?? this.ventaPendienteVendedor.infoSet?.importePorParticipacion ?? 0;
+  }
+
+  getDonativoVentaIndividual(): number {
+    if (!this.ventaPendienteVendedor?.participacion) return 0;
+    const p = this.ventaPendienteVendedor.participacion;
+    return p.donation_amount ?? p.donativo ?? 0;
+  }
+
+  getImporteTotalVentaIndividual(): number {
+    if (!this.ventaPendienteVendedor) return 0;
+    const p = this.ventaPendienteVendedor.participacion;
+    return p?.amount ?? p?.importeTotal ?? this.ventaPendienteVendedor.infoSet?.importePorParticipacion ?? 0;
+  }
+
+  getNumeroParticipacionVentaIndividual(): string {
+    if (!this.ventaPendienteVendedor) return '—';
+    const p = this.ventaPendienteVendedor.participacion;
+    const n = this.ventaPendienteVendedor.infoSet?.participationNumber;
+    if (p?.numeroParticipacion) return p.numeroParticipacion;
+    if (p?.participation_code) return p.participation_code;
+    if (n != null) return `${n}/${String(n).padStart(4, '0')}`;
+    return '—';
+  }
+
+  getReferenciaVentaIndividual(): string {
+    return this.ventaPendienteVendedor?.referencia || this.ventaPendienteVendedor?.participacion?.reference || '0000000000000000000';
   }
 
   /** Cantidad e importe en el modal: venta individual (1), taco (N rangos) o múltiple (participacionesDigitalizadas) */
@@ -289,6 +367,7 @@ export class EscanerPage implements OnInit {
     this.ventaPendienteTaco = null;
     this.cerrarModalResumen();
     if (taco) this.guardarVentaTacoEnHistorial(taco, count, formaPagoUsada);
+    this.ventasService.notifyVentasChanged();
     this.mostrarModalExito = true;
   }
 
@@ -326,6 +405,7 @@ export class EscanerPage implements OnInit {
           this.guardarVentaDigitalEnHistorial(res, this.ventaPendienteVendedor!.referencia, formaPagoUsada);
           this.ventaPendienteVendedor = null;
           this.cerrarModalResumen();
+          this.ventasService.notifyVentasChanged();
           this.mostrarModalExito = true;
         } else {
           this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
@@ -340,6 +420,7 @@ export class EscanerPage implements OnInit {
 
   async iniciarScannerUsuario() {
     this.modoEscaneo = true;
+    let mostrarVistaEscaneo = false;
     try {
       const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
       const result = await CapacitorBarcodeScanner.scanBarcode({
@@ -349,17 +430,20 @@ export class EscanerPage implements OnInit {
       const qrText = result?.ScanResult?.trim() || null;
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
-        await this.consultarReferencia(referencia);
+        this.consultarReferencia(referencia);
+      } else if (qrText) {
+        mostrarVistaEscaneo = true;
+        await this.mostrarAlerta('QR no reconocido', 'El código QR no corresponde a una participación válida.');
       }
     } catch (err: any) {
       console.error('Error escáner QR:', err);
       if (err.message && err.message.includes('User canceled')) {
-        // Usuario canceló, no hacer nada
         return;
       }
+      mostrarVistaEscaneo = true;
       await this.mostrarAlerta('Error', 'No se pudo iniciar el escáner.');
     } finally {
-      this.modoEscaneo = false;
+      this.modoEscaneo = mostrarVistaEscaneo;
     }
   }
 
@@ -545,14 +629,12 @@ export class EscanerPage implements OnInit {
     this.loading = false;
 
     if (ventas.length > 0) {
-      // Guardar en historial
       const formaPagoUsada = this.formaPago === 'omitir' ? null : this.formaPago;
       ventas.forEach((res, index) => {
-        const p = res.participation || res;
         const participacion = this.participacionesDigitalizadas[index];
         this.guardarVentaDigitalEnHistorial(res, participacion.referencia, formaPagoUsada);
       });
-
+      this.ventasService.notifyVentasChanged();
       this.cerrarModalResumen();
       this.mostrarModalExito = true;
     } else {
@@ -592,7 +674,12 @@ export class EscanerPage implements OnInit {
     this.mostrarModalExito = false;
     this.participacionesDigitalizadas = [];
     this.mostrarInfoDigitalizacion = false;
+    this.ventaPendienteVendedor = null;
+    this.ventaPendienteTaco = null;
     this.modoEscaneo = true;
+    if (this.isVendedor) {
+      this.router.navigate(['/tabs/vendedor-tab3']);
+    }
   }
 
   async gestionarPremio() {

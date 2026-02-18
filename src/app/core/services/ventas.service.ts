@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -8,6 +8,17 @@ import { environment } from '../../../environments/environment';
 })
 export class VentasService {
   private apiUrl = environment.apiUrl;
+  private ventasChanged$ = new Subject<void>();
+
+  /** Emitir cuando hay ventas/participaciones que requieren recargar pantallas */
+  notifyVentasChanged(): void {
+    this.ventasChanged$.next();
+  }
+
+  /** Observable para suscribirse y recargar participaciones e historial */
+  getVentasChanged(): Observable<void> {
+    return this.ventasChanged$.asObservable();
+  }
 
   constructor(private http: HttpClient) {}
 

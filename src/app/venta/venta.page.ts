@@ -154,27 +154,20 @@ export class VentaPage implements OnInit {
         console.log('Respuesta completa de getReserves:', res);
         if (res.success && res.reserves) {
           console.log('Reserves recibidas:', res.reserves);
-          // Filtrar reservas de la entidad y sorteo seleccionados
-          const reserve = res.reserves.find((r: any) => {
+          // Filtrar TODAS las reservas de la entidad y sorteo seleccionados (puede haber varias)
+          const matchingReserves = res.reserves.filter((r: any) => {
             const entityId = r.entity_id || r.entity?.id;
             const lotteryId = r.lottery_id || r.lottery?.id;
-            console.log('Comparando:', {
-              entityId,
-              selectedEntityId: this.selectedEntity.id,
-              lotteryId,
-              selectedLotteryId: this.selectedLottery.id,
-              match: entityId === this.selectedEntity.id && lotteryId === this.selectedLottery.id
-            });
             return entityId === this.selectedEntity.id && lotteryId === this.selectedLottery.id;
           });
-          
-          if (reserve) {
-            console.log('Reserva encontrada:', reserve);
-            this.reserveSeleccionado = reserve;
-            this.reserves = [reserve];
-            this.sets = reserve.sets || [];
+
+          if (matchingReserves.length > 0) {
+            this.reserves = matchingReserves;
+            this.reserveSeleccionado = matchingReserves[0];
+            // Combinar todos los sets de todas las reservas coincidentes para listarlos en el select
+            this.sets = matchingReserves.flatMap((r: any) => r.sets || []);
             console.log('Sets encontrados:', this.sets);
-            
+
             // Seleccionar automáticamente si hay sets disponibles
             if (this.sets.length > 0) {
               this.setSeleccionado = this.sets[0];
@@ -410,6 +403,7 @@ export class VentaPage implements OnInit {
         this.loading = false;
         if (res.success) {
           this.guardarVentaEnHistorial(res, desde, hasta);
+          this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {
