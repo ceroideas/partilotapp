@@ -28,8 +28,9 @@ export class VentaPage implements OnInit {
   showVentaView: boolean = false;
   tipoParticipacion: 'fisicas' | 'digitales' = 'fisicas';
   
-  // Datos para venta
+  // Datos para venta (allSets = todos los sets; sets = filtrados por tipo físico/digital)
   reserves: any[] = [];
+  allSets: any[] = [];
   sets: any[] = [];
   reserveSeleccionado: any = null;
   setSeleccionado: any = null;
@@ -52,6 +53,11 @@ export class VentaPage implements OnInit {
   
   // Modal de éxito
   mostrarModalExito: boolean = false;
+
+  // Modal email (para venta digital)
+  mostrarModalEmail: boolean = false;
+  emailCliente: string = '';
+  clienteEncontrado: { id: number; email: string } | null = null;
 
   loading = false;
 
@@ -164,17 +170,15 @@ export class VentaPage implements OnInit {
           if (matchingReserves.length > 0) {
             this.reserves = matchingReserves;
             this.reserveSeleccionado = matchingReserves[0];
-            // Combinar todos los sets de todas las reservas coincidentes para listarlos en el select
-            this.sets = matchingReserves.flatMap((r: any) => r.sets || []);
-            console.log('Sets encontrados:', this.sets);
+            // Combinar todos los sets de todas las reservas coincidentes
+            this.allSets = matchingReserves.flatMap((r: any) => r.sets || []);
+            this.applySetsFilter();
+            console.log('Sets encontrados:', this.allSets, 'filtrados:', this.sets);
 
-            // Seleccionar automáticamente si hay sets disponibles
             if (this.sets.length > 0) {
-              this.setSeleccionado = this.sets[0];
-              this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
               console.log('Set seleccionado automáticamente:', this.setSeleccionado);
             } else {
-              console.log('No hay sets disponibles en la reserva');
+              console.log('No hay sets del tipo seleccionado');
             }
           } else {
             console.log('No se encontró reserva, intentando con reserve_id');
@@ -185,11 +189,9 @@ export class VentaPage implements OnInit {
                 console.log('Reserva encontrada por ID:', reserveById);
                 this.reserveSeleccionado = reserveById;
                 this.reserves = [reserveById];
-                this.sets = reserveById.sets || [];
-                console.log('Sets encontrados por ID:', this.sets);
+                this.allSets = reserveById.sets || [];
+                this.applySetsFilter();
                 if (this.sets.length > 0) {
-                  this.setSeleccionado = this.sets[0];
-                  this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
                   console.log('Set seleccionado desde reserve_id:', this.setSeleccionado);
                 } else {
                   console.log('No hay sets disponibles en la reserva por ID');
@@ -265,33 +267,56 @@ export class VentaPage implements OnInit {
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
+    this.setSeleccionado = null;
+    this.applySetsFilter();
+  }
+
+  /** Filtra sets por tipo físico o digital según tipoParticipacion */
+  applySetsFilter() {
+    if (!this.allSets.length) {
+      this.sets = [];
+      return;
+    }
+    if (this.tipoParticipacion === 'fisicas') {
+      this.sets = this.allSets.filter((s: any) => {
+        const phys = Number(s.physical_participations ?? 0);
+        const dig = Number(s.digital_participations ?? 0);
+        return phys > 0 && dig === 0;
+      });
+    } else {
+      this.sets = this.allSets.filter((s: any) => {
+        const phys = Number(s.physical_participations ?? 0);
+        const dig = Number(s.digital_participations ?? 0);
+        return dig > 0 && phys === 0;
+      });
+    }
+    if (this.sets.length > 0) {
+      this.setSeleccionado = this.sets[0];
+      this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+      this.disponibilidad = Number(this.setSeleccionado.digital_participations ?? 0) || 120;
+    } else {
+      this.setSeleccionado = null;
+      this.disponibilidad = 0;
+    }
   }
 
   onReserveChange() {
-    console.log('onReserveChange llamado, reserve:', this.reserveSeleccionado);
     if (this.reserveSeleccionado?.sets) {
-      this.sets = this.reserveSeleccionado.sets;
-      console.log('Sets cargados desde reserva:', this.sets);
-      // Siempre seleccionar el primer set si hay sets disponibles
-      if (this.sets.length > 0) {
-        this.setSeleccionado = this.sets[0];
-        this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-        console.log('Set seleccionado:', this.setSeleccionado);
-      } else {
-        this.setSeleccionado = null;
-      }
+      this.allSets = this.reserveSeleccionado.sets;
+      this.applySetsFilter();
     } else {
+      this.allSets = [];
       this.sets = [];
       this.setSeleccionado = null;
-      console.log('No hay sets en la reserva seleccionada');
     }
   }
 
   onSetChange() {
-    console.log('onSetChange llamado, set:', this.setSeleccionado);
     if (this.setSeleccionado) {
       this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-      console.log('Precio actualizado:', this.precioPorParticipacion);
+      if (this.tipoParticipacion === 'digitales') {
+        this.disponibilidad = Number(this.setSeleccionado.digital_participations ?? 0) || 0;
+      }
     }
   }
 
@@ -312,21 +337,16 @@ export class VentaPage implements OnInit {
 
   puedeVender(): boolean {
     if (this.tipoParticipacion === 'fisicas') {
-      // Verificar que haya un set seleccionado
-      if (!this.setSeleccionado) {
-        return false;
-      }
-      // Verificar que haya participación unidad o rango completo
+      if (!this.setSeleccionado) return false;
       const participacionUnidadStr = String(this.participacionUnidad || '').trim();
       const rangoDesdeStr = String(this.rangoDesde || '').trim();
       const rangoHastaStr = String(this.rangoHasta || '').trim();
-      
       const tieneUnidad = participacionUnidadStr.length > 0;
       const tieneRango = rangoDesdeStr.length > 0 && rangoHastaStr.length > 0;
-      
       return tieneUnidad || tieneRango;
     }
-    return this.numeroParticipaciones > 0 && this.numeroParticipaciones <= this.disponibilidad;
+    // Digitales: set seleccionado + cantidad válida
+    return !!this.setSeleccionado && this.numeroParticipaciones > 0 && this.numeroParticipaciones <= this.disponibilidad;
   }
 
   calcularTotalParticipaciones(): number {
@@ -358,7 +378,48 @@ export class VentaPage implements OnInit {
     this.totalParticipaciones = this.calcularTotalParticipaciones();
     this.importeTotal = this.totalParticipaciones * this.precioPorParticipacion;
     this.formaPago = null;
-    this.mostrarModalResumen = true;
+    if (this.tipoParticipacion === 'digitales') {
+      this.emailCliente = '';
+      this.clienteEncontrado = null;
+      this.mostrarModalEmail = true;
+    } else {
+      this.mostrarModalResumen = true;
+    }
+  }
+
+  cerrarModalEmail() {
+    this.mostrarModalEmail = false;
+    this.emailCliente = '';
+    this.clienteEncontrado = null;
+  }
+
+  async verificarEmailYContinuar() {
+    const email = (this.emailCliente || '').trim().toLowerCase();
+    if (!email) {
+      await this.mostrarAlerta('Atención', 'Introduce el email del cliente.');
+      return;
+    }
+    this.loading = true;
+    this.ventasService.checkUserExists(email).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (res.exists && res.user_id) {
+          this.clienteEncontrado = { id: res.user_id, email };
+          this.mostrarModalEmail = false;
+          this.mostrarModalResumen = true;
+        } else {
+          this.mostrarAlerta(
+            'Usuario no registrado',
+            'El correo no está registrado en la aplicación. Por ahora solo puedes vender participaciones digitales a usuarios que ya tengan cuenta.'
+          );
+        }
+      },
+      error: async (err) => {
+        this.loading = false;
+        const msg = err?.error?.message || 'Error al verificar el email. Intenta de nuevo.';
+        await this.mostrarAlerta('Error', msg);
+      }
+    });
   }
 
   cerrarModalResumen() {
@@ -375,11 +436,45 @@ export class VentaPage implements OnInit {
       return;
     }
 
-    if (this.tipoParticipacion !== 'fisicas' || !this.setSeleccionado) {
-      await this.mostrarAlerta('Error', 'Selecciona un sorteo y set válidos.');
+    if (this.tipoParticipacion === 'digitales') {
+      if (!this.clienteEncontrado || !this.setSeleccionado) {
+        await this.mostrarAlerta('Error', 'Datos incompletos. Verifica el email y el set.');
+        return;
+      }
+      this.loading = true;
+      const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
+      this.ventasService.sellDigital(
+        this.setSeleccionado.id,
+        this.numeroParticipaciones,
+        this.clienteEncontrado.email,
+        paymentMethod
+      ).subscribe({
+        next: async (res: any) => {
+          this.loading = false;
+          if (res.success) {
+            this.guardarVentaDigitalEnHistorial(res);
+            this.ventasService.notifyVentasChanged();
+            this.cerrarModalResumen();
+            this.mostrarModalExito = true;
+            this.clienteEncontrado = null;
+          } else {
+            await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
+          }
+        },
+        error: async (err) => {
+          this.loading = false;
+          const msg = err?.error?.message || 'Error de conexión. Intenta de nuevo.';
+          await this.mostrarAlerta('Error', msg);
+        }
+      });
       return;
     }
 
+    // Físicas
+    if (!this.setSeleccionado) {
+      await this.mostrarAlerta('Error', 'Selecciona un set válido.');
+      return;
+    }
     let desde: number;
     let hasta: number;
     if (this.participacionUnidad) {
@@ -418,6 +513,31 @@ export class VentaPage implements OnInit {
     });
   }
 
+  guardarVentaDigitalEnHistorial(res: any): void {
+    const lottery = this.selectedLottery;
+    const entidad = this.selectedEntity?.name || '—';
+    const drawDate = lottery?.draw_date
+      ? new Date(lottery.draw_date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })
+      : '—';
+    const historial = JSON.parse(localStorage.getItem('historial') || '[]');
+    historial.unshift({
+      id: Date.now(),
+      tipo: 'venta-digital',
+      fecha: new Date().toISOString(),
+      formaPago: this.formaPago === 'omitir' ? null : this.formaPago,
+      descripcion: `Venta digital ${entidad}`,
+      participacion: {
+        entidad,
+        numero: `${this.numeroParticipaciones} dig.`,
+        fechaSorteo: drawDate,
+        importeJugado: this.precioPorParticipacion,
+        importeTotal: this.importeTotal,
+        clienteEmail: this.clienteEncontrado?.email,
+      }
+    });
+    localStorage.setItem('historial', JSON.stringify(historial));
+  }
+
   guardarVentaEnHistorial(res: any, desde: number, hasta: number): void {
     const lottery = this.selectedLottery;
     const entidad = this.selectedEntity?.name || '—';
@@ -451,12 +571,12 @@ export class VentaPage implements OnInit {
 
   cerrarModalExito() {
     this.mostrarModalExito = false;
-    // Limpiar formulario
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
     this.formaPago = null;
+    this.clienteEncontrado = null;
   }
 
   disminuirParticipaciones() {

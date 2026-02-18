@@ -244,7 +244,19 @@
 
       <!-- Participaciones Digitales -->
       <div class="participaciones-digitales" *ngIf="tipoParticipacion === 'digitales'">
-        <div class="numero-participaciones-section">
+        <!-- Selector de Set (solo digitales) -->
+        <div class="selector-section" *ngIf="sets.length > 0">
+          <ion-item class="input-item">
+            <ion-label position="stacked">Set</ion-label>
+            <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="setDigital" placeholder="Selecciona set">
+              <ion-select-option *ngFor="let s of sets" [value]="s">{{ s.set_name || 'Set' }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+        <div class="no-sets-message" *ngIf="sets.length === 0 && reserves.length > 0">
+          <ion-label class="input-label">No hay sets digitales disponibles para este sorteo</ion-label>
+        </div>
+        <div class="numero-participaciones-section" *ngIf="sets.length > 0">
           <h3 class="counter-title">Número de Participaciones</h3>
           <div class="counter-controls">
             <ion-button 
@@ -288,6 +300,34 @@
     </div>
   </div>
 </ion-content>
+
+<!-- Modal Email (para venta digital) -->
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalEmail" (click)="cerrarModalEmail()">
+  <div class="modal-container resumen-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <ion-icon name="mail-outline"></ion-icon>
+        <div>
+          <h2 class="modal-title">Email del cliente</h2>
+          <p class="modal-subtitle">Introduce el email de un usuario registrado</p>
+        </div>
+      </div>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalEmail()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="modal-content">
+      <ion-item class="input-item">
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input type="email" [(ngModel)]="emailCliente" placeholder="cliente@ejemplo.com"></ion-input>
+      </ion-item>
+      <p class="modal-note">Solo se puede vender a usuarios que ya estén registrados en la aplicación.</p>
+    </div>
+    <ion-button class="registrar-button" expand="block" (click)="verificarEmailYContinuar()">
+      Continuar
+    </ion-button>
+  </div>
+</div>
 
 <!-- Modal de Resumen (Bottom Sheet) -->
 <div class="modal-overlay bottom-sheet" *ngIf="mostrarModalResumen" (click)="cerrarModalResumen()">

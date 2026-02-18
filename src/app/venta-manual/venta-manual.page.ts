@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-venta-manual',
@@ -44,7 +45,8 @@ export class VentaManualPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private ventasService: VentasService
+    private ventasService: VentasService,
+    public authService: AuthService
   ) { }
 
   ngOnInit() {

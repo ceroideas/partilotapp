@@ -42,6 +42,24 @@ export class VentasService {
     return this.http.post(`${this.apiUrl}/sales/manual`, body);
   }
 
+  /**
+   * Verificar si un usuario existe por email (para venta digital)
+   */
+  checkUserExists(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/check-exists`, { email });
+  }
+
+  /**
+   * Vender participaciones digitales a un usuario existente
+   */
+  sellDigital(setId: number, quantity: number, buyerEmail: string, paymentMethod?: string | null): Observable<any> {
+    const body: any = { set_id: setId, quantity, buyer_email: buyerEmail };
+    if (paymentMethod) {
+      body.payment_method = paymentMethod;
+    }
+    return this.http.post(`${this.apiUrl}/sales/digital`, body);
+  }
+
   sellByQr(referencia: string, desde?: number, hasta?: number, paymentMethod?: string | null): Observable<any> {
     const body: any = { referencia };
     if (desde !== undefined && hasta !== undefined) {

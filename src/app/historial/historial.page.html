@@ -133,6 +133,7 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
@@ -142,6 +143,39 @@
           </div>
           <div class="vendedor-detail-ref-section">
             <span class="vendedor-detail-ref-text">N°: {{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
+          </div>
+        </div>
+
+        <!-- Detalle expandible: Participaciones digitales recibidas -->
+        <div *ngIf="estaExpandido(item) && item.tipo === 'venta_digital_recibida' && (item.participacion || item.participaciones?.length)" class="vendedor-item-detail">
+          <div class="vendedor-detail-content">
+            <div class="vendedor-detail-left">
+              <div class="vendedor-ticket-image-container">
+                <img 
+                  *ngIf="getParticipacionImageUrl(item.participacion || item.participaciones?.[0])" 
+                  [src]="getParticipacionImageUrl(item.participacion || item.participaciones?.[0])" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image"
+                  (error)="onImageError($event)">
+                <img 
+                  *ngIf="!getParticipacionImageUrl(item.participacion || item.participaciones?.[0])" 
+                  src="/assets/participacion.png" 
+                  alt="Ticket" 
+                  class="vendedor-ticket-image">
+              </div>
+              <div class="vendedor-detail-count" *ngIf="item.participaciones?.length > 1">
+                <span class="vendedor-label">{{ item.participaciones.length }} part.</span>
+              </div>
+            </div>
+            <div class="vendedor-detail-info">
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe por participación:</span><span class="vendedor-detail-value">€{{ ((item.participacion || item.participaciones?.[0])?.importeJugado ?? (item.participacion || item.participaciones?.[0])?.importeTotal) | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="getDonativoVentaDigitalRecibida(item) > 0"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ getDonativoVentaDigitalRecibida(item) | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row" *ngIf="item.participaciones?.length > 1"><span class="vendedor-detail-label">Total participaciones:</span><span class="vendedor-detail-value">{{ item.participaciones.length }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ getImporteTotalVentaDigitalRecibida(item) | number:'1.2-2' }}</span></div>
+            </div>
           </div>
         </div>
 
@@ -165,6 +199,7 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
@@ -197,6 +232,7 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
@@ -225,6 +261,7 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.emailRemitente || item.remitente"><span class="vendedor-detail-label">Enviado por:</span><span class="vendedor-detail-value">{{ item.emailRemitente || item.remitente }}</span></div>

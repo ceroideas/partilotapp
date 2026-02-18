@@ -85,11 +85,11 @@ export class HistorialPage implements OnInit, OnDestroy {
     }
   }
 
-  /** Para usuario: solo digitalizaciones, regalos, cobros y donaciones. Para vendedor/gestor: todo el historial. */
+  /** Para usuario: solo digitalizaciones, ventas digitales recibidas, regalos, cobros y donaciones. */
   get historialParaLista(): any[] {
     if (this.rolActual === 'usuario') {
       return this.historial.filter((i: any) =>
-        ['digitalizacion', 'regalo', 'recibido-regalo', 'cobro', 'donacion'].includes(i.tipo)
+        ['digitalizacion', 'venta_digital_recibida', 'regalo', 'recibido-regalo', 'cobro', 'donacion'].includes(i.tipo)
       );
     }
     return this.historial;
@@ -274,6 +274,7 @@ export class HistorialPage implements OnInit, OnDestroy {
     const iconos: { [key: string]: string } = {
       'venta': 'receipt-outline',
       'venta-digital': 'phone-portrait-outline',
+      'venta_digital_recibida': 'phone-portrait-outline',
       'digitalizacion': 'qr-code-outline',
       'regalo': 'arrow-down-outline',
       'recibido-regalo': 'gift-outline',
@@ -289,6 +290,7 @@ export class HistorialPage implements OnInit, OnDestroy {
     const titulos: { [key: string]: string } = {
       'venta': 'Venta',
       'venta-digital': 'Venta Digital',
+      'venta_digital_recibida': 'Participaciones digitales recibidas',
       'digitalizacion': 'Digitalización',
       'regalo': 'Envio Regalo',
       'recibido-regalo': 'Recibido Regalo',
@@ -304,6 +306,7 @@ export class HistorialPage implements OnInit, OnDestroy {
     const colores: { [key: string]: string } = {
       'venta': '#28a745',
       'venta-digital': '#0D6EFD',
+      'venta_digital_recibida': '#0D6EFD',
       'digitalizacion': '#0D6EFD',
       'regalo': '#F49200',
       'cobro': '#28a745',
@@ -312,6 +315,25 @@ export class HistorialPage implements OnInit, OnDestroy {
       'codigo-recarga': '#6c757d'
     };
     return colores[tipo] || '#6c757d';
+  }
+
+  /** Importe total para venta_digital_recibida (suma de importeTotal de cada participación, incluye donativo) */
+  getImporteTotalVentaDigitalRecibida(item: any): number {
+    if (!item || item.tipo !== 'venta_digital_recibida') return 0;
+    const parts = item.participaciones || (item.participacion ? [item.participacion] : []);
+    return parts.reduce((sum: number, p: any) => {
+      const total = parseFloat(p?.importeTotal);
+      const jugado = parseFloat(p?.importeJugado) || 0;
+      const donativo = parseFloat(p?.donativo) || 0;
+      return sum + (Number.isFinite(total) ? total : jugado + donativo);
+    }, 0);
+  }
+
+  /** Donativo por participación para venta_digital_recibida (solo 1 participación, no la suma) */
+  getDonativoVentaDigitalRecibida(item: any): number {
+    if (!item || item.tipo !== 'venta_digital_recibida') return 0;
+    const p = item.participacion || item.participaciones?.[0];
+    return parseFloat(p?.donativo) || 0;
   }
 
   /** Descripción para la lista: ej. "Participación CSIF-Rioja" */

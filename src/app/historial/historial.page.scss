@@ -549,6 +549,16 @@
   text-align: center;
 }
 
+.vendedor-detail-count {
+  text-align: center;
+
+  .vendedor-label {
+    font-size: 16px;
+    color: #6c757d;
+    font-weight: 500;
+  }
+}
+
 .vendedor-ticket-image {
   max-width: 80px;
   height: auto;
