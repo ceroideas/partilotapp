@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-gestor-home',
@@ -9,7 +10,10 @@ import { Router } from '@angular/router';
 })
 export class GestorHomePage implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    public authService: AuthService
+  ) { }
 
   ngOnInit() {
   }

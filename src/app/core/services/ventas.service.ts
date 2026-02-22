@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -8,6 +8,17 @@ import { environment } from '../../../environments/environment';
 })
 export class VentasService {
   private apiUrl = environment.apiUrl;
+  private ventasChanged$ = new Subject<void>();
+
+  /** Emitir cuando hay ventas/participaciones que requieren recargar pantallas */
+  notifyVentasChanged(): void {
+    this.ventasChanged$.next();
+  }
+
+  /** Observable para suscribirse y recargar participaciones e historial */
+  getVentasChanged(): Observable<void> {
+    return this.ventasChanged$.asObservable();
+  }
 
   constructor(private http: HttpClient) {}
 
@@ -29,6 +40,24 @@ export class VentasService {
       body.payment_method = paymentMethod;
     }
     return this.http.post(`${this.apiUrl}/sales/manual`, body);
+  }
+
+  /**
+   * Verificar si un usuario existe por email (para venta digital)
+   */
+  checkUserExists(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/check-exists`, { email });
+  }
+
+  /**
+   * Vender participaciones digitales a un usuario existente
+   */
+  sellDigital(setId: number, quantity: number, buyerEmail: string, paymentMethod?: string | null): Observable<any> {
+    const body: any = { set_id: setId, quantity, buyer_email: buyerEmail };
+    if (paymentMethod) {
+      body.payment_method = paymentMethod;
+    }
+    return this.http.post(`${this.apiUrl}/sales/digital`, body);
   }
 
   sellByQr(referencia: string, desde?: number, hasta?: number, paymentMethod?: string | null): Observable<any> {

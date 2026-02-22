@@ -17,7 +17,7 @@
   <div class="vendedor-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector">
+    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
       <ion-button 
         *ngIf="authService.canViewUsuario()"
         class="rol-button" 

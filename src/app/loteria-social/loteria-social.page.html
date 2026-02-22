@@ -19,9 +19,10 @@
 <ion-content [fullscreen]="true" class="loteria-social-content">
   <div class="loteria-social-container">
     
-    <!-- Selector de rol (Usuario/Vendedor/Gestor) -->
-    <div class="rol-selector">
+    <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
+    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
       <ion-button 
+        *ngIf="authService.canViewUsuario()"
         class="rol-button" 
         [class.active]="rolActual === 'usuario'"
         fill="clear"
@@ -31,6 +32,7 @@
         Usuario
       </ion-button>
       <ion-button 
+        *ngIf="authService.canViewVendedor()"
         class="rol-button" 
         [class.active]="rolActual === 'vendedor'"
         fill="clear"
@@ -40,6 +42,7 @@
         Vendedor
       </ion-button>
       <ion-button 
+        *ngIf="authService.canViewGestor()"
         class="rol-button" 
         [class.active]="rolActual === 'gestor'"
         fill="clear"
@@ -51,7 +54,7 @@
     </div>
 
     <!-- Card de Lotería Social -->
-    <div class="info-card figma-card">
+    <div class="info-card">
       <h2>Lotería Social</h2>
       <p>Selecciona con que entidad quieres colaborar</p>
     </div>

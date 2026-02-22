@@ -116,33 +116,235 @@
   min-height: 100%;
 }
 
-/* Venta individual vendedor (Tarea 2): set info */
-.venta-individual-vendedor .set-info {
-  background: #F5F6F7;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+/* Usuario: mismo diseño que digitalizar-participacion (al leer QR) */
+.usuario-digitalizar-style {
+  --background: #F5F6F7;
 
-  .info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+  .digitalizar-container {
+    padding: 16px;
+    padding-bottom: 32px;
+  }
 
-    &:last-child {
-      margin-bottom: 0;
-    }
+  .paso-block {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
-    .info-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #6c757d;
-    }
-
-    .info-value {
-      font-size: 14px;
-      font-weight: 600;
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
       color: #212529;
+      margin: 0 0 4px 0;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 20px 0;
+    }
+  }
+
+  .detalle-block {
+    .entidad-badge {
+      display: inline-block;
+      background: #E9ECEF;
+      color: #212529;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .ticket-image-wrap {
+      margin-bottom: 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #E9ECEF;
+
+      .ticket-image {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    }
+
+    .ticket-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #212529;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .detalle-box {
+      background: #F5F6F7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #E9ECEF;
+
+      .detalle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 8px 0;
+        font-size: 14px;
+
+        .detalle-label {
+          color: #6c757d;
+          font-weight: 500;
+        }
+
+        .detalle-value {
+          color: #212529;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .mensaje-ya-posees {
+      color: #F49200;
+      font-weight: 500;
+      text-align: center;
+      margin: 0 0 16px 0;
+    }
+
+    .btn-digitalizar {
+      --background: #F49200;
+      --color: #212529;
+      height: 56px;
+      font-weight: 600;
+      font-size: 18px;
+      text-transform: none;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn-block.outline {
+      --background: transparent;
+      --color: #212529;
+      --border-width: 1px;
+      --border-color: #E9ECEF;
+      height: 48px;
+      font-weight: 500;
+      text-transform: none;
+      border-radius: 12px;
+    }
+  }
+}
+
+/* Venta individual vendedor: mismo diseño que digitalizar-participacion */
+.venta-individual-vendedor.detalle-digitalizar-style {
+  --background: #F5F6F7;
+
+  .digitalizar-container {
+    padding: 16px;
+    padding-bottom: 32px;
+  }
+
+  .paso-block {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 20px 0;
+    }
+  }
+
+  .detalle-block {
+    .entidad-badge {
+      display: inline-block;
+      background: #E9ECEF;
+      color: #212529;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .ticket-image-wrap {
+      margin-bottom: 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #E9ECEF;
+
+      .ticket-image {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    }
+
+    .ticket-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #212529;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .detalle-box {
+      background: #F5F6F7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #E9ECEF;
+
+      .detalle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 8px 0;
+        font-size: 14px;
+
+        .detalle-label {
+          color: #6c757d;
+          font-weight: 500;
+        }
+
+        .detalle-value {
+          color: #212529;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .btn-digitalizar {
+      --background: #F49200;
+      --color: #212529;
+      height: 56px;
+      font-weight: 600;
+      font-size: 18px;
+      text-transform: none;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn-block.outline {
+      --background: transparent;
+      --color: #212529;
+      --border-width: 1px;
+      --border-color: #E9ECEF;
+      height: 48px;
+      font-weight: 500;
+      text-transform: none;
+      border-radius: 12px;
     }
   }
 }

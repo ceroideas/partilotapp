@@ -107,6 +107,7 @@
           <div class="participacion-right">
             <div class="participacion-meta">
               <div class="participacion-top-right">
+                <span class="sorteo" *ngIf="participacion.sorteo">Sorteo: {{ participacion.sorteo }}</span>
                 <span class="fecha">
                   <ion-icon name="calendar-outline"></ion-icon>
                   {{ participacion.fechaSorteo || '—' }}
@@ -137,6 +138,10 @@
         <!-- Detalle desplegable -->
         <div class="participacion-detalle" *ngIf="estaExpandida(participacion)">
           <div class="detalle-box">
+            <div class="detalle-row">
+              <span class="detalle-label">Sorteo:</span>
+              <span class="detalle-value">{{ participacion.sorteo || '—' }}</span>
+            </div>
             <div class="detalle-row">
               <span class="detalle-label">Fecha Sorteo:</span>
               <span class="detalle-value">{{ participacion.fechaSorteo || '—' }}</span>

@@ -102,43 +102,55 @@
     </div>
   </div>
 
-  <!-- Vista Venta individual (Modo Vendedor): QR participación → detalle y set → modal pago → vender -->
-  <div class="comprobacion-view venta-individual-vendedor" *ngIf="isVendedor && ventaPendienteVendedor && !ventaPendienteTaco && !mostrarModalResumen">
-    <div class="comprobacion-container">
-      <div class="comprobacion-header">
-        <div class="header-title-text">
-          <h2 class="comprobacion-title">Venta por QR</h2>
-          <p class="comprobacion-subtitle">Comprueba los datos y elige forma de pago</p>
+  <!-- Vista Venta individual (Modo Vendedor): mismo diseño que digitalizar-participacion -->
+  <div class="comprobacion-view venta-individual-vendedor detalle-digitalizar-style" *ngIf="isVendedor && ventaPendienteVendedor && !ventaPendienteTaco && !mostrarModalResumen">
+    <div class="digitalizar-container">
+      <div class="paso-block detalle-block">
+        <h2 class="section-title">Venta por QR</h2>
+        <p class="section-subtitle">Gestiona tus participaciones</p>
+
+        <div class="entidad-badge">{{ getEntidadVentaIndividual() }}</div>
+
+        <div class="ticket-image-wrap" *ngIf="getImagenVentaIndividual()">
+          <img [src]="getImagenVentaIndividual()" alt="Ticket" class="ticket-image">
         </div>
-        <ion-button fill="clear" class="close-button" (click)="cancelarVentaIndividual()">
-          <ion-icon name="close"></ion-icon>
+        <div class="ticket-number">{{ getNumeroVentaIndividual() }}</div>
+
+        <div class="detalle-box">
+          <div class="detalle-row">
+            <span class="detalle-label">Fecha Sorteo:</span>
+            <span class="detalle-value">{{ getFechaSorteoVentaIndividual() }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Importe Jugado:</span>
+            <span class="detalle-value">€{{ getImporteJugadoVentaIndividual() | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Donativo:</span>
+            <span class="detalle-value">€{{ getDonativoVentaIndividual() | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Importe total:</span>
+            <span class="detalle-value">€{{ getImporteTotalVentaIndividual() | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Nº:</span>
+            <span class="detalle-value">{{ getNumeroParticipacionVentaIndividual() }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Nº Referencia:</span>
+            <span class="detalle-value">{{ getReferenciaVentaIndividual() }}</span>
+          </div>
+        </div>
+
+        <ion-button
+          class="btn-digitalizar"
+          expand="block"
+          (click)="mostrarResumenVentaIndividual()">
+          Vender
         </ion-button>
-      </div>
-      <div class="set-info" *ngIf="ventaPendienteVendedor">
-        <div class="info-item">
-          <span class="info-label">Set:</span>
-          <span class="info-value">{{ ventaPendienteVendedor.infoSet.setName }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Sorteo:</span>
-          <span class="info-value">{{ ventaPendienteVendedor.infoSet.lotteryName }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Participación:</span>
-          <span class="info-value">{{ ventaPendienteVendedor.infoSet.participationNumber }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Importe:</span>
-          <span class="info-value">€{{ ventaPendienteVendedor.infoSet.importePorParticipacion | number:'1.2-2' }}</span>
-        </div>
-      </div>
-      <div class="actions-section">
-        <ion-button class="figma-button" expand="block" (click)="mostrarResumenVentaIndividual()">
-          <ion-icon name="card-outline" slot="start"></ion-icon>
-          Vender – Elegir forma de pago
-        </ion-button>
-        <ion-button fill="outline" expand="block" (click)="cancelarVentaIndividual()">
-          Cancelar
+        <ion-button class="btn-block outline" expand="block" (click)="cancelarVentaIndividual()">
+          Volver
         </ion-button>
       </div>
     </div>
@@ -197,101 +209,65 @@
     </div>
   </div>
 
-  <!-- Vista de comprobación/detalle después del escaneo (Modo Usuario) -->
-  <div class="comprobacion-view" *ngIf="!isVendedor && !modoEscaneo && ticketEscaneado">
-    <div class="comprobacion-container">
-      <!-- Header de comprobación -->
-      <div class="comprobacion-header">
-        <div class="header-title-group">
-          <div class="header-title-icon">
-            <ion-icon name="qr-code-outline" class="icon-qr"></ion-icon>
-            <ion-icon name="add-circle-outline" class="icon-plus"></ion-icon>
-          </div>
-          <div class="header-title-text">
-            <h2 class="comprobacion-title">Comprobación</h2>
-            <p class="comprobacion-subtitle">Comprueba tus participaciones y tus décimos</p>
-          </div>
+  <!-- Vista usuario: mismo diseño y flujo que digitalizar-participacion (al leer QR) -->
+  <div class="comprobacion-view usuario-digitalizar-style" *ngIf="!isVendedor && !modoEscaneo && ticketEscaneado">
+    <div class="digitalizar-container">
+      <div class="paso-block detalle-block">
+        <h2 class="section-title">Digitalizar Participación</h2>
+        <p class="section-subtitle">Gestiona tus participaciones</p>
+
+        <div class="entidad-badge">{{ ticketEscaneado.entidad || '—' }}</div>
+
+        <div class="ticket-image-wrap" *ngIf="imagenTicket">
+          <img [src]="imagenTicket" alt="Ticket" class="ticket-image">
         </div>
-        <ion-button fill="clear" class="close-button" (click)="volverAEscanear()">
-          <ion-icon name="close"></ion-icon>
-        </ion-button>
-      </div>
+        <div class="ticket-number">{{ ticketEscaneado.numero }}</div>
 
-      <!-- Entidad -->
-      <div class="entidad-badge" *ngIf="ticketEscaneado.entidad">
-        {{ ticketEscaneado.entidad }}
-      </div>
-
-      <!-- Imagen del ticket -->
-      <div class="ticket-image-container" *ngIf="imagenTicket">
-        <img [src]="imagenTicket" alt="Ticket" class="ticket-image">
-      </div>
-
-      <!-- Número del ticket -->
-      <div class="ticket-number">
-        <h2>{{ ticketEscaneado.numero }}</h2>
-      </div>
-
-      <!-- Detalles del ticket -->
-      <div class="ticket-details-card">
-        <div class="detail-row">
-          <span class="label">Fecha Sorteo:</span>
-          <span class="value destacado">{{ ticketEscaneado.fechaSorteo }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">Importe Jugado:</span>
-          <div class="value-group-premio">
-            <span class="value">€{{ ticketEscaneado.importeJugado | number:'1.2-2' }}</span>
-            <span class="premio-badge" 
-                  [class.con-premio]="ticketEscaneado.premio > 0"
-                  [class.sin-premio]="ticketEscaneado.premio === 0">
-              Premio €{{ ticketEscaneado.premio | number:'1.2-2' }}
-            </span>
+        <div class="detalle-box">
+          <div class="detalle-row">
+            <span class="detalle-label">Fecha Sorteo:</span>
+            <span class="detalle-value">{{ ticketEscaneado.fechaSorteo || '—' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Importe Jugado:</span>
+            <span class="detalle-value">€{{ (ticketEscaneado.importeJugado ?? 0) | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Donativo:</span>
+            <span class="detalle-value">€{{ (ticketEscaneado.donativo ?? 0) | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Importe total:</span>
+            <span class="detalle-value">€{{ (ticketEscaneado.importeTotal ?? 0) | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Nº:</span>
+            <span class="detalle-value">{{ ticketEscaneado.numeroParticipacion || '—' }}</span>
+          </div>
+          <div class="detalle-row">
+            <span class="detalle-label">Nº Referencia:</span>
+            <span class="detalle-value">{{ ticketEscaneado.numeroReferencia || '0000000000000000000' }}</span>
           </div>
         </div>
-        <div class="detail-row" *ngIf="ticketEscaneado.donativo">
-          <span class="label">Donativo:</span>
-          <span class="value">€{{ ticketEscaneado.donativo | number:'1.2-2' }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">Importe total:</span>
-          <span class="value">€{{ ticketEscaneado.importeTotal | number:'1.2-2' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="ticketEscaneado.numeroParticipacion">
-          <span class="label">N°:</span>
-          <span class="value">{{ ticketEscaneado.numeroParticipacion }} - N° Referencia: {{ ticketEscaneado.numeroReferencia || '0000000000000000000' }}</span>
-        </div>
-      </div>
 
-      <!-- Recordatorio para Lotería Nacional -->
-      <div class="recordatorio-card" *ngIf="ticketEscaneado.tipo === 'nacional' && ticketEscaneado.premio > 0">
-        <p class="recordatorio-title">Recuerda:</p>
-        <p class="recordatorio-text">
-          Los décimos premiados de los sorteos de Lotería Nacional pueden cobrarse en cualquier punto de venta autorizado del ámbito nacional. Dispones de un plazo de 3 meses desde la fecha del sorteo para realizar el cobro.
-        </p>
-      </div>
+        <p class="mensaje-ya-posees" *ngIf="status === 'already_mine'">Ya la posees en tu cartera.</p>
 
-      <!-- Mensaje de estado -->
-      <div class="status-message" *ngIf="status === 'already_mine'">
-        <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-        <p>Esta participación ya está en tu cartera.</p>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="actions-section">
-        <ion-button 
-          *ngIf="status === 'can_link' && (!ticketEscaneado.premio || ticketEscaneado.premio === 0)"
-          class="figma-button digitalizar-button" 
+        <ion-button
+          class="btn-digitalizar"
           expand="block"
+          *ngIf="status === 'can_link' && (!ticketEscaneado.premio || ticketEscaneado.premio === 0)"
           (click)="digitalizar()">
           Digitalizar
         </ion-button>
-        <ion-button 
-          *ngIf="status === 'can_link' && ticketEscaneado.premio && ticketEscaneado.premio > 0"
-          class="figma-button-accent gestionar-button" 
+        <ion-button
+          class="btn-digitalizar gestionar-button"
           expand="block"
+          *ngIf="status === 'can_link' && ticketEscaneado.premio && ticketEscaneado.premio > 0"
           (click)="gestionarPremio()">
           Gestionar Premio
+        </ion-button>
+        <ion-button class="btn-block outline" expand="block" (click)="volverAEscanear()">
+          Volver
         </ion-button>
       </div>
     </div>

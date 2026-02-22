@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-entidad-detalle',
@@ -19,7 +20,8 @@ export class EntidadDetallePage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    public authService: AuthService
   ) { }
 
   ngOnInit() {

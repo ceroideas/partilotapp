@@ -244,10 +244,14 @@
 
 .participacion-top-right {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  
+  .sorteo {
+    font-size: 12px;
+    color: #6c757d;
+  }
   
   .fecha {
     display: flex;

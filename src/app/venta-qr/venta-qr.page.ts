@@ -266,6 +266,7 @@ export class VentaQRPage implements OnInit {
           this.guardarVentaDigitalEnHistorial(res, referencia, paymentMethod);
           this.ventaPendienteUnidad = null;
           this.infoSet = null;
+          this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {
@@ -302,6 +303,7 @@ export class VentaQRPage implements OnInit {
           this.primeraReferencia = null;
           this.primeraParticipationNumber = null;
           this.primeraSetId = null;
+          this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
         } else {
