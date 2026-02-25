@@ -23,7 +23,8 @@
     <div class="user-info-card figma-card">
       <div class="avatar-container">
         <ion-avatar class="user-avatar">
-          <ion-icon name="person" size="large"></ion-icon>
+          <img *ngIf="usuarioImagenUrl" [src]="usuarioImagenUrl" [alt]="usuario.nombre" (error)="onUserImageError()" />
+          <ion-icon *ngIf="!usuarioImagenUrl" name="person" size="large"></ion-icon>
         </ion-avatar>
       </div>
       <h2 class="user-name">{{ usuario.nombre || 'Usuario' }}</h2>

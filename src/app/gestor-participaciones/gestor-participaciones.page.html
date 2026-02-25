@@ -25,9 +25,9 @@
 <ion-content [fullscreen]="true" class="participaciones-content">
   <div class="participaciones-page-container">
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
-        *ngIf="authService.canViewUsuario()"
+        *ngIf="authService.canCliente()"
         class="rol-button" 
         [class.active]="rolActual === 'usuario'"
         fill="clear"
@@ -37,7 +37,7 @@
         Usuario
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewVendedor()"
+        *ngIf="authService.canSeller()"
         class="rol-button" 
         [class.active]="rolActual === 'vendedor'"
         fill="clear"
@@ -47,7 +47,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         [class.active]="rolActual === 'gestor'"
         fill="clear"
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Vista 1: Selección de Entidades (si hay más de 1) -->
-    <div class="participaciones-container" *ngIf="isVendedor && showEntitySelection && !showTacosList && !showTacoDetail && !loading">
+    <div class="participaciones-container" *ngIf="(isVendedor || isGestor) && showEntitySelection && !showTacosList && !showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Entidades</h1>
       <p class="section-subtitle">Selecciona la entidad para la venta</p>
@@ -82,7 +82,7 @@
   </div>
 
   <!-- Vista 2: Lista de Tacos con Resumen -->
-  <div class="participaciones-container" *ngIf="isVendedor && showTacosList && !showTacoDetail && !loading">
+  <div class="participaciones-container" *ngIf="(isVendedor || isGestor) && showTacosList && !showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
@@ -143,7 +143,7 @@
 
     <!-- Lista de Tacos -->
     <div class="tacos-list" *ngIf="tacos.length > 0">
-      <div class="taco-card" *ngFor="let taco of tacos" (click)="viewTaco(taco)">
+      <div class="taco-card" *ngFor="let taco of tacos" (click)="openTaco(taco)">
         <div class="taco-header">
           <div class="taco-ticket-icon">
             <ion-icon name="ticket-outline"></ion-icon>
@@ -151,6 +151,9 @@
           <div class="taco-info">
             <div class="taco-title">Taco: {{ taco.set_number }}/{{ padNumber(taco.book_number, 3) }}</div>
             <div class="taco-subtitle">Particip.: {{ taco.participations_range }}</div>
+            <div class="taco-vendedor" *ngIf="isGestor && taco.seller_name">
+              Vendedor: {{ taco.seller_name }}
+            </div>
             <div class="taco-reservation" *ngIf="taco.reservation_numbers_display">Reserva: {{ taco.reservation_numbers_display }}</div>
             <div class="taco-lottery">Sorteo: {{ taco.lottery_name }} - Fecha: {{ formatDate(taco.lottery_date) }}</div>
           </div>
@@ -178,8 +181,8 @@
       </div>
     </div>
     
-    <!-- Mensaje cuando no hay tacos -->
-    <div class="empty-state" *ngIf="showTacosList && tacos.length === 0">
+    <!-- Mensaje cuando no hay tacos (vendedor o gestor) -->
+    <div class="empty-state" *ngIf="(isVendedor || isGestor) && showTacosList && tacos.length === 0">
       <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
       <h2>No hay participaciones</h2>
       <p>No tienes participaciones asignadas para esta entidad.</p>
@@ -187,7 +190,7 @@
   </div>
 
   <!-- Vista 3: Detalle de Participaciones del Taco -->
-  <div class="participaciones-container" *ngIf="isVendedor && showTacoDetail && !loading">
+  <div class="participaciones-container" *ngIf="(isVendedor || isGestor) && showTacoDetail && !loading">
     <div class="section-header">
       <h1 class="section-title">Participaciones</h1>
       <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
@@ -215,6 +218,9 @@
           <div class="taco-detail-title">N-{{ selectedTaco.set_number }}</div>
           <div class="taco-detail-price">Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</div>
           <div class="taco-detail-range">Taco: {{ selectedTaco.set_number }}/{{ padNumber(selectedTaco.book_number, 3) }} Particip.: {{ selectedTaco.participations_range }}</div>
+          <div class="taco-detail-vendedor" *ngIf="isGestor && selectedTaco.seller_name">
+            Vendedor: {{ selectedTaco.seller_name }}
+          </div>
           <div class="taco-detail-reservation" *ngIf="selectedTaco.reservation_numbers_display">Reserva: {{ selectedTaco.reservation_numbers_display }}</div>
           <div class="taco-detail-lottery">Sorteo: {{ selectedTaco.lottery_name }} - Fecha: {{ selectedTaco.lottery_date }}</div>
         </div>
@@ -278,12 +284,12 @@
     </div>
   </div>
 
-    <!-- Vista para Gestor (si no es vendedor) -->
-    <div class="participaciones-container" *ngIf="!isVendedor">
+    <!-- Vista cuando no es ni vendedor ni gestor -->
+    <div class="participaciones-container" *ngIf="!isVendedor && !isGestor">
       <div class="empty-state">
         <ion-icon name="ticket-outline" class="empty-icon"></ion-icon>
         <h2>Participaciones</h2>
-        <p>Esta vista estará disponible próximamente</p>
+        <p>No tienes acceso a esta sección.</p>
       </div>
     </div>
   </div>

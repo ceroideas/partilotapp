@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-perfil',
@@ -12,10 +13,11 @@ export class PerfilPage implements OnInit {
 
   usuario: any = {};
   esVendedor: boolean = false;
+  usuarioImagenUrl: string | null = null;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    public authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -23,18 +25,33 @@ export class PerfilPage implements OnInit {
     if (user) {
       this.usuario = {
         nombre: user.name || user.nombre || 'Usuario',
-        correo: user.email || user.correo || ''
+        correo: user.email || user.correo || '',
+        imagen: user.image || user.imagen || null
       };
+      this.usuarioImagenUrl = this.buildUserImageUrl(this.usuario.imagen);
     } else {
       const usuarioStr = localStorage.getItem('usuario');
       if (usuarioStr) {
         this.usuario = JSON.parse(usuarioStr);
+        this.usuarioImagenUrl = this.buildUserImageUrl(this.usuario?.imagen);
       }
     }
     
     this.esVendedor = this.authService.isSeller() || 
                       this.usuario?.tipo === 'vendedor' || 
                       this.usuario?.rol === 'vendedor';
+  }
+
+  private buildUserImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    const p = path.startsWith('/') ? path.slice(1) : path;
+    return p ? `${base}/${p}` : null;
+  }
+
+  onUserImageError() {
+    this.usuarioImagenUrl = null;
   }
 
   goToDigitalizarParticipacion() {

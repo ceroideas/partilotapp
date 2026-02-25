@@ -64,7 +64,7 @@ export class VentaPage implements OnInit {
   constructor(
     private router: Router,
     private ventasService: VentasService,
-    private authService: AuthService,
+    public authService: AuthService,
     private alertController: AlertController
   ) { }
 

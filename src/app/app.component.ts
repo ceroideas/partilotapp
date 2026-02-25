@@ -3,6 +3,9 @@ import { MenuController } from '@ionic/angular';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,11 +18,12 @@ export class AppComponent implements OnInit {
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
   userName: string = '';
   userEmail: string = '';
+  userImage: string | null = null;
 
   constructor(
     private menuController: MenuController,
     private router: Router,
-    private authService: AuthService
+    public authService: AuthService
   ) {
     // Detectar cambios de ruta
     this.router.events.pipe(
@@ -31,9 +35,24 @@ export class AppComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.detectarRol();
     this.actualizarUsuario();
+    await this.inicializarStatusBar();
+  }
+
+  /**
+   * Configura la barra de estado del dispositivo para que no se monte sobre el header.
+   * Solo se ejecuta en app nativa (Capacitor).
+   */
+  private async inicializarStatusBar(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      await StatusBar.setOverlaysWebView({ overlay: false });
+      await StatusBar.setStyle({ style: Style.Light });
+    } catch (e) {
+      console.warn('StatusBar no disponible:', e);
+    }
   }
 
   actualizarUsuario() {
@@ -41,7 +60,23 @@ export class AppComponent implements OnInit {
     if (user) {
       this.userName = user.name || '';
       this.userEmail = user.email || '';
+      this.userImage = this.getUserImageUrl(user.image);
+    } else {
+      this.userImage = null;
     }
+  }
+
+  /** URL de la imagen del usuario (desde API). Si no hay imagen, devuelve null. */
+  getUserImageUrl(imagePath: string | null | undefined): string | null {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    const path = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+    return path ? `${base}/${path}` : null;
+  }
+
+  onUserImageError() {
+    this.userImage = null;
   }
 
   logout(event: Event) {

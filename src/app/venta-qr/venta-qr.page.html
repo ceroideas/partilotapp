@@ -38,9 +38,9 @@
   <div *ngIf="!mostrandoScanner" class="venta-qr-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="canViewUsuario() || canViewVendedor() || canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
-        *ngIf="canViewUsuario()"
+        *ngIf="authService.canCliente()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('usuario')">
@@ -56,7 +56,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('gestor')">

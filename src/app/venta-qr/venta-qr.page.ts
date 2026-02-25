@@ -55,7 +55,7 @@ export class VentaQRPage implements OnInit {
     private alertController: AlertController,
     private ventasService: VentasService,
     private carteraService: CarteraService,
-    private authService: AuthService
+    public authService: AuthService
   ) { }
 
   canViewUsuario(): boolean { return this.authService.canViewUsuario(); }

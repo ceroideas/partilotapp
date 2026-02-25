@@ -266,6 +266,12 @@
   color: #6c757d;
 }
 
+.taco-vendedor {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
 .taco-stats {
   display: flex;
   flex-direction: column;
@@ -354,6 +360,12 @@
 .taco-detail-lottery {
   font-size: 12px;
   color: #6c757d;
+}
+
+.taco-detail-vendedor {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 4px;
 }
 
 .taco-detail-summary {

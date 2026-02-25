@@ -20,7 +20,7 @@
   <div class="loteria-social-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
         *ngIf="authService.canViewUsuario()"
         class="rol-button" 
@@ -32,7 +32,7 @@
         Usuario
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewVendedor()"
+        *ngIf="authService.canSeller()"
         class="rol-button" 
         [class.active]="rolActual === 'vendedor'"
         fill="clear"
@@ -42,7 +42,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         [class.active]="rolActual === 'gestor'"
         fill="clear"

@@ -20,9 +20,9 @@
   <div class="historial-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="canViewUsuario() || canViewVendedor() || canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
-        *ngIf="canViewUsuario()"
+        *ngIf="authService.canCliente()"
         class="rol-button" 
         [class.active]="rolActual === 'usuario'"
         fill="clear"
@@ -32,7 +32,7 @@
         Usuario
       </ion-button>
       <ion-button 
-        *ngIf="canViewVendedor()"
+        *ngIf="authService.canSeller()"
         class="rol-button" 
         [class.active]="rolActual === 'vendedor'"
         fill="clear"
@@ -42,7 +42,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         [class.active]="rolActual === 'gestor'"
         fill="clear"

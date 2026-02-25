@@ -20,9 +20,9 @@
   <div class="cartera-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
-        *ngIf="authService.canViewUsuario()"
+        *ngIf="authService.canCliente()"
         class="rol-button" 
         [class.active]="rolActual === 'usuario'"
         fill="clear"
@@ -42,7 +42,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         [class.active]="rolActual === 'gestor'"
         fill="clear"

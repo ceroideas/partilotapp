@@ -17,7 +17,7 @@ export class LoginPage {
   showPassword = false;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private alertController: AlertController

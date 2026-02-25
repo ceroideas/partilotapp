@@ -25,7 +25,7 @@ export class HistorialPage implements OnInit, OnDestroy {
     private router: Router,
     private ventasService: VentasService,
     private carteraService: CarteraService,
-    private authService: AuthService
+    public authService: AuthService
   ) { }
 
   ngOnInit() {

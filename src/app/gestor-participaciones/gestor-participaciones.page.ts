@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
 })
 export class GestorParticipacionesPage implements OnInit, OnDestroy {
   isVendedor: boolean = false;
+  isGestor: boolean = false;
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'vendedor';
   
   // Vista 1: Selección de entidades
@@ -45,19 +46,41 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.isVendedor = this.authService.isSeller();
     this.detectarRol();
-    if (this.isVendedor) {
-      this.loadEntities();
-    }
-    this.ventasChangedSub = this.ventasService.getVentasChanged().subscribe(() => this.recargarVistaActual());
+    // Carga solo en ionViewWillEnter para evitar doble carga (mensaje "no hay" duplicado)
+    this.ventasChangedSub = this.ventasService.getVentasChanged().subscribe(() => {
+      if (this.usaFlujoGestor) this.recargarVistaActualGestor();
+      else if (this.usaFlujoVendedor) this.recargarVistaActual();
+    });
   }
 
   ngOnDestroy() {
     this.ventasChangedSub?.unsubscribe();
   }
 
+  /** True si estamos en la pestaña de gestor (usa API managers/me). */
+  private get usaFlujoGestor(): boolean {
+    const ruta = window.location.pathname;
+    return ruta.includes('/gestor-tab') && this.authService.isManager();
+  }
+
+  /** True si estamos en la pestaña de vendedor (usa API sellers/me). */
+  private get usaFlujoVendedor(): boolean {
+    const ruta = window.location.pathname;
+    return ruta.includes('/vendedor-tab') && this.authService.isSeller();
+  }
+
+  /** Para la plantilla: true si estamos en pestaña gestor (mostrar nombre vendedor, etc.). */
+  get enPestanaGestor(): boolean {
+    return window.location.pathname.includes('/gestor-tab');
+  }
+
   ionViewWillEnter() {
     this.detectarRol();
-    if (this.isVendedor) {
+    this.isVendedor = this.authService.isSeller();
+    this.isGestor = this.authService.isManager();
+    if (this.usaFlujoGestor) {
+      this.recargarVistaActualGestor();
+    } else if (this.usaFlujoVendedor) {
       this.recargarVistaActual();
     }
   }
@@ -72,8 +95,24 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
       }
     } else if (this.showTacosList && this.selectedEntity) {
       this.loadTacos();
-    } else if (this.isVendedor) {
+    } else {
       this.loadEntities();
+    }
+  }
+
+  /** Recarga la vista actual para gestor (entidades, tacos con vendedor o detalle taco) */
+  private recargarVistaActualGestor() {
+    if (this.showTacoDetail && this.selectedTaco) {
+      const setId = this.selectedTaco.set_id ?? this.selectedTaco.setId;
+      const bookNumber = this.selectedTaco.book_number ?? this.selectedTaco.bookNumber;
+      const sellerId = this.selectedTaco.seller_id ?? this.selectedTaco.sellerId;
+      if (setId != null && bookNumber != null && sellerId != null) {
+        this.viewTacoGestor(setId, bookNumber, sellerId);
+      }
+    } else if (this.showTacosList && this.selectedEntity) {
+      this.loadTacosGestor();
+    } else {
+      this.loadEntitiesGestor();
     }
   }
 
@@ -126,6 +165,71 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     }
   }
 
+  loadEntitiesGestor() {
+    this.loading = true;
+    this.ventasService.getManagerEntities().subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (res.success && res.entities) {
+          this.entities = res.entities || [];
+          if (this.entities.length === 1) {
+            this.selectedEntity = this.entities[0];
+            this.loadTacosGestor();
+          } else if (this.entities.length > 1) {
+            this.showEntitySelection = true;
+          } else {
+            this.mostrarAlerta('Sin entidades', 'No tienes entidades asignadas como gestor.');
+          }
+        } else {
+          this.mostrarAlerta('Error', res.message || 'Error al cargar las entidades.');
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.mostrarAlerta('Error', err?.error?.message || 'Error al cargar las entidades.');
+      }
+    });
+  }
+
+  loadTacosGestor() {
+    if (!this.selectedEntity) return;
+    this.loading = true;
+    this.ventasService.getManagerTacos(this.selectedEntity.id).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (res.success) {
+          this.summary = res.summary;
+          this.tacos = res.tacos || [];
+          this.showTacosList = true;
+        } else {
+          this.mostrarAlerta('Error', res.message || 'Error al cargar los tacos.');
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.mostrarAlerta('Error', err?.error?.message || 'Error al cargar los tacos.');
+      }
+    });
+  }
+
+  viewTacoGestor(setId: number, bookNumber: number, sellerId: number) {
+    this.loading = true;
+    this.ventasService.getManagerTacoParticipations(setId, bookNumber, sellerId).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        if (res.success) {
+          this.selectedTaco = { ...res.taco_info, set_id: res.taco_info.set_id, book_number: res.taco_info.book_number };
+          this.tacoParticipations = res.participations;
+          this.showTacoDetail = true;
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.mostrarAlerta('Error', 'Error al cargar las participaciones.');
+      }
+    });
+  }
+
   async loadEntities() {
     this.loading = true;
     this.ventasService.getMyEntities().subscribe({
@@ -157,7 +261,11 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   selectEntity(entity: any) {
     this.selectedEntity = entity;
     this.showEntitySelection = false;
-    this.loadTacos();
+    if (this.isGestor) {
+      this.loadTacosGestor();
+    } else {
+      this.loadTacos();
+    }
   }
 
   async loadTacos() {
@@ -186,6 +294,18 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
         await this.mostrarAlerta('Error', errorMessage);
       }
     });
+  }
+
+  /** Abre el detalle de un taco: como vendedor o como gestor (con seller_id) */
+  openTaco(taco: any) {
+    if (this.isGestor && (taco.seller_id != null || taco.sellerId != null)) {
+      const setId = taco.set_id ?? taco.setId;
+      const bookNumber = taco.book_number ?? taco.bookNumber;
+      const sellerId = taco.seller_id ?? taco.sellerId;
+      this.viewTacoGestor(setId, bookNumber, sellerId);
+    } else {
+      this.viewTaco(taco);
+    }
   }
 
   async viewTaco(taco: any) {

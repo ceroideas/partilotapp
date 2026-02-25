@@ -19,7 +19,7 @@ export class TabsPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -67,29 +67,31 @@ export class TabsPage implements OnInit, OnDestroy {
   }
 
   detectarRol() {
-    // Si tiene seller guardado, puede ser tanto vendedor como usuario
-    // Si no tiene seller, solo puede ser usuario
-    const tieneSeller = this.authService.isSeller();
+    const canSeller = this.authService.canSeller();
+    const canManager = this.authService.canManager();
     const rolGuardado = localStorage.getItem('rolActual');
 
-    // Si hay un rol guardado, usarlo (permite que vendedores elijan modo usuario)
     if (rolGuardado) {
       this.rolActual = rolGuardado as 'usuario' | 'vendedor' | 'gestor';
-      // Si elige vendedor pero no tiene seller, forzar a usuario
-      if (this.rolActual === 'vendedor' && !tieneSeller) {
+      if (this.rolActual === 'vendedor' && !canSeller) {
         this.rolActual = 'usuario';
         localStorage.setItem('rolActual', 'usuario');
         localStorage.setItem('esVendedor', 'false');
+      } else if (this.rolActual === 'gestor' && !canManager) {
+        this.rolActual = canSeller ? 'vendedor' : 'usuario';
+        localStorage.setItem('rolActual', this.rolActual);
+        localStorage.setItem('esVendedor', canSeller ? 'true' : 'false');
       }
     } else {
-      // Si no hay rol guardado, determinar según tenga seller o no
-      if (tieneSeller) {
-        // Si tiene seller, por defecto puede ser vendedor, pero puede cambiar a usuario
+      if (canManager) {
+        this.rolActual = 'gestor';
+        localStorage.setItem('rolActual', 'gestor');
+        localStorage.setItem('esVendedor', 'false');
+      } else if (canSeller) {
         this.rolActual = 'vendedor';
         localStorage.setItem('rolActual', 'vendedor');
         localStorage.setItem('esVendedor', 'true');
       } else {
-        // Si no tiene seller, solo puede ser usuario
         this.rolActual = 'usuario';
         localStorage.setItem('rolActual', 'usuario');
         localStorage.setItem('esVendedor', 'false');
@@ -151,14 +153,14 @@ export class TabsPage implements OnInit, OnDestroy {
     return this.rolActual === 'gestor';
   }
 
-  /** Solo mostrar opción Vendedor si está asignado como vendedor. */
+  /** Solo mostrar opción Vendedor si está en tabla sellers. */
   puedeVerVendedor(): boolean {
-    return this.authService.canViewVendedor();
+    return this.authService.canSeller();
   }
 
-  /** Solo mostrar opción Gestor si es gestor. */
+  /** Solo mostrar opción Gestor si está en tabla managers. */
   puedeVerGestor(): boolean {
-    return this.authService.canViewGestor();
+    return this.authService.canManager();
   }
 
 }

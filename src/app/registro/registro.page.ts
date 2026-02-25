@@ -20,7 +20,7 @@ export class RegistroPage {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   togglePassword() {

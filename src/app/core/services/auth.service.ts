@@ -9,6 +9,7 @@ export interface LoginResponse {
   token?: string;
   user?: any;
   seller?: any;
+  manager?: any;
   message?: string;
 }
 
@@ -74,23 +75,23 @@ export class AuthService {
           if (response.user) {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
-          // Si el usuario es vendedor y tiene seller activo, guardarlo para permitir cambio de roles
           if (response.seller) {
             localStorage.setItem('seller', JSON.stringify(response.seller));
           } else {
             localStorage.removeItem('seller');
           }
-          
-          // Determinar el rol inicial según las capacidades del usuario
-          const user = response.user;
-          const isGestor = user?.role === 'entity' || user?.role === 'administration' || user?.role === 'super_admin';
-          const isVendedor = !!response.seller;
-          
-          // Establecer el rol inicial: gestor tiene prioridad, luego vendedor, luego usuario
-          if (isGestor) {
+          if (response.manager) {
+            localStorage.setItem('manager', JSON.stringify(response.manager));
+          } else {
+            localStorage.removeItem('manager');
+          }
+          // Rol inicial según tablas sellers/managers (no users.role): gestor > vendedor > usuario
+          const canManager = !!response.manager;
+          const canSeller = !!response.seller;
+          if (canManager) {
             localStorage.setItem('rolActual', 'gestor');
             localStorage.setItem('esVendedor', 'false');
-          } else if (isVendedor) {
+          } else if (canSeller) {
             localStorage.setItem('rolActual', 'vendedor');
             localStorage.setItem('esVendedor', 'true');
           } else {
@@ -121,6 +122,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('seller');
+    localStorage.removeItem('manager');
     localStorage.removeItem('rolActual');
     this.router.navigate(['/login']);
   }
@@ -133,25 +135,44 @@ export class AuthService {
     return !!localStorage.getItem('seller');
   }
 
-  /** Usuario es gestor (rol entity). */
-  isGestor(): boolean {
-    const user = this.getUser();
-    return user?.role === 'entity' || user?.role === 'administration' || user?.role === 'super_admin';
+  /** Usuario puede actuar como gestor (está en tabla managers). */
+  isManager(): boolean {
+    return !!localStorage.getItem('manager');
   }
 
-  /** Puede ver pestaña Usuario (todos los usuarios logueados). */
-  canViewUsuario(): boolean {
+  /** Alias: mismo que isManager (gestor = manager en la app). */
+  isGestor(): boolean {
+    return this.isManager();
+  }
+
+  /** Puede actuar como cliente (cualquier usuario logueado). */
+  canCliente(): boolean {
     return this.isLoggedIn();
   }
 
-  /** Puede ver pestaña Vendedor (solo si está asignado como vendedor). */
-  canViewVendedor(): boolean {
+  /** Puede actuar como vendedor (está en tabla sellers con estado activo). */
+  canSeller(): boolean {
     return this.isLoggedIn() && this.isSeller();
   }
 
-  /** Puede ver pestaña Gestor (solo si es gestor/entity/administration). */
+  /** Puede actuar como gestor (está en tabla managers). */
+  canManager(): boolean {
+    return this.isLoggedIn() && this.isManager();
+  }
+
+  /** Puede ver pestaña Usuario/Cliente (todos los usuarios logueados). */
+  canViewUsuario(): boolean {
+    return this.canCliente();
+  }
+
+  /** Puede ver pestaña Vendedor (solo si está en sellers). */
+  canViewVendedor(): boolean {
+    return this.canSeller();
+  }
+
+  /** Puede ver pestaña Gestor (solo si está en managers). */
   canViewGestor(): boolean {
-    return this.isLoggedIn() && this.isGestor();
+    return this.canManager();
   }
 
   getToken(): string | null {
@@ -168,6 +189,11 @@ export class AuthService {
     return seller ? JSON.parse(seller) : null;
   }
 
+  getManager(): any {
+    const manager = localStorage.getItem('manager');
+    return manager ? JSON.parse(manager) : null;
+  }
+
   refreshToken(): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/refresh`, {}).pipe(
       tap(response => {
@@ -178,6 +204,13 @@ export class AuthService {
           }
           if (response.seller) {
             localStorage.setItem('seller', JSON.stringify(response.seller));
+          } else {
+            localStorage.removeItem('seller');
+          }
+          if (response.manager) {
+            localStorage.setItem('manager', JSON.stringify(response.manager));
+          } else {
+            localStorage.removeItem('manager');
           }
         }
       })

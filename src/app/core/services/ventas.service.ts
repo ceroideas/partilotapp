@@ -88,6 +88,23 @@ export class VentasService {
     return this.http.get(`${this.apiUrl}/sellers/me/tacos/${setId}/${bookNumber}/participations`);
   }
 
+  /** Gestor: entidades que gestiona (tabla managers) */
+  getManagerEntities(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/entities`);
+  }
+
+  /** Gestor: tacos de una entidad (con seller_id y seller_name en cada taco) */
+  getManagerTacos(entityId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/tacos`, { params: { entity_id: entityId } });
+  }
+
+  /** Gestor: participaciones de un taco (set + book + seller) */
+  getManagerTacoParticipations(setId: number, bookNumber: number, sellerId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/tacos/${setId}/${bookNumber}/participations`, {
+      params: { seller_id: sellerId }
+    });
+  }
+
   /**
    * Resolver QR del taco (portada): devuelve rangos disponibles para el vendedor.
    * Solo vendedores. GET /api/sellers/me/taco-by-qr?taco_ref=...

@@ -61,7 +61,7 @@ export class EscanerPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private authService: AuthService,
+    public authService: AuthService,
     private ventasService: VentasService,
     private carteraService: CarteraService
   ) { }

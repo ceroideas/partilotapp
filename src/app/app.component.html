@@ -154,7 +154,8 @@
   <div class="user-info">
     <ion-item button [routerLink]="['/perfil']" routerDirection="root" (click)="cerrarMenu()">
       <ion-avatar slot="start">
-        <div class="avatar-placeholder">
+        <img *ngIf="userImage" [src]="userImage" alt="{{ userName }}" (error)="onUserImageError()" />
+        <div *ngIf="!userImage" class="avatar-placeholder">
           <ion-icon name="person-outline"></ion-icon>
         </div>
       </ion-avatar>

@@ -20,9 +20,9 @@
   <div class="venta-manual-container">
     
     <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-    <div class="rol-selector" *ngIf="authService.canViewUsuario() || authService.canViewVendedor() || authService.canViewGestor()">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
       <ion-button 
-        *ngIf="authService.canViewUsuario()"
+        *ngIf="authService.canCliente()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('usuario')">
@@ -38,7 +38,7 @@
         Vendedor
       </ion-button>
       <ion-button 
-        *ngIf="authService.canViewGestor()"
+        *ngIf="authService.canManager()"
         class="rol-button" 
         fill="clear"
         (click)="cambiarRol('gestor')">
