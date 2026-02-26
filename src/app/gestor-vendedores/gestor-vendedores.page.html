@@ -1,7 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button *ngIf="!showEntitySelection && selectedEntity && !showAddSellerScreen && !showSellerDetail"></ion-back-button>
+      <ion-button *ngIf="showSellersList && !showAddSellerScreen && !showSellerDetail && entities.length > 1" fill="clear" (click)="backToEntities()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="showAddSellerScreen" fill="clear" (click)="closeAddSellerScreen()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="showSellerDetail" fill="clear" (click)="backToSellerList()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title></ion-title>
     <div class="header-content">
@@ -11,18 +20,482 @@
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button menu="main-menu"></ion-menu-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="gestor-vendedores-content">
-  <div class="gestor-vendedores-container">
-    <div class="empty-state">
-      <ion-icon name="people-outline" class="empty-icon"></ion-icon>
-      <h2>Vendedores</h2>
-      <p>Esta vista estará disponible próximamente</p>
+  <div class="gestor-vendedores-page-container">
+    <!-- Selector de rol (Usuario / Vendedor / Gestor) como en diseños -->
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+      <ion-button
+        *ngIf="authService.canCliente()"
+        class="rol-button"
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canSeller()"
+        class="rol-button"
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canManager()"
+        class="rol-button"
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
+    <!-- Vista 1: Selector de entidades -->
+    <div class="vendedores-container" *ngIf="showEntitySelection && !showSellersList && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Entidades</h1>
+        <p class="section-subtitle">Selecciona la entidad para la venta</p>
+      </div>
+      <div class="entities-grid">
+        <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
+          <div class="entity-logo" *ngIf="entity.image">
+            <img [src]="getImageUrl(entity.image)" [alt]="entity.name">
+          </div>
+          <div class="entity-name">{{ entity.name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista: Añadir Vendedor (pantalla completa con dos tarjetas, captura 1) -->
+    <div class="add-seller-screen" *ngIf="showAddSellerScreen && showSellersList">
+      <div class="add-seller-header">
+        <span class="add-seller-title-icon">+</span>
+        <h1 class="add-seller-title">Añadir Vendedor</h1>
+      </div>
+      <p class="add-seller-subtitle">Nuevo Vendedor</p>
+      <div class="add-seller-cards">
+        <div class="add-seller-type-card" (click)="openPartilotFlow()">
+          <div class="add-seller-type-icon sipart">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="add-seller-type-label">Vendedor SIPART</span>
+        </div>
+        <div class="add-seller-type-card" (click)="openExternalForm()">
+          <div class="add-seller-type-icon externo">
+            <ion-icon name="person-add-outline"></ion-icon>
+          </div>
+          <span class="add-seller-type-label">Vendedor Externo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista 2: Listado de vendedores -->
+    <div class="vendedores-container" *ngIf="showSellersList && !showAddSellerScreen && !showSellerDetail && !loading">
+      <div class="section-header">
+        <div class="section-title-row">
+          <ion-icon name="bag-outline" class="section-title-icon"></ion-icon>
+          <h1 class="section-title">Vendedores</h1>
+        </div>
+        <p class="section-subtitle">Gestiona los vendedores.</p>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+
+      <div class="list-header">
+        <ion-button class="btn-add-seller" fill="solid" (click)="openAddSellerOptions()">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Añadir Vendedor
+        </ion-button>
+        <div class="filter-buttons">
+          <ion-button class="filter-btn" [class.active]="filterNombre.trim() !== ''" (click)="toggleFilterPanel('nombre')">
+            <ion-icon name="filter-outline" slot="start"></ion-icon>
+            <small>Nombre</small>
+          </ion-button>
+          <ion-button class="filter-btn" [class.active]="filterImporte !== 'todos'" (click)="toggleFilterPanel('importe')">
+            <ion-icon name="filter-outline" slot="start"></ion-icon>
+            <small>Importe</small>
+          </ion-button>
+          <ion-button class="filter-btn" [class.active]="filterGrupo !== ''" (click)="toggleFilterPanel('grupo')">
+            <ion-icon name="filter-outline" slot="start"></ion-icon>
+            <small>Grupo</small>
+            <ion-icon name="chevron-forward" slot="end" class="filter-arrow"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Panel de opciones del filtro activo -->
+      <div class="filter-panel" *ngIf="openFilterPanel === 'nombre'">
+        <ion-searchbar
+          [(ngModel)]="filterNombre"
+          placeholder="Buscar por nombre"
+          class="filter-panel-search"
+          [debounce]="200"></ion-searchbar>
+      </div>
+      <div class="filter-panel" *ngIf="openFilterPanel === 'importe'">
+        <span class="filter-chip" [class.active]="filterImporte === 'todos'" (click)="setFilterImporte('todos')">Todos</span>
+        <span class="filter-chip" [class.active]="filterImporte === 'con-saldo'" (click)="setFilterImporte('con-saldo')">Con saldo</span>
+        <span class="filter-chip" [class.active]="filterImporte === 'liquidado'" (click)="setFilterImporte('liquidado')">Liquidado</span>
+      </div>
+      <div class="filter-panel" *ngIf="openFilterPanel === 'grupo'">
+        <span class="filter-chip" [class.active]="filterGrupo === ''" (click)="setFilterGrupo('')">Todos</span>
+        <span class="filter-chip" *ngFor="let g of uniqueGroupNames" [class.active]="filterGrupo === g" (click)="setFilterGrupo(g)">{{ g }}</span>
+      </div>
+
+      <div class="sellers-list" *ngIf="filteredSellers.length > 0">
+        <div class="seller-card" *ngFor="let seller of filteredSellers" (click)="openSellerDetail(seller)">
+          <div class="seller-avatar" [class.no-image]="!seller.image">
+            <img *ngIf="seller.image" [src]="getUserImageUrl(seller.image)" [alt]="seller.name">
+            <ion-icon *ngIf="!seller.image" name="person-outline" class="placeholder-icon"></ion-icon>
+          </div>
+          <div class="seller-info">
+            <div class="seller-name">{{ seller.name || (seller.first_name + ' ' + (seller.last_name || '')).trim() || 'Sin nombre' }}</div>
+            <div class="seller-stats">
+              <span>Total participaciones: {{ seller.participations_count }}</span>
+            </div>
+            <div class="seller-badges">
+              <span *ngIf="(seller.group_name?.length) || seller.is_external">
+                <span class="badge badge-group" *ngFor="let group of (seller.group_name || [])">{{ group }}</span>
+                <span class="badge badge-ext" *ngIf="seller.is_external">Ext.</span>
+              </span>
+            </div>
+          </div>
+          <div class="seller-right">
+            <div class="seller-amount" *ngIf="seller.pending_amount > 0">{{ seller.pending_amount | number:'1.2-2' }}€</div>
+            <span class="badge badge-liquidado" *ngIf="seller.pending_amount === 0 && seller.participations_count > 0">Liquidado</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="showSellersList && filteredSellers.length === 0 && !loading">
+        <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+        <h2>{{ hasActiveFilters ? 'No hay resultados' : 'No hay vendedores' }}</h2>
+        <p>{{ hasActiveFilters ? 'Prueba a cambiar los filtros.' : 'Añade vendedores para esta entidad.' }}</p>
+        <ion-button *ngIf="!hasActiveFilters" fill="solid" (click)="openAddSellerOptions()">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Añadir Vendedor
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Vista: Detalle del vendedor -->
+    <div class="vendedores-container seller-detail-view" *ngIf="showSellerDetail && sellerDetail">
+      <div class="loading-section" *ngIf="loadingDetail">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando...</p>
+      </div>
+      <ng-container *ngIf="!loadingDetail">
+
+        <div class="seller-detail-container">
+          <div class="seller-detail-profile">
+            <div class="seller-detail-avatar" [class.no-image]="!sellerDetail.seller?.image">
+              <img *ngIf="sellerDetail.seller?.image" [src]="getUserImageUrl(sellerDetail.seller.image)" [alt]="sellerDetail.seller?.name">
+              <ion-icon *ngIf="!sellerDetail.seller?.image" name="person-outline" class="placeholder-icon"></ion-icon>
+            </div>
+            <div class="seller-detail-info">
+              <h2 class="seller-detail-name">{{ sellerDetail.seller?.name || 'Vendedor' }}</h2>
+              <p class="seller-detail-role">Vendedor.</p>
+            </div>
+            <div class="seller-detail-actions">
+              <ion-button fill="outline" size="small" class="btn-ver-mas" (click)="openVerMasSheet()">Ver más</ion-button>
+              <ion-button class="btn-asignar-particip" fill="solid">
+              <span class="btn-asignar-wrap">
+                <ion-icon name="add" class="btn-asignar-icon"></ion-icon>
+                <span class="btn-asignar-text"><span class="btn-asignar-line1">Asignar</span><span class="btn-asignar-line2">Particip.</span></span>
+              </span>
+            </ion-button>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <div class="detail-section-header">
+              <div class="detail-section-heading">
+                <ion-icon name="layers-outline" class="detail-section-icon"></ion-icon>
+                <div>
+                  <h3 class="detail-section-title">Participaciones</h3>
+                  <p class="detail-section-subtitle">Gestiona las participaciones.</p>
+                </div>
+              </div>
+              <span class="detail-section-date">02/09/25 - 16:45h</span>
+            </div>
+            <div class="detail-summary-box">
+              <p class="detail-summary-first">Total Participaciones: <strong>{{ sellerDetail.participations_summary?.total_participations ?? 0 }} ({{ (sellerDetail.participations_summary?.total_amount ?? 0) | number:'1.2-2' }}€)</strong></p>
+              <p>Ventas registradas: {{ sellerDetail.participations_summary?.sales_registered ?? 0 }} ({{ (sellerDetail.participations_summary?.sales_amount ?? 0) | number:'1.2-2' }}€)</p>
+              <p>Participaciones Devueltas: {{ sellerDetail.participations_summary?.returned_participations ?? 0 }} ({{ (sellerDetail.participations_summary?.returned_amount ?? 0) | number:'1.2-2' }}€)</p>
+              <p>Disponibles: {{ sellerDetail.participations_summary?.available_participations ?? 0 }} ({{ (sellerDetail.participations_summary?.available_amount ?? 0) | number:'1.2-2' }}€)</p>
+            </div>
+            <ion-button fill="solid" class="btn-devolver" [disabled]="(sellerDetail.participations_summary?.available_participations ?? 0) <= 0">Devolver</ion-button>
+          </div>
+
+          <div class="detail-section" style="margin-bottom: 0;">
+            <div class="detail-section-header">
+              <div class="detail-section-heading">
+                <ion-icon name="layers-outline" class="detail-section-icon"></ion-icon>
+                <div>
+                  <h3 class="detail-section-title">Liquidación</h3>
+                  <p class="detail-section-subtitle">Gestiona el dinero.</p>
+                </div>
+              </div>
+              <span class="detail-section-date">10/08/25 - 17:06h</span>
+            </div>
+            <div class="detail-summary-box">
+              <p>Total liquidación: <strong>{{ (sellerDetail.liquidation_summary?.total_to_liquidate ?? 0) | number:'1.2-2' }}€</strong></p>
+              <p>Pagos registrados: <strong>{{ (sellerDetail.liquidation_summary?.total_paid ?? 0) | number:'1.2-2' }}€</strong></p>
+              <p>Total a pagar: <strong>{{ (sellerDetail.liquidation_summary?.total_to_pay ?? 0) | number:'1.2-2' }}€</strong></p>
+            </div>
+            <ion-button fill="solid" class="btn-liquidar" [disabled]="(sellerDetail.liquidation_summary?.total_to_pay ?? 0) <= 0" (click)="openLiquidationModal()">Liquidar</ion-button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Sin entidades -->
+    <div class="vendedores-container" *ngIf="!loading && entities.length === 0 && !showEntitySelection">
+      <div class="empty-state">
+        <ion-icon name="business-outline" class="empty-icon"></ion-icon>
+        <h2>Sin entidades</h2>
+        <p>No tienes entidades asignadas como gestor.</p>
+      </div>
     </div>
   </div>
 </ion-content>
 
+<!-- Modal: Liquidación (mismo diseño Resumen que vendedor-tab1) -->
+<div class="modal-overlay bottom-sheet liquidation-resumen-overlay" *ngIf="showLiquidationModal" (click)="closeLiquidationModal()">
+  <div class="modal-container resumen-modal bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <div>
+          <h2 class="modal-title">Resumen</h2>
+          <p class="modal-subtitle">Comprueba los datos</p>
+        </div>
+      </div>
+      <ion-button fill="clear" class="close-button" (click)="closeLiquidationModal()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="modal-content">
+      <div class="resumen-info">
+        <div class="resumen-item">
+          <span class="resumen-label">Liquidación</span>
+          <span class="resumen-value importe-total">€{{ liquidationImporteTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+      <div class="forma-pago-section">
+        <h3 class="forma-pago-title">Forma de Pago</h3>
+        <p class="forma-pago-subtitle">Registra una forma de pago</p>
+        <div class="liquidacion-importes">
+          <div class="liquidacion-row">
+            <ion-icon name="cash-outline"></ion-icon>
+            <span>Pago en Efectivo</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="liquidationForm.efectivo"></ion-input>
+          </div>
+          <div class="liquidacion-row">
+            <ion-icon name="phone-portrait-outline"></ion-icon>
+            <span>Pago Por Bizum</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="liquidationForm.bizum"></ion-input>
+          </div>
+          <div class="liquidacion-row">
+            <ion-icon name="business-outline"></ion-icon>
+            <span>Pago Transferencia</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="liquidationForm.transferencia"></ion-input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ion-button class="registrar-button" expand="block" (click)="submitLiquidation()" [disabled]="savingSettlement">
+      {{ savingSettlement ? 'Procesando...' : 'Registrar' }}
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal: ¡Liquidación Registrada! -->
+<div class="modal-overlay modal-centered-overlay" *ngIf="showLiquidationSuccessModal" (click)="closeLiquidationSuccessModal()">
+  <div class="modal-centered-box modal-liquidacion-success" (click)="$event.stopPropagation()">
+    <h2 class="modal-liquidacion-success-title">¡Liquidación Registrada!</h2>
+    <p class="modal-liquidacion-success-text">La liquidación ha sido registrada con éxito. El usuario recibirá una notificación para comunicarle su nueva liquidación.</p>
+    <ion-button expand="block" color="warning" class="btn-modal-aceptar" (click)="closeLiquidationSuccessModal()">Aceptar</ion-button>
+  </div>
+</div>
+
+<!-- Action sheet: Ver más (datos del vendedor) -->
+<div class="modal-overlay bottom-sheet ver-mas-overlay" *ngIf="showVerMasSheet" (click)="closeVerMasSheet()">
+  <div class="ver-mas-sheet bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="ver-mas-handle"></div>
+    <div class="ver-mas-header">
+      <div class="ver-mas-header-left">
+        <ion-icon name="person-outline" class="ver-mas-header-icon"></ion-icon>
+        <div>
+          <h2 class="ver-mas-name">{{ sellerDetail?.seller?.name || 'Vendedor' }}</h2>
+          <p class="ver-mas-role">Vendedor</p>
+        </div>
+      </div>
+      <ion-button fill="clear" class="ver-mas-close" (click)="closeVerMasSheet()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="ver-mas-body">
+      <div class="ver-mas-photo-wrap">
+        <div class="ver-mas-photo" [class.no-image]="!sellerDetail?.seller?.image">
+          <img *ngIf="sellerDetail?.seller?.image" [src]="getUserImageUrl(sellerDetail?.seller?.image)" [alt]="sellerDetail?.seller?.name ?? ''">
+          <ion-icon *ngIf="!sellerDetail?.seller?.image" name="person-outline" class="ver-mas-photo-placeholder"></ion-icon>
+        </div>
+        <div class="ver-mas-actions-row">
+          <ion-button class="ver-mas-btn-particip" fill="solid" disabled>
+            <ion-icon name="layers-outline"></ion-icon>
+            Participaciones Asignadas
+          </ion-button>
+          <span *ngIf="sellerDetail?.seller?.group_name?.length">
+            <br>
+            <span class="ver-mas-grupo-badge" *ngFor="let group of sellerDetail?.seller?.group_name">{{ group }}</span>
+          </span>
+        </div>
+      </div>
+      <div class="ver-mas-fields">
+        <div class="ver-mas-field">
+          <ion-icon name="person-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.first_name || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="person-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.last_name || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="person-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.last_name2 || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="mail-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.email || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="call-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.phone || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.birthday || '—' }}</span>
+        </div>
+        <div class="ver-mas-field">
+          <ion-icon name="card-outline"></ion-icon>
+          <span class="ver-mas-field-value">{{ sellerDetail?.seller?.nif_cif || '—' }}</span>
+        </div>
+      </div>
+      <div class="ver-mas-buttons">
+        <ion-button class="ver-mas-btn-llamar" fill="solid" (click)="sellerLlamar()">
+          <ion-icon name="call"></ion-icon>
+          Llamar
+        </ion-button>
+        <ion-button class="ver-mas-btn-email" fill="solid" (click)="sellerEmail()">
+          <ion-icon name="mail"></ion-icon>
+          Email
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal centrado: ¡Buscar Usuario! (no action sheet) -->
+<div class="modal-overlay modal-centered-overlay" *ngIf="showSearchUserSheet" (click)="closeSearchUserSheet()">
+  <div class="modal-centered-box buscar-usuario-modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-centered-title">¡Buscar Usuario!</h2>
+    <div class="modal-email-input-wrap">
+      <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+      <ion-input
+        type="email"
+        [(ngModel)]="partilotEmail"
+        placeholder="email@example.com"
+        clearOnEdit="false"
+        class="modal-email-input"></ion-input>
+    </div>
+    <ion-button expand="block" class="btn-invitar-modal" (click)="invitePartilot()" [disabled]="!partilotEmail?.trim()">
+      Invitar
+    </ion-button>
+  </div>
+</div>
+
+<!-- Action sheet: Formulario Vendedor Externo -->
+<div class="modal-overlay action-sheet-overlay" *ngIf="showExternalFormSheet" (click)="closeExternalFormSheet()">
+  <div class="modal-container bottom-sheet-content action-sheet-container form-sheet" (click)="$event.stopPropagation()">
+    <div class="action-sheet-header">
+      <h2>Datos Vendedor (Externo)</h2>
+      <ion-button fill="clear" class="close-btn" (click)="closeExternalFormSheet()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <form (ngSubmit)="saveExternalSeller()">
+      <ion-item lines="full">
+        <ion-label position="stacked">Nombre</ion-label>
+        <ion-input [(ngModel)]="externalForm.name" name="name" type="text"></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Primer Apellido</ion-label>
+        <ion-input [(ngModel)]="externalForm.last_name" name="last_name" type="text"></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Segundo Apellido</ion-label>
+        <ion-input [(ngModel)]="externalForm.last_name2" name="last_name2" type="text"></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input [(ngModel)]="externalForm.email" name="email" type="email" required></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Teléfono</ion-label>
+        <ion-input [(ngModel)]="externalForm.phone" name="phone" type="tel"></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">Fecha de nacimiento</ion-label>
+        <ion-input [(ngModel)]="externalForm.birthday" name="birthday" type="date"></ion-input>
+      </ion-item>
+      <ion-item lines="full">
+        <ion-label position="stacked">NIF/NIE</ion-label>
+        <ion-input [(ngModel)]="externalForm.nif_cif" name="nif_cif" type="text"></ion-input>
+      </ion-item>
+      <ion-button type="submit" expand="block" class="submit-sheet-btn" [disabled]="savingExternal">
+        {{ savingExternal ? 'Guardando...' : 'Guardar' }}
+      </ion-button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: 1 coincidencia -->
+<div class="modal-overlay action-sheet-overlay" *ngIf="showMatchModal" (click)="closeMatchModal()">
+  <div class="modal-container bottom-sheet-content action-sheet-container small-modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">¡Hay 1 coincidencia!</h2>
+    <p class="modal-text">Se enviará una invitación a este usuario para unirse a la entidad.</p>
+    <div class="modal-actions">
+      <ion-button fill="outline" (click)="closeMatchModal()">Cancelar</ion-button>
+      <ion-button fill="solid" (click)="confirmMatchOne()" [disabled]="savingPartilot">Aceptar</ion-button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 0 coincidencias -->
+<div class="modal-overlay action-sheet-overlay" *ngIf="showNoMatchModal" (click)="closeNoMatchModal()">
+  <div class="modal-container bottom-sheet-content action-sheet-container small-modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">¡Hay 0 coincidencias!</h2>
+    <p class="modal-text">Se enviará una invitación por email al registrarse como vendedor.</p>
+    <div class="modal-actions">
+      <ion-button fill="outline" (click)="closeNoMatchModal()">Cancelar</ion-button>
+      <ion-button fill="solid" (click)="confirmMatchZero()" [disabled]="savingPartilot">Aceptar</ion-button>
+    </div>
+  </div>
+</div>

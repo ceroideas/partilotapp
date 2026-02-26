@@ -93,6 +93,28 @@ export class VentasService {
     return this.http.get(`${this.apiUrl}/managers/me/entities`);
   }
 
+  /** Gestor: vendedores de una entidad (listado con participaciones y monto por liquidar) */
+  getManagerEntitySellers(entityId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/entities/${entityId}/sellers`);
+  }
+
+  /** Gestor: detalle de un vendedor (participaciones + liquidación + lotteries_with_pending) */
+  getManagerSellerDetail(entityId: number, sellerId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/entities/${entityId}/sellers/${sellerId}/detail`);
+  }
+
+  /** Gestor: registrar liquidación de un vendedor (solo seller_settlements) */
+  storeManagerSettlement(
+    entityId: number,
+    sellerId: number,
+    data: { lottery_id: number; pagos: Array<{ payment_method: string; amount: number }> }
+  ): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/managers/me/entities/${entityId}/sellers/${sellerId}/settlement`,
+      data
+    );
+  }
+
   /** Gestor: tacos de una entidad (con seller_id y seller_name en cada taco) */
   getManagerTacos(entityId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/managers/me/tacos`, { params: { entity_id: entityId } });
@@ -103,6 +125,32 @@ export class VentasService {
     return this.http.get(`${this.apiUrl}/managers/me/tacos/${setId}/${bookNumber}/participations`, {
       params: { seller_id: sellerId }
     });
+  }
+
+  /** Gestor: comprobar si existe usuario por email (flujo Añadir Vendedor SIPART) */
+  checkManagerUserEmail(email: string): Observable<{ exists: boolean }> {
+    return this.http.post<{ exists: boolean }>(`${this.apiUrl}/managers/me/check-user-email`, { email });
+  }
+
+  /** Gestor: añadir vendedor PARTILOT (usuario existente) */
+  storeManagerExistingUser(entityId: number, email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/managers/me/store-existing-user`, { entity_id: entityId, email });
+  }
+
+  /** Gestor: invitar vendedor (0 coincidencias) */
+  storeManagerNewUser(entityId: number, email: string, name?: string, last_name?: string): Observable<any> {
+    const body: any = { entity_id: entityId, email };
+    if (name != null) body.name = name;
+    if (last_name != null) body.last_name = last_name;
+    return this.http.post(`${this.apiUrl}/managers/me/store-new-user`, body);
+  }
+
+  /** Gestor: crear vendedor externo (formulario completo) */
+  storeManagerExternalSeller(entityId: number, data: {
+    name?: string; last_name?: string; last_name2?: string;
+    email: string; phone?: string; birthday?: string; nif_cif?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/managers/me/store-external-seller`, { entity_id: entityId, ...data });
   }
 
   /**

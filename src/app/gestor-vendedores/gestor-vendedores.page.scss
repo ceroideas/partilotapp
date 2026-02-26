@@ -2,6 +2,41 @@
   --background: #F5F6F7;
 }
 
+.gestor-vendedores-page-container {
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 24px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 20px;
+    margin: 0;
+    height: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+
+    ion-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
 .header-content {
   display: flex;
   align-items: center;
@@ -9,38 +44,1265 @@
   width: 100%;
 }
 
-// Logo ahora es una imagen, estilos en global.scss
-
-.gestor-vendedores-container {
-  padding: 16px;
-  padding-bottom: 100px;
+.loading-section {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  justify-content: center;
+  padding: 32px;
+  color: #6c757d;
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.vendedores-container {
+  padding-bottom: 100px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+  position: relative;
+
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title-icon {
+    font-size: 26px;
+    color: #212529;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 4px 0;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+
+  .entity-logo-small {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.entity-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  .entity-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 8px;
+    border-radius: 12px;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .entity-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+  }
+}
+
+.entity-card:active {
+  transform: scale(0.98);
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+
+  .btn-add-seller {
+    --background: #212529;
+    --color: #fff;
+    text-transform: none;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .filter-btn {
+    --background: #fff;
+    --color: #212529;
+    --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    text-transform: none;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+    height: 38px;
+    --padding-start: 10px;
+    --padding-end: 10px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+
+    ion-icon:first-of-type {
+      font-size: 16px;
+      margin-right: 4px;
+    }
+
+    .filter-arrow {
+      font-size: 14px;
+      margin-left: 2px;
+      opacity: 0.7;
+    }
+
+    &.active {
+      --background: #e9ecef;
+      border-color: #adb5bd;
+    }
+  }
+}
+
+.filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eee;
+
+  .filter-panel-search {
+    flex: 1;
+    min-width: 180px;
+    padding: 0;
+    --background: #f8f9fa;
+    border-radius: 8px;
+  }
+}
+
+.filter-chip {
+  font-size: 12px;
+  color: #6c757d;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  user-select: none;
+
+  &.active {
+    background: #212529;
+    color: #fff;
+    border-color: #212529;
+  }
+}
+
+.sellers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seller-card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+}
+
+.seller-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder-icon {
+    font-size: 20px;
+    color: #6c757d;
+    margin: 0;
+  }
+
+  ion-icon.placeholder-icon {
+    width: auto;
+    height: auto;
+  }
+
+  &.no-image {
+    .placeholder-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.seller-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.seller-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.seller-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: #198754;
+}
+
+.seller-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.seller-stats {
+  font-size: 13px;
+  color: #6c757d;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seller-badges {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
+
+  &.badge-group {
+    background: #212529;
+    color: #fff;
+    margin-right: 4px;
+  }
+
+  &.badge-ext {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  &.badge-liquidado {
+    background: #dc3545;
+    color: #fff;
+  }
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0 0 16px 0;
+  }
+
+  ion-button {
+    --background: #F49200;
+    text-transform: none;
+  }
 }
 
-.empty-icon {
-  font-size: 80px;
-  color: #ccc;
-  margin-bottom: 24px;
+// Pantalla Añadir Vendedor (captura 1): vista completa con dos tarjetas
+.add-seller-screen {
+  padding: 16px;
+  padding-bottom: 100px;
+  min-height: 100%;
 }
 
-.empty-state h2 {
-  font-size: 24px;
+.add-seller-header {
+  margin-bottom: 4px;
+}
+
+.add-seller-title-icon {
+  font-size: 28px;
   font-weight: bold;
   color: #212529;
-  margin: 0 0 12px 0;
+  margin-right: 4px;
 }
 
-.empty-state p {
-  font-size: 16px;
-  color: #6c757d;
+.add-seller-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #212529;
   margin: 0;
+  display: inline;
 }
 
+.add-seller-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 24px 0;
+}
+
+.add-seller-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.add-seller-type-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.add-seller-type-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ion-icon {
+    font-size: 28px;
+    color: #212529;
+  }
+
+  &.sipart {
+    background: #e9ecef;
+  }
+
+  &.externo {
+    background: #e9ecef;
+  }
+}
+
+.add-seller-type-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #212529;
+}
+
+// Modal centrado (¡Buscar Usuario!) - no action sheet
+.modal-centered-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 24px;
+  box-sizing: border-box;
+  backdrop-filter: blur(4px);
+}
+
+.modal-centered-box {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-centered-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #212529;
+  margin: 0 0 20px 0;
+}
+
+.buscar-usuario-modal {
+  .modal-email-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0f0f0;
+    border-radius: 12px;
+    padding: 0 14px;
+    margin-bottom: 16px;
+  }
+
+  .input-icon {
+    font-size: 20px;
+    color: #6c757d;
+  }
+
+  .modal-email-input {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --padding-start: 0;
+    flex: 1;
+  }
+
+  .btn-invitar-modal {
+    --background: #e8a64a;
+    --color: #212529;
+    text-transform: none;
+    font-weight: 600;
+    --border-radius: 12px;
+  }
+}
+
+// Modal Liquidación: mismo diseño que vendedor-tab1 (Resumen bottom sheet)
+.liquidation-resumen-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+}
+
+.liquidation-resumen-overlay .modal-container {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUpBottomLiquidacion 0.3s ease-out;
+}
+
+@keyframes slideUpBottomLiquidacion {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.resumen-modal {
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      ion-icon {
+        font-size: 24px;
+        color: #212529;
+      }
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+
+    .modal-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+
+    .close-button {
+      --color: #212529;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 32px;
+      height: 32px;
+      --border-radius: 50%;
+      margin: 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+
+  .modal-content {
+    .resumen-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 20px;
+      margin-bottom: 24px;
+      background: transparent;
+
+      .resumen-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        .resumen-label {
+          font-size: 14px;
+          color: #6c757d;
+        }
+
+        .resumen-value {
+          font-size: 24px;
+          font-weight: bold;
+          color: #212529;
+
+          &.importe-total {
+            color: #28a745;
+          }
+        }
+      }
+    }
+
+    .forma-pago-section {
+      .forma-pago-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin: 0 0 4px 0;
+      }
+
+      .forma-pago-subtitle {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0 0 16px 0;
+      }
+
+      .liquidacion-importes {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .liquidacion-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        height: 56px;
+        --background: white;
+        --border-radius: 12px;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        background: white;
+
+        ion-icon {
+          font-size: 24px;
+          color: #212529;
+          flex-shrink: 0;
+        }
+
+        span {
+          flex: 1;
+          font-size: 15px;
+          font-weight: 500;
+          color: #212529;
+        }
+
+        ion-input {
+          width: 90px;
+          --padding-start: 10px;
+          --padding-end: 10px;
+          --background: #f8f9fa;
+          border-radius: 8px;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
+  .registrar-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+}
+
+// Modal ¡Liquidación Registrada!
+.modal-liquidacion-success {
+  max-width: 360px;
+  padding: 24px;
+  .modal-liquidacion-success-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 14px 0;
+  }
+  .modal-liquidacion-success-text {
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+  }
+  .btn-modal-aceptar {
+    --border-radius: 9999px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+}
+
+// Action sheets y modales: bordes superiores redondeados, por encima del menú inferior (z-index > 1001)
+.modal-overlay.action-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+  box-sizing: border-box;
+}
+
+.modal-container.bottom-sheet-content.action-sheet-container {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+  animation: slideUpSheet 0.3s ease-out;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.action-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+  }
+
+  .close-btn {
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.action-sheet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .option-btn {
+    text-transform: none;
+    font-weight: 500;
+    --border-radius: 12px;
+    height: 48px;
+    justify-content: flex-start;
+    --background: #f0f0f0;
+    --color: #212529;
+    ion-icon {
+      margin-right: 12px;
+    }
+  }
+}
+
+.sheet-input-item {
+  --padding-start: 0;
+  margin-bottom: 16px;
+  --border-radius: 12px;
+}
+
+.submit-sheet-btn {
+  --background: #F49200;
+  --color: #fff;
+  text-transform: none;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.form-sheet {
+  ion-item {
+    --padding-start: 0;
+    margin-bottom: 8px;
+  }
+  ion-label[position="stacked"] {
+    font-size: 12px;
+    color: #6c757d;
+  }
+}
+
+.small-modal {
+  .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0 0 12px 0;
+  }
+
+  .modal-text {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+}
+
+// Vista detalle vendedor (estilos según captura: tarjetas blancas, iconos, fechas, botones)
+.seller-detail-container {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.seller-detail-view {
+  .seller-detail-profile {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    // padding: 14px 16px;
+    // background: #f1f3f5;
+    // border-radius: 20px;
+    margin-bottom: 20px;
+    // box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    // border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .seller-detail-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    align-self: center;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &.no-image {
+      background: #212529;
+      .placeholder-icon {
+        font-size: 22px;
+        color: #fff;
+      }
+    }
+  }
+
+  .seller-detail-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .seller-detail-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+  }
+
+  .seller-detail-role {
+    font-size: 12px;
+    color: #495057;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .seller-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .btn-ver-mas {
+    --background: #fff;
+    --color: #212529;
+    --border-width: 1px;
+    --border-color: #dee2e6;
+    --border-radius: 9999px;
+    margin: 0;
+    font-size: 11px;
+    min-height: 28px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    font-weight: 500;
+  }
+
+  .btn-asignar-particip {
+    --background: #212529;
+    --color: #fff;
+    --border-radius: 16px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    margin: 0;
+    min-width: 72px;
+    min-height: 0;
+    align-self: stretch;
+    flex-shrink: 0;
+
+    .btn-asignar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-asignar-icon {
+      font-size: 22px;
+      color: #fff;
+    }
+
+    .btn-asignar-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.3;
+      text-align: center;
+
+      .btn-asignar-line1,
+      .btn-asignar-line2 {
+        display: block;
+      }
+    }
+  }
+
+  .detail-section {
+    margin-bottom: 24px;
+  }
+
+  .detail-section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .detail-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .detail-section-icon {
+    font-size: 22px;
+    color: #212529;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .detail-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 4px 0;
+  }
+
+  .detail-section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+
+  .detail-section-date {
+    font-size: 12px;
+    color: #6c757d;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .detail-summary-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+    // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    // border: 1px solid #e9ecef;
+
+    p {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #212529;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .detail-summary-first {
+      font-weight: 600;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+  }
+
+  .btn-devolver {
+    --background: #495057;
+    --color: #fff;
+    --border-radius: 9999px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    --padding-start: 20px;
+    --padding-end: 20px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 4px;
+
+    &[disabled] {
+      opacity: 0.6;
+      --background: #dee2e6;
+      --color: #6c757d;
+    }
+  }
+
+  .btn-liquidar {
+    --background: #F49200;
+    --color: #fff;
+    --border-radius: 9999px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    --padding-start: 20px;
+    --padding-end: 20px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 4px;
+
+    &[disabled] {
+      opacity: 0.6;
+      --background: #dee2e6;
+      --color: #6c757d;
+    }
+  }
+}
+
+// Action sheet: Ver más (datos del vendedor)
+.ver-mas-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(4px);
+}
+
+.ver-mas-sheet {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 16px 20px 28px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUpBottomLiquidacion 0.3s ease-out;
+}
+
+.ver-mas-handle {
+  width: 40px;
+  height: 4px;
+  background: #dee2e6;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.ver-mas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  .ver-mas-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .ver-mas-header-icon {
+      font-size: 22px;
+      color: #212529;
+    }
+
+    .ver-mas-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #212529;
+      margin: 0 0 2px 0;
+    }
+
+    .ver-mas-role {
+      font-size: 13px;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+
+  .ver-mas-close {
+    --padding-start: 0;
+    --padding-end: 0;
+    --color: #212529;
+    margin: 0;
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.ver-mas-body {
+  .ver-mas-photo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .ver-mas-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &.no-image {
+      background: #495057;
+
+      .ver-mas-photo-placeholder {
+        font-size: 56px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+
+  .ver-mas-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .ver-mas-btn-particip {
+    --background: #F49200;
+    --color: #fff;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    height: 44px;
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0;
+
+    ion-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .ver-mas-grupo-badge {
+    color: #e9ecef;
+    background: #495057;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    margin: 4px;
+  }
+
+  .ver-mas-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .ver-mas-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    // background: #f1f3f5;
+    border-radius: 12px;
+    padding: 12px 14px;
+    min-height: 48px;
+
+    ion-icon {
+      font-size: 20px;
+      color: #6c757d;
+      flex-shrink: 0;
+    }
+
+    .ver-mas-field-value {
+      font-size: 15px;
+      color: #212529;
+    }
+  }
+
+  .ver-mas-buttons {
+    display: flex;
+    gap: 12px;
+
+    ion-button {
+      flex: 1;
+      --border-radius: 9999px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      min-height: 48px;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 0;
+
+      ion-icon {
+        margin-right: 8px;
+      }
+    }
+
+    .ver-mas-btn-llamar {
+      --background: #F49200;
+      --color: #fff;
+    }
+
+    .ver-mas-btn-email {
+      --background: #212529;
+      --color: #fff;
+    }
+  }
+}
