@@ -7,17 +7,17 @@
   gap: 8px;
   margin-bottom: 24px;
   background: white;
-  border-radius: 28px;
-  padding: 5px;
+  border-radius: 24px;
+  padding: 4px;
 
   .rol-button {
     flex: 1;
     --color: #6c757d;
-    --border-radius: 24px;
+    --border-radius: 20px;
     margin: 0;
-    height: 44px;
+    height: 40px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: none;
 
     &.active {
@@ -95,8 +95,8 @@
   }
 
   .section-title {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: bold;
     color: #212529;
     margin: 0 0 4px 0;
   }
@@ -133,7 +133,9 @@
 
     .section-title {
       font-size: 24px;
-      font-weight: 800;
+      font-weight: bold;
+      color: #212529;
+      margin: 0 0 4px 0;
     }
 
     .section-subtitle {

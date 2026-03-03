@@ -26,8 +26,8 @@
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
-      <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
     </ion-buttons>
+    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Paso: Entrada -->
-    <div class="view-section card-block" *ngIf="step === 'entrada' && !loading">
+    <div class="view-section" *ngIf="step === 'entrada' && !loading">
       <div class="section-header">
         <h1 class="section-title">Pago</h1>
         <p class="section-subtitle">Gestiona el pago de participaciones</p>
