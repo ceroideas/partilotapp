@@ -104,16 +104,59 @@ body {
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Botones según diseño Figma */
+/* Botones: estilo unificado en toda la app (más anchos, bordes muy redondeados / pill) */
+ion-button {
+  --border-radius: 9999px;
+  font-weight: 600;
+  text-transform: none;
+  min-height: 48px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+}
+
+/* Botones expand="block": ocupar todo el ancho disponible */
+ion-button[expand="block"] {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: 100%;
+}
+
+/* Botones solo icono en toolbars: mantener compactos */
+ion-toolbar ion-button,
+ion-buttons ion-button {
+  min-height: 44px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --border-radius: 12px;
+}
+
+/* Selector de rol (Usuario / Vendedor / Gestor): estilo original para que no se salga del contenedor */
+.rol-selector ion-button,
+.rol-selector .rol-button {
+  min-height: 44px;
+  height: 44px;
+  --border-radius: 24px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  flex: 1;
+  margin: 0;
+}
+
+/* Clases legacy / diseño Figma (siguen aplicando pill) */
 .figma-button {
   --background: #212529;
   --color: #ffffff;
-  --border-radius: 28px;
+  --border-radius: 9999px;
   --padding-top: 16px;
   --padding-bottom: 16px;
   --padding-start: 24px;
   --padding-end: 24px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: none;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
 }
@@ -121,8 +164,8 @@ body {
 .figma-button-accent {
   --background: #F49200;
   --color: #ffffff;
-  --border-radius: 28px;
-  font-weight: 500;
+  --border-radius: 9999px;
+  font-weight: 600;
   text-transform: none;
 }
 
@@ -222,5 +265,50 @@ ion-title {
   display: block;
   margin: 0 auto;
   pointer-events: auto;
+}
+
+/* Modal éxito pago: pequeño, blanco, centrado, backdrop oscuro */
+ion-modal.modal-exito-pago {
+  --width: 90%;
+  --max-width: 340px;
+  --height: auto;
+  --border-radius: 20px;
+  --backdrop-opacity: 0.8;
+  --box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+ion-modal.modal-exito-pago app-modal-exito-pago,
+ion-modal.modal-exito-pago .ion-page {
+  background: #fff;
+  border-radius: 20px;
+}
+
+/* Contenido del modal (global para que siempre se vea dentro del overlay) */
+ion-modal.modal-exito-pago .modal-exito-pago-content {
+  padding: 28px 24px;
+  text-align: center;
+  background: #fff;
+}
+ion-modal.modal-exito-pago .modal-exito-titulo {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #212529;
+  text-align: center;
+}
+ion-modal.modal-exito-pago .modal-exito-texto {
+  margin: 0 0 28px 0;
+  color: #212529;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  font-weight: 400;
+}
+ion-modal.modal-exito-pago .btn-aceptar-modal {
+  --background: #e78307;
+  --color: #ffffff;
+  --border-radius: 9999px;
+  font-weight: 600;
+  margin: 0;
+  min-height: 48px;
 }
 

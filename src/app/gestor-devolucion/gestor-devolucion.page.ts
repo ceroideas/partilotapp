@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DevolutionsService } from '../core/services/devolutions.service';
 import { AuthService } from '../core/services/auth.service';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
+import { DevolucionPreselectService } from '../core/services/devolucion-preselect.service';
 import { environment } from '../../environments/environment';
 
 type Step = 'entidades' | 'sorteos' | 'vendedores' | 'participaciones' | 'resumen' | 'liquidacion';
@@ -52,7 +53,8 @@ export class GestorDevolucionPage implements OnInit {
     private router: Router,
     private devolutionsService: DevolutionsService,
     public authService: AuthService,
-    private alertController: AlertController
+    private alertModal: AlertModalService,
+    private devolucionPreselect: DevolucionPreselectService
   ) {}
 
   ngOnInit() {
@@ -61,9 +63,51 @@ export class GestorDevolucionPage implements OnInit {
 
   ionViewWillEnter() {
     this.detectarRol();
+    const preselect = this.devolucionPreselect.getAndClear();
+    if (preselect?.entity && preselect?.sellerId != null) {
+      this.applyPreselectionFromDetail(preselect.entity, preselect.sellerId);
+      return;
+    }
     if (this.step === 'entidades') {
       this.loadEntities();
     }
+  }
+
+  /**
+   * Llegada desde detalle del vendedor (Devolver): entidad y vendedor ya elegidos.
+   * Lleva al paso Sorteos para que el usuario solo elija el sorteo.
+   */
+  private applyPreselectionFromDetail(entity: any, sellerId: number) {
+    this.selectedEntity = entity;
+    this.entities = [entity];
+    this.loading = true;
+    this.errorMessage = '';
+    this.devolutionsService.getSellersByEntity(entity.id).subscribe({
+      next: (res) => {
+        if (res.success && res.sellers) {
+          this.sellers = res.sellers;
+          this.selectedSeller = res.sellers.find((s: any) => s.id === sellerId) || null;
+          this.devolutionsService.getLotteriesByEntity(entity.id).subscribe({
+            next: (lotRes) => {
+              this.loading = false;
+              if (lotRes.success && lotRes.lotteries) this.lotteries = lotRes.lotteries;
+              this.step = 'sorteos';
+            },
+            error: () => {
+              this.loading = false;
+              this.step = 'sorteos';
+            }
+          });
+        } else {
+          this.loading = false;
+          this.errorMessage = 'Error al cargar vendedores.';
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Error al cargar vendedores.';
+      }
+    });
   }
 
   detectarRol() {
@@ -125,8 +169,8 @@ export class GestorDevolucionPage implements OnInit {
 
   selectEntity(entity: any) {
     this.selectedEntity = entity;
-    this.loadSorteos();
-    this.step = 'sorteos';
+    this.loadSellers();
+    this.step = 'vendedores';
   }
 
   loadSorteos() {
@@ -155,35 +199,43 @@ export class GestorDevolucionPage implements OnInit {
   selectSorteo(lottery: any) {
     this.selectedLottery = lottery;
     this.loadSets();
-    this.loadSellers();
-    this.step = 'vendedores';
+    this.step = 'participaciones';
   }
 
   loadSellers() {
     if (!this.selectedEntity) return;
+    this.loading = true;
+    this.errorMessage = '';
     this.devolutionsService.getSellersByEntity(this.selectedEntity.id).subscribe({
       next: (res) => {
+        this.loading = false;
         if (res.success && res.sellers) {
           this.sellers = res.sellers;
           if (this.sellers.length === 1) {
             this.selectSeller(this.sellers[0]);
           } else if (this.sellers.length === 0) {
             this.selectedSeller = null;
-            this.step = 'participaciones';
+            this.loadSorteos();
+            this.step = 'sorteos';
           }
+        } else {
+          this.errorMessage = 'Error al cargar vendedores.';
         }
       },
       error: () => {
+        this.loading = false;
         this.sellers = [];
         this.selectedSeller = null;
-        this.step = 'participaciones';
+        this.loadSorteos();
+        this.step = 'sorteos';
       }
     });
   }
 
   selectSeller(seller: any) {
     this.selectedSeller = seller;
-    this.step = 'participaciones';
+    this.loadSorteos();
+    this.step = 'sorteos';
   }
 
   loadSets() {
@@ -524,17 +576,17 @@ export class GestorDevolucionPage implements OnInit {
   backToSorteos() {
     this.step = 'sorteos';
     this.selectedLottery = null;
-    this.selectedSeller = null;
-    this.sellers = [];
     this.sets = [];
     this.selectedSet = null;
     this.participacionesAsignadas = [];
-    this.loadSorteos();
+    this.summary = null;
   }
 
   backToVendedores() {
     this.step = 'vendedores';
-    this.selectedSeller = null;
+    this.selectedLottery = null;
+    this.sets = [];
+    this.selectedSet = null;
     this.participacionesAsignadas = [];
     this.summary = null;
   }
@@ -552,17 +604,30 @@ export class GestorDevolucionPage implements OnInit {
     if (!imagePath) return '';
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    return `${base}/uploads/${imagePath}`;
+    const normalized = imagePath.replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
+  }
+
+  /** Imagen del vendedor/usuario (storage), igual que en gestor-vendedores */
+  getUserImageUrl(imagePath: string | null | undefined): string {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    const base = environment.apiUrl.replace(/\/api\/?$/, '');
+    const normalized = imagePath.replace(/^storage\/?/, '');
+    return `${base}/storage/${normalized}`;
+  }
+
+  /** Path de imagen del vendedor (API devuelve seller.image o seller.user?.image) */
+  getSellerImage(seller: any): string | null | undefined {
+    return seller?.image ?? seller?.user?.image ?? null;
+  }
+
+  onLotteryImageError(lot: any) {
+    if (lot) lot.image = null;
   }
 
   async mostrarAlerta(header: string, message: string) {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK']
-    });
-    await alert.present();
-    return alert;
+    await this.alertModal.show(header, message);
   }
 
   /** QR para participación unidad: escanea y añade esa participación a la lista */

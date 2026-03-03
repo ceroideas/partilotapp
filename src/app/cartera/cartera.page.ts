@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
 import { environment } from '../../environments/environment';
 import { Subscription } from 'rxjs';
 
@@ -29,7 +29,7 @@ export class CarteraPage implements OnInit, OnDestroy {
     private router: Router,
     private carteraService: CarteraService,
     public authService: AuthService,
-    private alertController: AlertController
+    private alertModal: AlertModalService
   ) { }
 
   ngOnInit() {
@@ -119,8 +119,8 @@ export class CarteraPage implements OnInit, OnDestroy {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    if (path.startsWith('storage/')) return `${base}/${path}`;
-    return `${base}/storage/${path}`;
+    const normalized = path.replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
   }
 
   agregarParticipacion() {
@@ -184,8 +184,7 @@ export class CarteraPage implements OnInit, OnDestroy {
       },
       error: async (err) => {
         const msg = err.error?.message || 'No se pudo enviar el regalo.';
-        const alert = await this.alertController.create({ header: 'Error', message: msg, buttons: ['OK'] });
-        await alert.present();
+        await this.alertModal.show('Error', msg);
       }
     });
   }

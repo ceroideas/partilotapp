@@ -1,5 +1,5 @@
 .gestor-pago-content {
-  --background: #F5F6F7;
+  --background: #f5f6f7;
 }
 
 .header-content {
@@ -7,40 +7,391 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-}
+  gap: 8px;
 
-// Logo ahora es una imagen, estilos en global.scss
+  .entity-logo-header {
+    height: 32px;
+    img {
+      max-height: 32px;
+      max-width: 80px;
+      object-fit: contain;
+    }
+  }
+}
 
 .gestor-pago-container {
   padding: 16px;
   padding-bottom: 100px;
+}
+
+.rol-selector {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 200px);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.empty-icon {
-  font-size: 80px;
-  color: #ccc;
+  gap: 8px;
   margin-bottom: 24px;
+  background: white;
+  border-radius: 28px;
+  padding: 5px;
+
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 24px;
+    margin: 0;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
+
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
 }
 
-.empty-state h2 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #212529;
-  margin: 0 0 12px 0;
-}
-
-.empty-state p {
-  font-size: 16px;
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
   color: #6c757d;
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.view-section {
+  padding-bottom: 24px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 4px 0;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0 0 8px 0;
+  }
+
+  .entity-logo-small {
+    margin-top: 8px;
+    img {
+      max-height: 36px;
+      max-width: 120px;
+      object-fit: contain;
+    }
+  }
+
+  &.section-header-with-logo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    .header-titles {
+      flex: 1;
+    }
+
+    .entity-logo-small {
+      margin-top: 0;
+      flex-shrink: 0;
+      img {
+        max-height: 40px;
+        max-width: 100px;
+        object-fit: contain;
+      }
+    }
+  }
+}
+
+.error-msg {
+  color: var(--ion-color-danger);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.card-block {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.pago-options {
+  .option-block {
+    margin-bottom: 20px;
+    .option-desc {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 10px 0;
+    }
+    .btn-scan {
+      --background: #e78307;
+      --color: #212529;
+      font-weight: 600;
+      ion-icon {
+        margin-right: 8px;
+      }
+    }
+    .btn-manual {
+      --border-color: #212529;
+      --color: #212529;
+    }
+  }
+}
+
+// Selector de entidades (mismo estilo que gestor-devolucion)
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.entity-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .entity-logo {
+    margin-bottom: 12px;
+    img {
+      max-height: 48px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .entity-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+  }
+}
+
+.lotteries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .lottery-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+
+    .lottery-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lottery-image-wrap {
+      width: 100px;
+      height: 52px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img { width: 100%; height: 100%; object-fit: cover; }
+      .lottery-placeholder-icon { font-size: 24px; color: #e78307; }
+    }
+    .lottery-info {
+      min-width: 0;
+      .lottery-title, .lottery-subtitle {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    .lottery-ticket-icon {
+      font-size: 28px;
+      color: #e78307;
+    }
+    .lottery-info {
+      .lottery-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+      }
+      .lottery-subtitle {
+        font-size: 12px;
+        color: #6c757d;
+      }
+    }
+  }
+}
+
+.selector-section {
+  .input-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.participacion-inputs {
+  .block-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+    margin: 12px 0 6px 0;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  .input-item {
+    --background: #f5f6f7;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .rango-row {
+    display: flex;
+    gap: 8px;
+    .flex-item {
+      flex: 1;
+    }
+  }
+  .btn-comprobar {
+    margin-top: 16px;
+    --background: #212529;
+    font-weight: 600;
+  }
+}
+
+.list-block {
+  .participation-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  .participation-icon {
+    font-size: 28px;
+    color: #e78307;
+    margin-right: 12px;
+  }
+  .participation-info {
+    flex: 1;
+    .participation-code {
+      font-size: 15px;
+      font-weight: 600;
+      color: #212529;
+    }
+    .participation-entity {
+      font-size: 12px;
+      color: #6c757d;
+    }
+  }
+  .participation-premio {
+    font-size: 16px;
+    font-weight: 700;
+    color: #212529;
+    margin-right: 8px;
+  }
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  strong {
+    font-size: 18px;
+  }
+}
+
+.btn-pagar {
+  --background: #e78307;
+  --color: #212529;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+// Cuando el footer de pago está visible, dejar espacio para no quedar oculto al hacer scroll
+.gestor-pago-content.has-footer-pago {
+  --padding-bottom: 140px;
+}
+
+.gestor-pago-content.has-footer-pago .gestor-pago-container {
+  padding-bottom: 140px;
+}
+
+// Footer fijo pegado al menú de tabs: Importe total + Pagar
+.footer-pago {
+  --background: #f5f6f7;
+  --border-width: 1px 0 0 0;
+  --border-color: rgba(0, 0, 0, 0.08);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.footer-pago-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 100%;
+}
+
+.footer-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 14px;
+  color: #212529;
+}
+
+.footer-total-label {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.footer-total-amount {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.footer-pago .btn-pagar {
   margin: 0;
+  flex-shrink: 0;
+  min-width: 140px;
 }
 

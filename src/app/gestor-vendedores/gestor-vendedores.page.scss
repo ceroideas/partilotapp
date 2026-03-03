@@ -172,6 +172,7 @@
     --background: #fff;
     --color: #212529;
     --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --border-radius: 8px; /* Filtros: bordes poco redondeados, no pill */
     text-transform: none;
     font-size: 13px;
     font-weight: 500;
@@ -275,14 +276,13 @@
     margin: 0;
   }
 
-  ion-icon.placeholder-icon {
-    width: auto;
-    height: auto;
-  }
-
   &.no-image {
-    .placeholder-icon {
-      font-size: 20px;
+    background: #212529;
+    .placeholder-icon,
+    ion-icon.placeholder-icon {
+      font-size: 22px;
+      color: #fff;
+      --color: #fff;
     }
   }
 }
@@ -897,9 +897,11 @@
 
     &.no-image {
       background: #212529;
-      .placeholder-icon {
+      .placeholder-icon,
+      ion-icon.placeholder-icon {
         font-size: 22px;
         color: #fff;
+        --color: #fff;
       }
     }
   }

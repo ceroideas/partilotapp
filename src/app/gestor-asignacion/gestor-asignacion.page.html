@@ -79,19 +79,14 @@
       <div class="lotteries-list" *ngIf="lotteries.length > 0">
         <div class="lottery-card" *ngFor="let lot of lotteries" (click)="selectSorteo(lot)">
           <div class="lottery-header">
-            <div class="lottery-ticket-icon">
-              <ion-icon name="ticket-outline"></ion-icon>
+            <div class="lottery-image-wrap" [class.no-image]="!lot.image">
+              <img *ngIf="lot.image" [src]="getImageUrl(lot.image)" [alt]="lot.name" (error)="onLotteryImageError(lot)">
+              <ion-icon *ngIf="!lot.image" name="ticket-outline" class="lottery-placeholder-icon"></ion-icon>
             </div>
             <div class="lottery-info">
               <div class="lottery-title">Sorteo: {{ lot.name }}</div>
-              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date }}</div>
+              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date | date:'dd-MM-yyyy HH:mm' }}</div>
             </div>
-          </div>
-          <div class="lottery-action">
-            <ion-button fill="clear" size="small">
-              Seleccionar
-              <ion-icon name="chevron-forward" slot="end"></ion-icon>
-            </ion-button>
           </div>
         </div>
       </div>
@@ -227,9 +222,11 @@
 
     <!-- Paso 4: Firma de confirmación -->
     <div class="view-section" *ngIf="step === 'firma' && !loading">
-      <div class="section-header">
-        <h1 class="section-title">Firma de Confirmación</h1>
-        <p class="section-subtitle">El vendedor ha de firmar para confirmar.</p>
+      <div class="section-header devolucion-qr-header">
+        <div class="header-titles">
+          <h1 class="section-title">Firma de Confirmación</h1>
+          <p class="section-subtitle">El vendedor ha de firmar para confirmar.</p>
+        </div>
         <div class="entity-logo-small" *ngIf="selectedEntity?.image">
           <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
         </div>

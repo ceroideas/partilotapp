@@ -339,7 +339,12 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     if (!imagePath) return '';
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    return `${base}/uploads/${imagePath}`;
+    const normalized = (imagePath || '').replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
+  }
+
+  onLotteryImageError(lot: any) {
+    if (lot) lot.image = null;
   }
 
   async mostrarAlerta(header: string, message: string) {

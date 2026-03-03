@@ -126,6 +126,30 @@
   flex: 1;
 }
 
+.lottery-image-wrap {
+  width: 100px;
+  height: 52px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  .lottery-placeholder-icon { font-size: 24px; color: #6c757d; }
+}
+
+.lottery-info {
+  flex: 1;
+  min-width: 0;
+  .lottery-title, .lottery-subtitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .lottery-ticket-icon {
   width: 48px;
   height: 48px;
@@ -136,8 +160,6 @@
   justify-content: center;
   ion-icon { font-size: 24px; color: #6c757d; }
 }
-
-.lottery-info { flex: 1; }
 
 .lottery-title {
   font-size: 16px;

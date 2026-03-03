@@ -1,28 +1,211 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button *ngIf="step === 'entrada'" defaultHref="/tabs/gestor-tab3"></ion-back-button>
+      <ion-button *ngIf="step === 'entidades'" fill="clear" (click)="backToEntrada()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'sorteos'" fill="clear" (click)="backToEntidades()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'participaciones'" fill="clear" (click)="backToSorteos()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'gestion'" fill="clear" (click)="step = 'participaciones'">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title></ion-title>
     <div class="header-content">
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
+      <div class="entity-logo-header" *ngIf="selectedEntity?.image && step !== 'entrada' && step !== 'entidades'">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+      </div>
     </div>
     <ion-buttons slot="end">
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="gestor-pago-content">
+<ion-content [fullscreen]="true" class="gestor-pago-content" [class.has-footer-pago]="step === 'gestion'">
   <div class="gestor-pago-container">
-    <div class="empty-state">
-      <ion-icon name="cash-outline" class="empty-icon"></ion-icon>
-      <h2>Pago</h2>
-      <p>Esta vista estará disponible próximamente</p>
+    <!-- Selector de rol -->
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+      <ion-button *ngIf="authService.canCliente()" class="rol-button" [class.active]="rolActual === 'usuario'" fill="clear"
+        (click)="cambiarRol('usuario')" [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon> Usuario
+      </ion-button>
+      <ion-button *ngIf="authService.canSeller()" class="rol-button" [class.active]="rolActual === 'vendedor'" fill="clear"
+        (click)="cambiarRol('vendedor')" [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon> Vendedor
+      </ion-button>
+      <ion-button *ngIf="authService.canManager()" class="rol-button" [class.active]="rolActual === 'gestor'" fill="clear"
+        (click)="cambiarRol('gestor')" [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon> Gestor
+      </ion-button>
+    </div>
+
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
+    <!-- Paso: Entrada -->
+    <div class="view-section card-block" *ngIf="step === 'entrada' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Pago</h1>
+        <p class="section-subtitle">Gestiona el pago de participaciones</p>
+      </div>
+      <div class="pago-options">
+        <div class="option-block">
+          <p class="option-desc">Lee el código QR y registra el pago</p>
+          <ion-button expand="block" class="btn-scan" (click)="escanearQR()">
+            <ion-icon name="qr-code-outline"></ion-icon>
+            Escanear QR
+          </ion-button>
+        </div>
+        <div class="option-block">
+          <p class="option-desc">Registra el pago por participación o rango</p>
+          <ion-button expand="block" fill="outline" class="btn-manual" (click)="irAManual()">
+            Manual
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso: Entidades -->
+    <div class="view-section" *ngIf="step === 'entidades' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Entidades</h1>
+        <p class="section-subtitle">Selecciona la entidad</p>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="entities-grid" *ngIf="entities.length > 1">
+        <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
+          <div class="entity-logo" *ngIf="entity.image">
+            <img [src]="getImageUrl(entity.image)" [alt]="entity.name">
+          </div>
+          <div class="entity-name">{{ entity.name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso: Sorteos -->
+    <div class="view-section" *ngIf="step === 'sorteos' && !loading">
+      <div class="section-header section-header-with-logo">
+        <div class="header-titles">
+          <h1 class="section-title">Sorteos</h1>
+          <p class="section-subtitle">Selecciona el sorteo</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="lotteries-list" *ngIf="lotteries.length > 0">
+        <div class="lottery-card" *ngFor="let lot of lotteries" (click)="selectSorteo(lot)">
+          <div class="lottery-header">
+            <div class="lottery-image-wrap" [class.no-image]="!lot.image">
+              <img *ngIf="lot.image" [src]="getImageUrl(lot.image)" [alt]="lot.name" (error)="onLotteryImageError(lot)">
+              <ion-icon *ngIf="!lot.image" name="ticket-outline" class="lottery-placeholder-icon"></ion-icon>
+            </div>
+            <div class="lottery-info">
+              <div class="lottery-title">Sorteo: {{ lot.name }}</div>
+              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date | date:'dd-MM-yyyy HH:mm' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso: Participaciones (manual: set + unidad / rango / referencia) -->
+    <div class="view-section" *ngIf="step === 'participaciones' && !loading">
+      <div class="section-header section-header-with-logo">
+        <div class="header-titles">
+          <h1 class="section-title">Participaciones</h1>
+          <p class="section-subtitle">Indica referencia, unidad o rango para comprobar (solo con premio)</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="selector-section card-block" *ngIf="sets.length > 0">
+        <ion-item lines="none" class="input-item">
+          <ion-label position="stacked">Set</ion-label>
+          <ion-select [(ngModel)]="selectedSet" (ionChange)="onSetChange($event)" [compareWith]="compareSet"
+            placeholder="Selecciona set" interface="action-sheet">
+            <ion-select-option *ngFor="let s of sets" [value]="s">
+              {{ s.set_name || s.name || ('Set ' + s.set_number) }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <div class="card-block participacion-inputs">
+        <h3 class="block-title">Participación Unidad</h3>
+        <ion-item lines="none" class="input-item">
+          <ion-input [(ngModel)]="unidadNumero" placeholder="Ej: 1/0001"></ion-input>
+        </ion-item>
+        <h3 class="block-title">Por Rango</h3>
+        <div class="rango-row">
+          <ion-item lines="none" class="input-item flex-item">
+            <ion-input type="text" [(ngModel)]="rangoDesde" placeholder="desde"></ion-input>
+          </ion-item>
+          <ion-item lines="none" class="input-item flex-item">
+            <ion-input type="text" [(ngModel)]="rangoHasta" placeholder="hasta"></ion-input>
+          </ion-item>
+        </div>
+        <h3 class="block-title">Referencia (QR)</h3>
+        <ion-item lines="none" class="input-item">
+          <ion-input [(ngModel)]="referencia" placeholder="Referencia"></ion-input>
+        </ion-item>
+        <ion-button expand="block" class="btn-comprobar" (click)="comprobar()" [disabled]="loading">
+          Comprobar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Paso: Gestión de pagos (solo listado; Importe total + Pagar en footer fijo) -->
+    <div class="view-section view-gestion" *ngIf="step === 'gestion' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Gestión de Pagos</h1>
+        <p class="section-subtitle">Gestiona los pagos de las participaciones</p>
+      </div>
+      <div class="card-block list-block list-gestion">
+        <div class="participation-item" *ngFor="let p of listaParaPagar">
+          <div class="participation-icon">
+            <ion-icon name="ticket-outline"></ion-icon>
+          </div>
+          <div class="participation-info">
+            <div class="participation-code">Participación {{ p.participation_code || p.participation_number }}</div>
+            <div class="participation-entity">{{ p.entity_name }}</div>
+          </div>
+          <div class="participation-premio">{{ p.premio | number:'1.2-2' }}€</div>
+          <ion-button fill="clear" size="small" (click)="quitarDeLista(p)">
+            <ion-icon name="close-circle" color="danger"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
     </div>
   </div>
 </ion-content>
+
+<!-- Footer fijo pegado al menú: importe a la izquierda, botón Pagar a la derecha -->
+<ion-footer class="footer-pago" *ngIf="step === 'gestion' && !loading">
+  <div class="footer-pago-inner">
+    <div class="footer-total">
+      <span class="footer-total-label">Importe total</span>
+      <strong class="footer-total-amount">{{ totalPremio | number:'1.2-2' }}€</strong>
+    </div>
+    <ion-button class="btn-pagar" (click)="pagar()" [disabled]="loading || listaParaPagar.length === 0">
+      Pagar
+    </ion-button>
+  </div>
+</ion-footer>
 

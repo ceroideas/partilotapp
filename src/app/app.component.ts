@@ -66,13 +66,13 @@ export class AppComponent implements OnInit {
     }
   }
 
-  /** URL de la imagen del usuario (desde API). Si no hay imagen, devuelve null. */
+  /** URL de la imagen del usuario (desde API). Las imágenes de usuario se sirven desde storage. */
   getUserImageUrl(imagePath: string | null | undefined): string | null {
     if (!imagePath) return null;
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
     const path = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-    return path ? `${base}/${path}` : null;
+    return `${base}/storage/${path.replace(/^storage\/?/, '')}`;
   }
 
   onUserImageError() {

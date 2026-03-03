@@ -240,7 +240,7 @@
               <p>Participaciones Devueltas: {{ sellerDetail.participations_summary?.returned_participations ?? 0 }} ({{ (sellerDetail.participations_summary?.returned_amount ?? 0) | number:'1.2-2' }}€)</p>
               <p>Disponibles: {{ sellerDetail.participations_summary?.available_participations ?? 0 }} ({{ (sellerDetail.participations_summary?.available_amount ?? 0) | number:'1.2-2' }}€)</p>
             </div>
-            <ion-button fill="solid" class="btn-devolver" [disabled]="(sellerDetail.participations_summary?.available_participations ?? 0) <= 0">Devolver</ion-button>
+            <ion-button fill="solid" class="btn-devolver" [disabled]="(sellerDetail.participations_summary?.available_participations ?? 0) <= 0" (click)="goToDevolucion()">Devolver</ion-button>
           </div>
 
           <div class="detail-section" style="margin-bottom: 0;">

@@ -14,6 +14,10 @@ const routes: Routes = [
   },
   {
     path: '',
+    loadChildren: () => import('./splash/splash.module').then(m => m.SplashPageModule)
+  },
+  {
+    path: 'tabs',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule),
     canActivate: [loggedInGuard]
   },

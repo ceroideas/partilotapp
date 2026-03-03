@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
 import { environment } from '../../environments/environment';
@@ -21,7 +21,7 @@ export class DigitalizarParticipacionPage implements OnInit {
   loading = false;
 
   constructor(
-    private alertController: AlertController,
+    private alertModal: AlertModalService,
     private router: Router,
     private carteraService: CarteraService
   ) { }
@@ -32,8 +32,8 @@ export class DigitalizarParticipacionPage implements OnInit {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    if (path.startsWith('storage/')) return `${base}/${path}`;
-    return `${base}/storage/${path}`;
+    const normalized = path.replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
   }
 
   async abrirEscaner() {
@@ -142,8 +142,7 @@ export class DigitalizarParticipacionPage implements OnInit {
   }
 
   async mostrarAlerta(header: string, message: string) {
-    const alert = await this.alertController.create({ header, message, buttons: ['OK'] });
-    await alert.present();
+    await this.alertModal.show(header, message);
   }
 
   /**

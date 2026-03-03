@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { GestorPagoPageRoutingModule } from './gestor-pago-routing.module';
 
 import { GestorPagoPage } from './gestor-pago.page';
+import { ModalExitoPagoComponent } from './modal-exito-pago/modal-exito-pago.component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { GestorPagoPage } from './gestor-pago.page';
     IonicModule,
     GestorPagoPageRoutingModule
   ],
-  declarations: [GestorPagoPage]
+  declarations: [GestorPagoPage, ModalExitoPagoComponent]
 })
 export class GestorPagoPageModule {}

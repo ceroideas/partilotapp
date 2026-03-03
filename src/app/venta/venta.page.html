@@ -95,24 +95,18 @@
       Volver a Entidades
     </ion-button> -->
 
-    <!-- Lista de Sorteos -->
+    <!-- Lista de Sorteos (estilo como en gestor: imagen, Sorteo + Fecha, sin "Seleccionar") -->
     <div class="lotteries-list">
       <div class="lottery-card" *ngFor="let lottery of lotteries" (click)="selectLottery(lottery)">
         <div class="lottery-header">
-          <div class="lottery-ticket-icon">
-            <ion-icon name="ticket-outline"></ion-icon>
+          <div class="lottery-image-wrap" [class.no-image]="!lottery.image">
+            <img *ngIf="lottery.image" [src]="getImageUrl(lottery.image)" [alt]="lottery.name" (error)="onLotteryImageError(lottery)">
+            <ion-icon *ngIf="!lottery.image" name="ticket-outline" class="lottery-placeholder-icon"></ion-icon>
           </div>
           <div class="lottery-info">
             <div class="lottery-title">Sorteo: {{ lottery.name }}</div>
-            <div class="lottery-subtitle">Fecha: {{ formatDate(lottery.draw_date) }}</div>
-            <div class="lottery-type" *ngIf="lottery.lottery_type">{{ lottery.lottery_type }}</div>
+            <div class="lottery-subtitle" *ngIf="lottery.draw_date">Fecha: {{ lottery.draw_date | date:'dd-MM-yyyy HH:mm' }}</div>
           </div>
-        </div>
-        <div class="lottery-action">
-          <ion-button fill="clear" size="small">
-            Seleccionar
-            <ion-icon name="chevron-forward" slot="end"></ion-icon>
-          </ion-button>
         </div>
       </div>
     </div>

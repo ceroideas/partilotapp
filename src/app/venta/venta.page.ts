@@ -603,9 +603,14 @@ export class VentaPage implements OnInit {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    // Construir URL completa desde la API base (sin /api)
-    const apiBaseUrl = environment.apiUrl.replace('/api', '');
-    return `${apiBaseUrl}/uploads/${imagePath}`;
+    // Construir URL desde la API base; entidades/sorteos usan uploads (normalizar sin storage/)
+    const apiBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+    const normalized = imagePath.replace(/^storage\/?/, '');
+    return `${apiBaseUrl}/uploads/${normalized}`;
+  }
+
+  onLotteryImageError(lottery: any) {
+    if (lottery) lottery.image = null;
   }
 
   async mostrarAlerta(header: string, message: string) {

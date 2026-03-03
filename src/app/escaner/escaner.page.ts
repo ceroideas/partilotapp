@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { VentasService } from '../core/services/ventas.service';
@@ -60,7 +60,7 @@ export class EscanerPage implements OnInit {
 
   constructor(
     private router: Router,
-    private alertController: AlertController,
+    private alertModal: AlertModalService,
     public authService: AuthService,
     private ventasService: VentasService,
     private carteraService: CarteraService
@@ -500,8 +500,8 @@ export class EscanerPage implements OnInit {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    if (path.startsWith('storage/')) return `${base}/${path}`;
-    return `${base}/storage/${path}`;
+    const normalized = path.replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
   }
 
   private async procesarQRDigitalizacion(referencia: string) {
@@ -553,12 +553,8 @@ export class EscanerPage implements OnInit {
       next: async () => {
         this.loading = false;
         this.carteraService.notifyParticipacionesChanged();
-        const alert = await this.alertController.create({
-          header: 'Digitalización exitosa',
-          message: 'La participación ha sido guardada en tu cartera.',
-          buttons: [{ text: 'OK', handler: () => this.router.navigate(['/tabs/tab1']) }]
-        });
-        await alert.present();
+        await this.alertModal.show('Digitalización exitosa', 'La participación ha sido guardada en tu cartera.');
+        this.router.navigate(['/tabs/tab1']);
       },
       error: async (err) => {
         this.loading = false;
@@ -699,12 +695,7 @@ export class EscanerPage implements OnInit {
   }
 
   async mostrarAlerta(header: string, message: string) {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK']
-    });
-    await alert.present();
+    await this.alertModal.show(header, message);
   }
 
   /**

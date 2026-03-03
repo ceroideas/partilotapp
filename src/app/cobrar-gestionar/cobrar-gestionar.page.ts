@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
 import { CarteraService } from '../core/services/cartera.service';
 import { environment } from '../../environments/environment';
 
@@ -47,7 +47,7 @@ export class CobrarGestionarPage implements OnInit {
 
   constructor(
     private router: Router,
-    private alertController: AlertController,
+    private alertModal: AlertModalService,
     private carteraService: CarteraService
   ) { }
 
@@ -123,12 +123,7 @@ export class CobrarGestionarPage implements OnInit {
 
   async continuarCobro() {
     if (this.participacionesSeleccionadas.size === 0) {
-      const alert = await this.alertController.create({
-        header: 'Selección requerida',
-        message: 'Por favor, selecciona al menos una participación para cobrar.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('Selección requerida', 'Por favor, selecciona al menos una participación para cobrar.');
       return;
     }
 
@@ -137,12 +132,7 @@ export class CobrarGestionarPage implements OnInit {
 
   async continuarDonacion() {
     if (this.participacionesSeleccionadas.size === 0) {
-      const alert = await this.alertController.create({
-        header: 'Selección requerida',
-        message: 'Por favor, selecciona al menos una participación para donar.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('Selección requerida', 'Por favor, selecciona al menos una participación para donar.');
       return;
     }
 
@@ -252,24 +242,14 @@ export class CobrarGestionarPage implements OnInit {
 
   async guardarDatos() {
     if (!this.datosPersonales.nombre || !this.datosPersonales.apellidos || !this.datosPersonales.nif) {
-      const alert = await this.alertController.create({
-        header: 'Datos incompletos',
-        message: 'Por favor, completa todos los campos requeridos.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('Datos incompletos', 'Por favor, completa todos los campos requeridos.');
       return;
     }
 
     // Validar NIF/NIE/DNI/CIF antes de continuar
     const nifLimpio = this.datosPersonales.nif.trim().toUpperCase();
     if (!this.validarDocumentoEspanol(nifLimpio)) {
-      const alert = await this.alertController.create({
-        header: 'NIF/NIE no válido',
-        message: 'El campo NIF/NIE no es un NIF, NIE, DNI o CIF válido.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('NIF/NIE no válido', 'El campo NIF/NIE no es un NIF, NIE, DNI o CIF válido.');
       return;
     }
 
@@ -334,21 +314,11 @@ export class CobrarGestionarPage implements OnInit {
     const ibanSinEspacios = this.ibanFormateado.replace(/\s/g, '').trim();
     const ibanLimpio = ibanSinEspacios.startsWith('ES') ? ibanSinEspacios : 'ES' + ibanSinEspacios;
     if (!ibanLimpio || ibanLimpio.length !== 24) {
-      const alert = await this.alertController.create({
-        header: 'IBAN incompleto',
-        message: 'Introduce los 22 dígitos del número de cuenta (ES está incluido).',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('IBAN incompleto', 'Introduce los 22 dígitos del número de cuenta (ES está incluido).');
       return;
     }
     if (!this.validarIbanEspanol(ibanLimpio)) {
-      const alert = await this.alertController.create({
-        header: 'IBAN no válido',
-        message: 'El IBAN no es correcto. Comprueba los dígitos de control.',
-        buttons: ['OK']
-      });
-      await alert.present();
+      await this.alertModal.show('IBAN no válido', 'El IBAN no es correcto. Comprueba los dígitos de control.');
       return;
     }
 
@@ -375,12 +345,7 @@ export class CobrarGestionarPage implements OnInit {
       },
       error: async (err) => {
         const msg = err.error?.message || 'No se pudo registrar el cobro.';
-        const alert = await this.alertController.create({
-          header: 'Error',
-          message: msg,
-          buttons: ['OK']
-        });
-        await alert.present();
+        await this.alertModal.show('Error', msg);
       }
     });
   }
@@ -423,12 +388,7 @@ export class CobrarGestionarPage implements OnInit {
     if (this.datosPersonales.nif && this.datosPersonales.nif.trim()) {
       const nifLimpio = this.datosPersonales.nif.trim().toUpperCase();
       if (!this.validarDocumentoEspanol(nifLimpio)) {
-        const alert = await this.alertController.create({
-          header: 'NIF/NIE no válido',
-          message: 'El campo NIF/NIE no es un NIF, NIE, DNI o CIF válido.',
-          buttons: ['OK']
-        });
-        await alert.present();
+        await this.alertModal.show('NIF/NIE no válido', 'El campo NIF/NIE no es un NIF, NIE, DNI o CIF válido.');
         return;
       }
     }
@@ -495,12 +455,7 @@ export class CobrarGestionarPage implements OnInit {
       },
       error: async (err) => {
         const msg = err.error?.message || 'No se pudo registrar la donación.';
-        const alert = await this.alertController.create({
-          header: 'Error',
-          message: msg,
-          buttons: ['OK']
-        });
-        await alert.present();
+        await this.alertModal.show('Error', msg);
       }
     });
   }
@@ -529,7 +484,8 @@ export class CobrarGestionarPage implements OnInit {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     const base = environment.apiUrl.replace(/\/api\/?$/, '');
-    return path.startsWith('storage/') ? `${base}/${path}` : `${base}/storage/${path}`;
+    const normalized = path.replace(/^storage\/?/, '');
+    return `${base}/uploads/${normalized}`;
   }
 
   volver() {

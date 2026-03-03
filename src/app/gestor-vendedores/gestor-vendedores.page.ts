@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
-import { AlertController } from '@ionic/angular';
+import { AlertModalService } from '../core/services/alert-modal.service';
+import { DevolucionPreselectService } from '../core/services/devolucion-preselect.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -74,7 +75,8 @@ export class GestorVendedoresPage implements OnInit {
     private router: Router,
     private ventasService: VentasService,
     public authService: AuthService,
-    private alertController: AlertController
+    private alertModal: AlertModalService,
+    private devolucionPreselect: DevolucionPreselectService
   ) {}
 
   detectarRol(): void {
@@ -341,6 +343,13 @@ export class GestorVendedoresPage implements OnInit {
     });
   }
 
+  /** Ir a Devoluciones con esta entidad y vendedor preseleccionados (lleva a elegir sorteo) */
+  goToDevolucion(): void {
+    if (!this.selectedEntity?.id || !this.sellerDetail?.seller?.id) return;
+    this.devolucionPreselect.setFromDetail(this.selectedEntity, this.sellerDetail.seller);
+    this.router.navigate(['/tabs/gestor-tab4']);
+  }
+
   backToEntities() {
     this.showSellersList = false;
     this.selectedEntity = null;
@@ -507,12 +516,7 @@ export class GestorVendedoresPage implements OnInit {
   }
 
   async showAlerta(header: string, message: string) {
-    const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK'],
-    });
-    await alert.present();
+    await this.alertModal.show(header, message);
   }
 
   getImageUrl(imagePath: string | null | undefined): string {
@@ -525,8 +529,9 @@ export class GestorVendedoresPage implements OnInit {
   getUserImageUrl(imagePath: string | null | undefined): string {
     if (!imagePath) return '';
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-    const apiBaseUrl = environment.apiUrl.replace('/api', '');
-    return `${apiBaseUrl}/storage/${imagePath}`;
+    const apiBaseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+    const normalized = imagePath.replace(/^storage\/?/, '');
+    return `${apiBaseUrl}/storage/${normalized}`;
   }
 
   openVerMasSheet(): void {
