@@ -176,4 +176,39 @@ export class VentasService {
   digitalizeParticipation(referencia: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/participations/digitalize`, { referencia });
   }
+
+  /**
+   * Gestor: validar participaciones disponibles para asignar a un vendedor.
+   * POST /api/sellers/validate-participations
+   * Para unidad: desde === hasta.
+   */
+  validateAssignments(
+    sellerId: number,
+    setId: number,
+    desde: number,
+    hasta: number
+  ): Observable<{ success: boolean; participations?: any[]; message?: string }> {
+    return this.http.post<{ success: boolean; participations?: any[]; message?: string }>(
+      `${this.apiUrl}/sellers/validate-participations`,
+      { seller_id: sellerId, set_id: setId, desde, hasta }
+    );
+  }
+
+  /**
+   * Gestor: guardar asignación de participaciones a un vendedor.
+   * POST /api/sellers/save-assignments
+   * Body: { seller_id, participations_json: JSON.stringify([{ id, number, set_id }]) }
+   */
+  saveAssignments(
+    sellerId: number,
+    participations: Array<{ id: number; number: number; set_id: number }>
+  ): Observable<{ success: boolean; message?: string; assigned_count?: number }> {
+    const participationsJson = JSON.stringify(
+      participations.map(p => ({ id: p.id, number: p.number, set_id: p.set_id }))
+    );
+    return this.http.post<{ success: boolean; message?: string; assigned_count?: number }>(
+      `${this.apiUrl}/sellers/save-assignments`,
+      { seller_id: sellerId, participations_json: participationsJson }
+    );
+  }
 }

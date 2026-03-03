@@ -1,0 +1,272 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button *ngIf="step === 'sorteos'" defaultHref="/tabs/gestor-tab2"></ion-back-button>
+      <ion-button *ngIf="step === 'participaciones'" fill="clear" (click)="backToSorteos()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'resumen'" fill="clear" (click)="step = 'participaciones'">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'firma'" fill="clear" (click)="step = 'resumen'">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title></ion-title>
+    <div class="header-content">
+      <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
+      <div class="entity-logo-header" *ngIf="selectedEntity?.image && step !== 'sorteos'">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+      </div>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button fill="clear">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </ion-button>
+      <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="gestor-asignacion-content">
+  <div class="asignacion-container">
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+      <ion-button
+        *ngIf="authService.canCliente()"
+        class="rol-button"
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="rolActual = 'usuario'"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canSeller()"
+        class="rol-button"
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="rolActual = 'vendedor'"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canManager()"
+        class="rol-button"
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="rolActual = 'gestor'"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
+    <!-- Paso 1: Sorteos -->
+    <div class="view-section" *ngIf="step === 'sorteos' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">+ Asignación Participaciones</h1>
+        <p class="section-subtitle">Gestiona la asignación de participaciones</p>
+        <p class="section-subtitle" *ngIf="sellerName">Vendedor: {{ sellerName }}</p>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="lotteries-list" *ngIf="lotteries.length > 0">
+        <div class="lottery-card" *ngFor="let lot of lotteries" (click)="selectSorteo(lot)">
+          <div class="lottery-header">
+            <div class="lottery-ticket-icon">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+            <div class="lottery-info">
+              <div class="lottery-title">Sorteo: {{ lot.name }}</div>
+              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date }}</div>
+            </div>
+          </div>
+          <div class="lottery-action">
+            <ion-button fill="clear" size="small">
+              Seleccionar
+              <ion-icon name="chevron-forward" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 2: Participaciones (escáner unidad/rango, Asignar/Seguir, lista, Terminar) -->
+    <div class="view-section" *ngIf="step === 'participaciones' && !loading">
+      <div class="section-header devolucion-qr-header">
+        <div class="header-titles">
+          <h1 class="section-title">Asignación Participaciones</h1>
+          <p class="section-subtitle">Gestiona la asignación por QR</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="selector-section card-block" *ngIf="sets.length > 0">
+        <ion-item lines="none" class="input-item">
+          <ion-label position="stacked">Set</ion-label>
+          <ion-select
+            [(ngModel)]="selectedSet"
+            (ionChange)="onSetChange($event)"
+            [compareWith]="compareSet"
+            placeholder="Selecciona set"
+            interface="action-sheet">
+            <ion-select-option *ngFor="let s of sets" [value]="s">
+              {{ s.set_name || s.name || ('Set ' + s.set_number) }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <div class="card-block escaner-section">
+        <h3 class="block-title">Escáner</h3>
+        <p class="block-subtitle">Gestiona la asignación por QR</p>
+
+        <div class="participacion-block">
+          <h4 class="participacion-label">Participación Unidad</h4>
+        </div>
+        <div class="participacion-unidad-row">
+          <ion-item lines="none" class="input-item flex-item">
+            <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
+          </ion-item>
+          <ion-button class="btn-escaner-qr" (click)="escanearQRUnidad()" [disabled]="loading">
+            <ion-icon name="qr-code-outline"></ion-icon>
+            Escanear QR
+          </ion-button>
+        </div>
+
+        <div class="participaciones-rango-rows">
+          <h4 class="participacion-label">Participaciones Por Rango</h4>
+          <div class="rango-row">
+            <ion-item lines="none" class="input-item flex-item">
+              <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="desde"></ion-input>
+            </ion-item>
+            <ion-button class="btn-escaner-qr" (click)="escanearQRParaDesde()" [disabled]="loading">
+              <ion-icon name="qr-code-outline"></ion-icon>
+              Escanear QR
+            </ion-button>
+          </div>
+          <div class="rango-row">
+            <ion-item lines="none" class="input-item flex-item">
+              <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="hasta"></ion-input>
+            </ion-item>
+            <ion-button class="btn-escaner-qr" (click)="escanearQRParaHasta()" [disabled]="loading">
+              <ion-icon name="qr-code-outline"></ion-icon>
+              Escanear QR
+            </ion-button>
+          </div>
+        </div>
+
+        <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
+          Asignar / Seguir
+        </ion-button>
+      </div>
+
+      <div class="asignadas-block card-block" *ngIf="participacionesToAssign.length > 0">
+        <h3 class="block-title">Participaciones a asignar ({{ participacionesToAssign.length }})</h3>
+        <div class="asignadas-list">
+          <div class="asignada-item" *ngFor="let p of participacionesToAssign">
+            <span>{{ p.participation_code || '#' + p.number }}</span>
+            <ion-button fill="clear" size="small" (click)="quitarParticipacion(p)">
+              <ion-icon name="close-circle" color="danger"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        <ion-button expand="block" class="btn-terminar" (click)="irAResumen()">
+          Terminar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Paso 3: Resumen (Total Asignadas: número grande izq, botón Aceptar derecha) -->
+    <div class="view-section" *ngIf="step === 'resumen' && !loading">
+      <div class="section-header devolucion-qr-header">
+        <div class="header-titles">
+          <h1 class="section-title">Resumen Asignación</h1>
+          <p class="section-subtitle">Gestiona tus participaciones asignadas.</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+
+      <div class="resumen-asignacion-card card-block">
+        <div class="resumen-participaciones-list">
+          <div class="resumen-participacion-item" *ngFor="let p of participacionesToAssign">
+            <div class="resumen-participacion-icon">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+            <div class="resumen-participacion-info">
+              <span class="resumen-participacion-label">Participación: {{ p.participation_code || ('#' + p.number) }}</span>
+            </div>
+            <span class="badge-asignada">Asignada</span>
+          </div>
+        </div>
+
+        <div class="total-y-actions-row">
+          <div class="total-asignadas-left">
+            <span class="total-asignadas-label">Total Asignadas</span>
+            <strong class="total-asignadas-value">{{ participacionesToAssign.length }}</strong>
+          </div>
+          <div class="resumen-actions">
+            <ion-button class="btn-aceptar-asignacion" (click)="aceptarResumenContinuar()">
+              Aceptar
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 4: Firma de confirmación -->
+    <div class="view-section" *ngIf="step === 'firma' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Firma de Confirmación</h1>
+        <p class="section-subtitle">El vendedor ha de firmar para confirmar.</p>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+
+      <div class="firma-card card-block">
+        <p class="firma-label">Firma: {{ sellerName || 'Vendedor' }}</p>
+        <div class="signature-wrapper"
+             (touchstart)="startDrawing($event)"
+             (touchmove)="draw($event)"
+             (touchend)="endDrawing()"
+             (mousedown)="startDrawing($event)"
+             (mousemove)="draw($event)"
+             (mouseup)="endDrawing()"
+             (mouseleave)="endDrawing()">
+          <canvas #signatureCanvas class="signature-canvas"></canvas>
+        </div>
+        <ion-button fill="clear" size="small" (click)="clearSignature()">Limpiar firma</ion-button>
+        <div class="total-y-actions-row total-firma-actions">
+          <div class="total-asignadas-left">
+            <span class="total-asignadas-label">Total Asignadas</span>
+            <strong class="total-asignadas-value">{{ participacionesToAssign.length }}</strong>
+          </div>
+          <ion-button class="btn-aceptar-asignacion" (click)="enviarAsignacion()" [disabled]="procesando || !hasSignature">
+            {{ procesando ? 'Enviando...' : 'Aceptar' }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- Modal: ¡Asignación Registrada! -->
+<div class="modal-overlay modal-centered-overlay" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+  <div class="modal-centered-box modal-asignacion-success" (click)="$event.stopPropagation()">
+    <h2 class="modal-asignacion-success-title">¡Asignación Registrada!</h2>
+    <p class="modal-asignacion-success-text">La asignación ha sido registrada con éxito. El usuario recibirá un email para comunicarle su nueva asignación.</p>
+    <ion-button expand="block" color="warning" class="btn-modal-aceptar" (click)="closeSuccessModal()">Aceptar</ion-button>
+  </div>
+</div>

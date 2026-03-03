@@ -85,6 +85,10 @@ const routes: Routes = [
         loadChildren: () => import('../gestor-pago/gestor-pago.module').then(m => m.GestorPagoPageModule)
       },
       {
+        path: 'gestor-asignacion',
+        loadChildren: () => import('../gestor-asignacion/gestor-asignacion.module').then(m => m.GestorAsignacionPageModule)
+      },
+      {
         path: '',
         redirectTo: '/tabs/tab3',
         pathMatch: 'full'

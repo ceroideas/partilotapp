@@ -327,6 +327,20 @@ export class GestorVendedoresPage implements OnInit {
     this.loadSellers();
   }
 
+  goToAsignacion(): void {
+    if (!this.selectedEntity?.id || !this.sellerDetail?.seller?.id) {
+      this.showAlerta('Aviso', 'Selecciona una entidad y un vendedor.');
+      return;
+    }
+    this.router.navigate(['/tabs/gestor-asignacion'], {
+      state: {
+        seller_id: this.sellerDetail.seller.id,
+        entity_id: this.selectedEntity.id,
+        seller_name: this.sellerDetail.seller.name || this.sellerDetail.seller.first_name || 'Vendedor'
+      }
+    });
+  }
+
   backToEntities() {
     this.showSellersList = false;
     this.selectedEntity = null;

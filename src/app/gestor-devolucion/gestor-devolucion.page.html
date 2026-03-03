@@ -1,28 +1,406 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button *ngIf="step === 'entidades'"></ion-back-button>
+      <ion-button *ngIf="step === 'sorteos'" fill="clear" (click)="backToEntidades()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'vendedores'" fill="clear" (click)="backToSorteos()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'participaciones'" fill="clear" (click)="sellers.length ? backToVendedores() : backToSorteos()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'resumen'" fill="clear" (click)="backToParticipaciones()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button *ngIf="step === 'liquidacion'" fill="clear" (click)="backToResumen()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title></ion-title>
     <div class="header-content">
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
+      <div class="entity-logo-header" *ngIf="selectedEntity?.image && step !== 'entidades'">
+        <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+      </div>
     </div>
     <ion-buttons slot="end">
       <ion-button fill="clear">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
+      <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
     </ion-buttons>
-    <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="gestor-devolucion-content">
-  <div class="gestor-devolucion-container">
-    <div class="empty-state">
-      <ion-icon name="return-down-back-outline" class="empty-icon"></ion-icon>
-      <h2>Devolución</h2>
-      <p>Esta vista estará disponible próximamente</p>
+  <div class="devolucion-container">
+    <!-- Selector de rol (Usuario / Vendedor / Gestor) -->
+    <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+      <ion-button
+        *ngIf="authService.canCliente()"
+        class="rol-button"
+        [class.active]="rolActual === 'usuario'"
+        fill="clear"
+        (click)="cambiarRol('usuario')"
+        [disabled]="rolActual === 'usuario'">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Usuario
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canSeller()"
+        class="rol-button"
+        [class.active]="rolActual === 'vendedor'"
+        fill="clear"
+        (click)="cambiarRol('vendedor')"
+        [disabled]="rolActual === 'vendedor'">
+        <ion-icon name="bag-outline" slot="start"></ion-icon>
+        Vendedor
+      </ion-button>
+      <ion-button
+        *ngIf="authService.canManager()"
+        class="rol-button"
+        [class.active]="rolActual === 'gestor'"
+        fill="clear"
+        (click)="cambiarRol('gestor')"
+        [disabled]="rolActual === 'gestor'">
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        Gestor
+      </ion-button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-section" *ngIf="loading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
+    <!-- Paso 1: Entidades (solo si hay más de una) -->
+    <div class="view-section" *ngIf="step === 'entidades' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Entidades</h1>
+        <p class="section-subtitle">Selecciona la entidad para la devolución</p>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="entities-grid" *ngIf="entities.length > 1">
+        <div class="entity-card" *ngFor="let entity of entities" (click)="selectEntity(entity)">
+          <div class="entity-logo" *ngIf="entity.image">
+            <img [src]="getImageUrl(entity.image)" [alt]="entity.name">
+          </div>
+          <div class="entity-name">{{ entity.name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 2: Sorteos -->
+    <div class="view-section" *ngIf="step === 'sorteos' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Sorteos</h1>
+        <p class="section-subtitle">Selecciona el sorteo para la devolución</p>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="lotteries-list" *ngIf="lotteries.length > 0">
+        <div class="lottery-card" *ngFor="let lot of lotteries" (click)="selectSorteo(lot)">
+          <div class="lottery-header">
+            <div class="lottery-ticket-icon">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+            <div class="lottery-info">
+              <div class="lottery-title">Sorteo: {{ lot.name }}</div>
+              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date }}</div>
+            </div>
+          </div>
+          <div class="lottery-action">
+            <ion-button fill="clear" size="small">
+              Seleccionar
+              <ion-icon name="chevron-forward" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 2b: Vendedor (devolución vendedor: las seleccionadas pasan a disponibles, el resumen es por las que quedan) -->
+    <div class="view-section" *ngIf="step === 'vendedores' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Vendedor</h1>
+        <p class="section-subtitle">Selecciona el vendedor del cual devolver participaciones</p>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="lotteries-list" *ngIf="sellers.length > 0">
+        <div class="lottery-card" *ngFor="let seller of sellers" (click)="selectSeller(seller)">
+          <div class="lottery-header">
+            <div class="lottery-ticket-icon">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="lottery-info">
+              <div class="lottery-title">{{ (seller.user?.name || '') + ' ' + (seller.user?.last_name || '') }}</div>
+              <div class="lottery-subtitle" *ngIf="seller.user?.email">{{ seller.user.email }}</div>
+            </div>
+          </div>
+          <div class="lottery-action">
+            <ion-button fill="clear" size="small">
+              Seleccionar
+              <ion-icon name="chevron-forward" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 4: Participaciones (Devolución QR) -->
+    <div class="view-section" *ngIf="step === 'participaciones' && !loading">
+      <div class="section-header devolucion-qr-header">
+        <div class="header-titles">
+          <h1 class="section-title">Devolución QR</h1>
+          <p class="section-subtitle">Gestiona la devolución de participaciones{{ selectedSeller ? ' del vendedor' : '' }}</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+      <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <!-- Selector de Set (select como en venta/manual) -->
+      <div class="selector-section card-block" *ngIf="sets.length > 0">
+        <ion-item lines="none" class="input-item">
+          <ion-label position="stacked">Set</ion-label>
+          <ion-select
+            [(ngModel)]="selectedSet"
+            (ionChange)="onSetChange($event)"
+            [compareWith]="compareSet"
+            placeholder="Selecciona set"
+            interface="action-sheet">
+            <ion-select-option *ngFor="let s of sets" [value]="s">
+              {{ s.set_name || s.name || ('Set ' + s.set_number) }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <!-- Escáner: Gestiona la devolución por QR -->
+      <div class="card-block escaner-section">
+        <h3 class="block-title">Escáner</h3>
+        <p class="block-subtitle">Gestiona la devolución por QR</p>
+
+        <!-- Participación Unidad -->
+        <div class="participacion-block">
+          <h4 class="participacion-label">Participación</h4>
+          <p class="participacion-sublabel">Participación Unidad</p>
+        </div>
+        <div class="participacion-unidad-row">
+          <ion-item lines="none" class="input-item flex-item">
+            <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
+          </ion-item>
+          <ion-button class="btn-escaner-qr" (click)="escanearQRUnidad()" [disabled]="loading">
+            <ion-icon name="qr-code-outline"></ion-icon>
+            Escanear QR
+          </ion-button>
+        </div>
+
+        <!-- Participaciones Por Rango -->
+        <div class="participaciones-rango-rows">
+          <h4 class="participacion-label">Participaciones</h4>
+          <p class="participacion-sublabel">Por Rango</p>
+          <div class="rango-row">
+            <ion-item lines="none" class="input-item flex-item">
+              <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="desde"></ion-input>
+            </ion-item>
+            <ion-button class="btn-escaner-qr" (click)="escanearQRParaDesde()" [disabled]="loading">
+              <ion-icon name="qr-code-outline"></ion-icon>
+              Escanear QR
+            </ion-button>
+          </div>
+          <div class="rango-row">
+            <ion-item lines="none" class="input-item flex-item">
+              <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="hasta"></ion-input>
+            </ion-item>
+            <ion-button class="btn-escaner-qr" (click)="escanearQRParaHasta()" [disabled]="loading">
+              <ion-icon name="qr-code-outline"></ion-icon>
+              Escanear QR
+            </ion-button>
+          </div>
+        </div>
+
+        <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
+          Devolver / Seguir
+        </ion-button>
+        <ion-button expand="block" fill="outline" class="btn-liquidar-sin-devolver" (click)="irALiquidacionSinDevolver()">
+          Liquidar sin devolver
+        </ion-button>
+      </div>
+
+      <!-- Lista de asignadas -->
+      <div class="asignadas-block card-block" *ngIf="participacionesAsignadas.length > 0">
+        <h3 class="block-title">Participaciones a devolver ({{ participacionesAsignadas.length }})</h3>
+        <div class="asignadas-list">
+          <div class="asignada-item" *ngFor="let p of participacionesAsignadas">
+            <span>{{ p.participation_code || '#' + p.number }}</span>
+            <ion-button fill="clear" size="small" (click)="quitarParticipacion(p)">
+              <ion-icon name="close-circle" color="danger"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        <ion-button expand="block" class="btn-terminar" (click)="irAResumen()">
+          Terminar
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Paso 4: Resumen de participaciones a devolver -->
+    <div class="view-section" *ngIf="step === 'resumen' && !loading">
+      <div class="section-header devolucion-qr-header">
+        <div class="header-titles">
+          <h1 class="section-title">Resumen Devolución</h1>
+          <p class="section-subtitle">Gestiona tus participaciones devueltas.</p>
+        </div>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+
+      <div class="resumen-devolucion-card card-block">
+        <div class="resumen-participaciones-list">
+          <div class="resumen-participacion-item" *ngFor="let p of participacionesAsignadas">
+            <div class="resumen-participacion-icon">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+            <div class="resumen-participacion-info">
+              <span class="resumen-participacion-label">Participación: {{ p.participation_code || ('#' + p.number) }}</span>
+            </div>
+            <span class="badge-devuelta">Devuelta</span>
+          </div>
+        </div>
+
+        <div class="total-y-actions-row">
+          <div class="total-devueltas-left">
+            <span class="total-devueltas-label">Total Devueltas</span>
+            <strong class="total-devueltas-value">{{ participacionesAsignadas.length }}</strong>
+          </div>
+          <div class="resumen-actions">
+            <ion-button class="btn-aceptar-resumen" (click)="aceptarResumenVolver()">
+              Aceptar
+            </ion-button>
+            <ion-button class="btn-aceptar-liquidar" (click)="irALiquidacion()">
+              Aceptar / Liquidar
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 5: Liquidación (resumen + botón Liquidar; el formulario de pago va en el actionsheet) -->
+    <div class="view-section" *ngIf="step === 'liquidacion' && !loading">
+      <div class="section-header">
+        <h1 class="section-title">Liquidación</h1>
+        <p class="section-subtitle">Gestiona el dinero.</p>
+        <div class="entity-logo-small" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        </div>
+      </div>
+
+      <!-- Resumen participaciones del set (Total, Ventas, Devueltas, Disponibles) -->
+      <div class="liquidacion-participaciones-card card-block" *ngIf="summary">
+        <div class="liquidacion-participaciones-row">
+          <span>Total Participaciones:</span>
+          <strong>{{ summary.total_participations }} ({{ totalParticipacionesImporte | number:'1.2-2' }}€)</strong>
+        </div>
+        <div class="liquidacion-participaciones-row">
+          <span>Ventas registradas:</span>
+          <strong>{{ summary.ventas_registradas ?? summary.sold_participations }} ({{ ventasRegistradasImporte | number:'1.2-2' }}€)</strong>
+        </div>
+        <div class="liquidacion-participaciones-row">
+          <span>Participaciones Devueltas:</span>
+          <strong>{{ summary.returned_participations }} ({{ devueltasImporte | number:'1.2-2' }}€)</strong>
+        </div>
+        <div class="liquidacion-participaciones-row">
+          <span>Disponibles:</span>
+          <strong>{{ summary.available_participations }} ({{ disponiblesImporte | number:'1.2-2' }}€)</strong>
+        </div>
+      </div>
+
+      <div class="liquidacion-resumen-card card-block">
+        <div class="liquidacion-resumen-row">
+          <span>Total liquidación:</span>
+          <strong>{{ (summary?.total_liquidation ?? 0) | number:'1.2-2' }}€</strong>
+        </div>
+        <div class="liquidacion-resumen-row">
+          <span>Pagos registrados:</span>
+          <strong>{{ (summary?.registered_payments ?? 0) | number:'1.2-2' }}€</strong>
+        </div>
+        <div class="liquidacion-resumen-row total-a-pagar">
+          <span>Total a pagar:</span>
+          <strong>{{ totalAPagar | number:'1.2-2' }}€</strong>
+        </div>
+        <ion-button expand="block" class="btn-liquidar" (click)="openLiquidationModal()">
+          Liquidar
+        </ion-button>
+      </div>
     </div>
   </div>
 </ion-content>
 
+<!-- Action sheet: Liquidación (formulario de pago, como en gestor-vendedores) -->
+<div class="modal-overlay bottom-sheet liquidation-sheet-overlay" *ngIf="showLiquidationModal" (click)="closeLiquidationModal()">
+  <div class="modal-container liquidation-sheet-content bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="liquidation-sheet-handle"></div>
+    <div class="liquidation-sheet-header">
+      <div class="liquidation-sheet-title-row">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <div>
+          <h2 class="liquidation-sheet-title">Liquidación</h2>
+          <p class="liquidation-sheet-subtitle">Gestiona el dinero.</p>
+        </div>
+      </div>
+      <ion-button fill="clear" class="liquidation-sheet-close" (click)="closeLiquidationModal()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="liquidation-sheet-body">
+      <div class="importe-total-box">
+        <span class="importe-total-label">Importe total</span>
+        <span class="importe-total-value">{{ totalAPagar | number:'1.2-2' }}€</span>
+      </div>
+      <div class="forma-pago-section">
+        <h3 class="forma-pago-title">Forma de Pago</h3>
+        <p class="forma-pago-subtitle">Registra una forma de pago</p>
+        <div class="liquidacion-importes">
+          <div class="liquidacion-row">
+            <ion-icon name="cash-outline"></ion-icon>
+            <span>Pago en Efectivo</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="pagoEfectivo"></ion-input>
+          </div>
+          <div class="liquidacion-row">
+            <ion-icon name="phone-portrait-outline"></ion-icon>
+            <span>Pago Por Bizum</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="pagoBizum"></ion-input>
+          </div>
+          <div class="liquidacion-row">
+            <ion-icon name="business-outline"></ion-icon>
+            <span>Pago Transferencia</span>
+            <ion-input type="number" step="0.01" placeholder="Importe" [(ngModel)]="pagoTransferencia"></ion-input>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ion-button expand="block" class="btn-liquidacion-submit" (click)="confirmarLiquidacion()" [disabled]="procesando">
+      {{ procesando ? 'Procesando...' : 'Liquidación' }}
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal: ¡Liquidación Registrada! -->
+<div class="modal-overlay modal-centered-overlay" *ngIf="showLiquidationSuccessModal" (click)="closeLiquidationSuccessModal()">
+  <div class="modal-centered-box modal-liquidacion-success" (click)="$event.stopPropagation()">
+    <h2 class="modal-liquidacion-success-title">¡Liquidación Registrada!</h2>
+    <p class="modal-liquidacion-success-text">La devolución ha sido registrada con éxito. El usuario recibirá una notificación para comunicarle los detalles de la liquidación.</p>
+    <ion-button expand="block" color="warning" class="btn-modal-aceptar" (click)="closeLiquidationSuccessModal()">Aceptar</ion-button>
+  </div>
+</div>

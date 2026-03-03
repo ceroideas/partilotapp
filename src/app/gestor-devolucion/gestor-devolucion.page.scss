@@ -1,5 +1,34 @@
 .gestor-devolucion-content {
-  --background: #F5F6F7;
+  --background: #f5f6f7;
+}
+
+.rol-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 28px;
+  padding: 5px;
+
+  .rol-button {
+    flex: 1;
+    --color: #6c757d;
+    --border-radius: 24px;
+    margin: 0;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: none;
+
+    &.active {
+      --background: #212529;
+      --color: #ffffff;
+    }
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
 }
 
 .header-content {
@@ -7,40 +36,797 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  gap: 8px;
+
+  .entity-logo-header {
+    height: 32px;
+    img {
+      max-height: 32px;
+      max-width: 80px;
+      object-fit: contain;
+    }
+  }
 }
 
-// Logo ahora es una imagen, estilos en global.scss
-
-.gestor-devolucion-container {
+.devolucion-container {
   padding: 16px;
   padding-bottom: 100px;
+}
+
+.loading-section {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  justify-content: center;
+  padding: 32px;
+  color: #6c757d;
+  ion-spinner {
+    margin-bottom: 12px;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
 }
 
-.empty-state {
+.view-section {
+  padding-bottom: 24px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+  position: relative;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 12px;
+    padding: 0;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 4px 0;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0 0 8px 0;
+  }
+
+  .entity-logo-small {
+    margin-top: 8px;
+    img {
+      max-height: 36px;
+      max-width: 120px;
+      object-fit: contain;
+    }
+  }
+
+  &.devolucion-qr-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    .header-titles {
+      flex: 1;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .entity-logo-small {
+      margin-top: 0;
+      flex-shrink: 0;
+      img {
+        max-height: 40px;
+        max-width: 100px;
+      }
+    }
+  }
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+// Entidades
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.entity-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
   text-align: center;
-  padding: 40px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .entity-logo {
+    margin-bottom: 12px;
+    img {
+      max-height: 48px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .entity-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+  }
 }
 
-.empty-icon {
-  font-size: 80px;
-  color: #ccc;
-  margin-bottom: 24px;
+// Sorteos (mismo estilo que venta)
+.lotteries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
 }
 
-.empty-state h2 {
-  font-size: 24px;
+.lottery-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.lottery-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.lottery-ticket-icon {
+  width: 48px;
+  height: 48px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 24px;
+    color: #6c757d;
+  }
+}
+
+.lottery-info {
+  flex: 1;
+}
+
+.lottery-title {
+  font-size: 16px;
   font-weight: bold;
   color: #212529;
-  margin: 0 0 12px 0;
+  margin-bottom: 4px;
 }
 
-.empty-state p {
-  font-size: 16px;
+.lottery-subtitle {
+  font-size: 14px;
   color: #6c757d;
-  margin: 0;
+  margin-bottom: 2px;
 }
 
+.lottery-action {
+  display: flex;
+  align-items: center;
+}
+
+// Cards genéricos (más redondeados)
+.card-block {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.block-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.block-subtitle {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 14px 0;
+}
+
+.participacion-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 2px 0;
+}
+
+.participacion-sublabel {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0 0 10px 0;
+}
+
+.participacion-block {
+  margin-bottom: 4px;
+}
+
+// Selector de Set (como en venta-manual)
+.selector-section {
+  ion-item.input-item {
+    --background: #f8f9fa;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    border-radius: 20px;
+    margin-bottom: 0;
+
+    ion-select {
+      max-width: 100%;
+    }
+  }
+}
+
+// Escáner: unidad y rango con botones QR naranjas (más gruesos y redondeados)
+.escaner-section {
+  .block-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .block-subtitle {
+    margin-bottom: 18px;
+  }
+
+  .participacion-unidad-row,
+  .rango-row {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .flex-item {
+      flex: 1;
+      --background: #f8f9fa;
+      --padding-start: 14px;
+      --padding-end: 14px;
+      border-radius: 20px;
+      margin-bottom: 0;
+      min-height: 56px;
+    }
+
+    .btn-escaner-qr {
+      --background: #e78307;
+      --color: #fff;
+      --border-radius: 28px;
+      --box-shadow: none;
+      margin-bottom: 0;
+      min-height: 56px;
+      height: 56px;
+      padding-left: 20px;
+      // padding-right: 20px;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: none;
+      white-space: nowrap;
+
+      ion-icon {
+        font-size: 22px;
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .participaciones-rango-rows {
+    margin-bottom: 20px;
+
+    .participacion-label {
+      margin-bottom: 2px;
+    }
+
+    .participacion-sublabel {
+      margin-bottom: 10px;
+    }
+
+    .rango-row {
+      margin-bottom: 14px;
+    }
+  }
+
+  .participacion-block + .participacion-unidad-row {
+    margin-top: 4px;
+  }
+
+  .btn-devolver-seguir {
+    --background: #212529;
+    --color: #fff;
+    --border-radius: 28px;
+    min-height: 56px;
+    height: 56px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: none;
+    margin-top: 12px;
+  }
+
+  .btn-liquidar-sin-devolver {
+    --border-radius: 28px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: none;
+    margin-top: 8px;
+    --color: #6c757d;
+    --border-color: #6c757d;
+  }
+}
+
+.participaciones-form {
+  .block-title.sub {
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .input-item {
+    --background: #f8f9fa;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+
+    &.full {
+      grid-column: 1 / -1;
+    }
+  }
+  .btn-asignar {
+    margin-top: 16px;
+    --border-radius: 24px;
+    font-weight: 600;
+  }
+}
+
+.asignadas-block {
+  .asignadas-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+  .asignada-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  .btn-terminar {
+    margin-top: 12px;
+    --border-radius: 28px;
+    min-height: 56px;
+    height: 56px;
+    font-weight: 700;
+    font-size: 16px;
+    --background: #e78307;
+    --color: #212529;
+  }
+}
+
+// Resumen Devolución (lista + Total Devueltas + Aceptar / Aceptar Liquidar)
+.resumen-devolucion-card {
+  .resumen-participaciones-list {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .resumen-participacion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .resumen-participacion-icon {
+    width: 40px;
+    height: 40px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 20px;
+      color: #6c757d;
+    }
+  }
+
+  .resumen-participacion-info {
+    flex: 1;
+  }
+
+  .resumen-participacion-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #212529;
+  }
+
+  .badge-devuelta {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #dc3545;
+    color: #fff;
+  }
+
+  .total-y-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+  }
+
+  .total-devueltas-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .total-devueltas-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #212529;
+    }
+
+    .total-devueltas-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #212529;
+      line-height: 1.1;
+    }
+  }
+
+  .resumen-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+
+    ion-button {
+      --border-radius: 28px;
+      min-height: 48px;
+      height: 48px;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: none;
+      margin: 0;
+    }
+
+    .btn-aceptar-resumen {
+      --background: #e78307;
+      --color: #212529;
+    }
+
+    .btn-aceptar-liquidar {
+      --background: #212529;
+      --color: #fff;
+    }
+  }
+}
+
+// Liquidación: bloque Total participaciones, Ventas, Devueltas, Disponibles
+.liquidacion-participaciones-card {
+  margin-bottom: 16px;
+
+  .liquidacion-participaciones-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 15px;
+  }
+}
+
+// Liquidación: card con Total liquidación, Pagos registrados, Total a pagar y botón Liquidar
+.liquidacion-resumen-card {
+  .liquidacion-resumen-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 15px;
+
+    &.total-a-pagar strong {
+      font-size: 18px;
+      color: #212529;
+    }
+  }
+
+  .btn-liquidar {
+    --background: #e78307;
+    --color: #212529;
+    --border-radius: 28px;
+    min-height: 56px;
+    height: 56px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: none;
+    margin-top: 16px;
+  }
+}
+
+// Action sheet: Liquidación (formulario de pago)
+.modal-overlay.liquidation-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1002;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.liquidation-sheet-content {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUpLiquidacion 0.3s ease-out;
+}
+
+@keyframes slideUpLiquidacion {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.liquidation-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #dee2e6;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.liquidation-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+
+  .liquidation-sheet-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #212529;
+    }
+  }
+
+  .liquidation-sheet-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 2px 0;
+  }
+
+  .liquidation-sheet-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+  }
+
+  .liquidation-sheet-close {
+    --color: #212529;
+    --padding-start: 0;
+    --padding-end: 0;
+    width: 32px;
+    height: 32px;
+    --border-radius: 50%;
+    margin: 0;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.liquidation-sheet-body {
+  .importe-total-box {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+
+    .importe-total-label {
+      display: block;
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 4px;
+    }
+
+    .importe-total-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #28a745;
+    }
+  }
+
+  .forma-pago-section {
+    .forma-pago-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 4px 0;
+    }
+
+    .forma-pago-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0 0 16px 0;
+    }
+
+    .liquidacion-importes {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .liquidacion-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      height: 56px;
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+
+      ion-icon {
+        font-size: 24px;
+        color: #212529;
+        flex-shrink: 0;
+      }
+
+      span {
+        flex: 1;
+        font-size: 15px;
+        font-weight: 500;
+        color: #212529;
+      }
+
+      ion-input {
+        width: 90px;
+        --padding-start: 10px;
+        --padding-end: 10px;
+        --background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.btn-liquidacion-submit {
+  --background: #e78307;
+  --color: #212529;
+  --border-radius: 28px;
+  min-height: 56px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  margin-top: 24px;
+}
+
+// Modal ¡Liquidación Registrada!
+.modal-overlay.modal-centered-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-centered-box.modal-liquidacion-success {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+
+  .modal-liquidacion-success-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #212529;
+    margin: 0 0 14px 0;
+  }
+
+  .modal-liquidacion-success-text {
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+  }
+
+  .btn-modal-aceptar {
+    --border-radius: 28px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+  }
+}

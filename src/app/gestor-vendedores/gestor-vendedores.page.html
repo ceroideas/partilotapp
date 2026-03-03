@@ -214,7 +214,7 @@
             </div>
             <div class="seller-detail-actions">
               <ion-button fill="outline" size="small" class="btn-ver-mas" (click)="openVerMasSheet()">Ver más</ion-button>
-              <ion-button class="btn-asignar-particip" fill="solid">
+              <ion-button class="btn-asignar-particip" fill="solid" (click)="goToAsignacion()">
               <span class="btn-asignar-wrap">
                 <ion-icon name="add" class="btn-asignar-icon"></ion-icon>
                 <span class="btn-asignar-text"><span class="btn-asignar-line1">Asignar</span><span class="btn-asignar-line2">Particip.</span></span>
@@ -425,7 +425,7 @@
         clearOnEdit="false"
         class="modal-email-input"></ion-input>
     </div>
-    <ion-button expand="block" class="btn-invitar-modal" (click)="invitePartilot()" [disabled]="!partilotEmail?.trim()">
+    <ion-button expand="block" class="btn-invitar-modal" (click)="invitePartilot()" [disabled]="!partilotEmail.trim()">
       Invitar
     </ion-button>
   </div>
