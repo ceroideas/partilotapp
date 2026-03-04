@@ -69,14 +69,14 @@
         fill="outline"
         (click)="agregarParticipacion()">
         <ion-icon name="qr-code-outline" slot="start"></ion-icon>
-        Digitalizar + Participación
+        Digitalizar + <br> Participación
       </ion-button>
       <ion-button 
         class="action-button gestionar-button" 
         fill="outline"
         (click)="irACobrarGestionar()">
         <ion-icon name="cash-outline" slot="start"></ion-icon>
-        Cobrar / Gestionar
+        Cobrar / <br> Gestionar
       </ion-button>
     </div>
 
@@ -101,7 +101,8 @@
           <div class="participacion-info">
             <div class="participacion-header">
               <span class="entidad">{{ participacion.entidad || 'Entidad' }}</span>
-              <span class="numero">{{ participacion.numeroReservado || participacion.numero || participacion.id }}</span>
+              <span class="numero-reservado">{{ participacion.numeroReservado || participacion.numero || participacion.id }}</span>
+              <span class="numero-participacion" *ngIf="participacion.numeroParticipacion">{{ participacion.numeroParticipacion }}</span>
             </div>
           </div>
           <div class="participacion-right">

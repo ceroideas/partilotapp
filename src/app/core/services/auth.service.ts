@@ -124,7 +124,8 @@ export class AuthService {
     localStorage.removeItem('seller');
     localStorage.removeItem('manager');
     localStorage.removeItem('rolActual');
-    this.router.navigate(['/login']);
+    // Recarga completa para descargar de caché todas las vistas de Ionic y evitar datos viejos
+    window.location.href = '/login';
   }
 
   isLoggedIn(): boolean {

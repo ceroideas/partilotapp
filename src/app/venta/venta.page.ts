@@ -74,9 +74,26 @@ export class VentaPage implements OnInit {
 
   ngOnInit() {
     this.isVendedor = this.authService.isSeller();
-    if (this.isVendedor) {
-      this.loadEntities();
-    }
+  }
+
+  /** Carga inicial y al volver a la vista (cambio de rol/tab): refresca datos para no mostrar caché vieja. */
+  ionViewWillEnter() {
+    this.isVendedor = this.authService.isSeller();
+    if (!this.isVendedor) return;
+    this.loading = false;
+    this.entities = [];
+    this.selectedEntity = null;
+    this.lotteries = [];
+    this.selectedLottery = null;
+    this.showEntitySelection = false;
+    this.showLotteriesList = false;
+    this.showVentaView = false;
+    this.reserves = [];
+    this.allSets = [];
+    this.sets = [];
+    this.reserveSeleccionado = null;
+    this.setSeleccionado = null;
+    this.loadEntities();
   }
 
   async loadEntities() {
@@ -130,6 +147,7 @@ export class VentaPage implements OnInit {
             this.showLotteriesList = true;
           } else {
             await this.mostrarAlerta('Sin sorteos', 'No hay sorteos disponibles con reservas, sets y diseño para esta entidad.');
+            this.showLotteriesList = true; // Mostrar vista de sorteos (vacía) para que aparezca la flecha atrás
           }
         } else {
           await this.mostrarAlerta('Error', res.message || 'Error al cargar los sorteos.');
@@ -244,9 +262,12 @@ export class VentaPage implements OnInit {
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';
-    if (this.entities.length > 1) {
-      this.showEntitySelection = true;
-    }
+    this.showEntitySelection = true; // Siempre volver a selección de entidad (aunque solo haya 1, para poder salir)
+  }
+
+  /** Navegar al Home (útil cuando solo hay una entidad y se vuelve desde sorteos). */
+  goToHome() {
+    this.router.navigate(['/tabs/tab1']);
   }
 
   cambiarRol(rol: string) {

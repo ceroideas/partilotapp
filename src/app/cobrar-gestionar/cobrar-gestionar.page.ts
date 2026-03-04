@@ -97,16 +97,46 @@ export class CobrarGestionarPage implements OnInit {
     this.loadParticipaciones();
   }
 
-  toggleSeleccion(participacion: any, event?: Event) {
+  /** entity_id de las participaciones actualmente seleccionadas (todas deben ser de la misma entidad). */
+  get entityIdDeSeleccion(): number | null {
+    const firstId = this.participacionesSeleccionadas.values().next().value;
+    if (firstId == null) return null;
+    const p = this.participaciones.find(x => x.id === firstId);
+    return p?.entity_id ?? null;
+  }
+
+  /** Nombre de entidad de la selección actual (para mensajes). */
+  get entidadDeSeleccion(): string | null {
+    const firstId = this.participacionesSeleccionadas.values().next().value;
+    if (firstId == null) return null;
+    const p = this.participaciones.find(x => x.id === firstId);
+    return p?.entidad ?? null;
+  }
+
+  /** Comprueba si una participación puede añadirse a la selección (misma entidad que las ya seleccionadas). */
+  puedeSeleccionarParticipacion(participacion: any): boolean {
+    if (this.participacionesSeleccionadas.size === 0) return true;
+    const idActual = this.entityIdDeSeleccion;
+    if (idActual != null && participacion.entity_id != null) return participacion.entity_id === idActual;
+    return (participacion.entidad ?? '') === (this.entidadDeSeleccion ?? '');
+  }
+
+  async toggleSeleccion(participacion: any, event?: Event) {
     event?.stopPropagation();
     const id = participacion.id;
     if (this.participacionesSeleccionadas.has(id)) {
       this.participacionesSeleccionadas.delete(id);
     } else {
+      if (!this.puedeSeleccionarParticipacion(participacion)) {
+        await this.alertModal.show(
+          'Misma entidad',
+          'Solo puedes seleccionar participaciones de la misma entidad. Las seleccionadas son de «' + (this.entidadDeSeleccion || '') + '». Deselecciona antes de elegir participaciones de otra entidad.'
+        );
+        return;
+      }
       this.participacionesSeleccionadas.add(id);
     }
     this.calcularImporteTotal();
-    // No abrir automáticamente ningún modal, permitir seleccionar múltiples participaciones
   }
 
   estaSeleccionada(participacionId: number): boolean {

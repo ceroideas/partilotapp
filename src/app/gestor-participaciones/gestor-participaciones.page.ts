@@ -57,21 +57,32 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     this.ventasChangedSub?.unsubscribe();
   }
 
+  /** Path del tab actual (vendedor-tab4, gestor-tab1, etc.) desde la ruta activa; más fiable que router.url al cargar. */
+  private get pathTabActual(): string {
+    const fromUrl = this.router.url || '';
+    if (fromUrl.includes('vendedor-tab') || fromUrl.includes('gestor-tab')) return fromUrl;
+    let r: ActivatedRoute | null = this.route;
+    while (r) {
+      const path = r.snapshot?.routeConfig?.path || '';
+      if (path.includes('vendedor-tab') || path.includes('gestor-tab')) return path;
+      r = r.parent;
+    }
+    return fromUrl;
+  }
+
   /** True si estamos en la pestaña de gestor (usa API managers/me). */
   private get usaFlujoGestor(): boolean {
-    const ruta = window.location.pathname;
-    return ruta.includes('/gestor-tab') && this.authService.isManager();
+    return this.pathTabActual.includes('gestor-tab') && this.authService.isManager();
   }
 
   /** True si estamos en la pestaña de vendedor (usa API sellers/me). */
   private get usaFlujoVendedor(): boolean {
-    const ruta = window.location.pathname;
-    return ruta.includes('/vendedor-tab') && this.authService.isSeller();
+    return this.pathTabActual.includes('vendedor-tab') && this.authService.isSeller();
   }
 
   /** Para la plantilla: true si estamos en pestaña gestor (mostrar nombre vendedor, etc.). */
   get enPestanaGestor(): boolean {
-    return window.location.pathname.includes('/gestor-tab');
+    return this.pathTabActual.includes('gestor-tab');
   }
 
   ionViewWillEnter() {
@@ -117,18 +128,18 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   detectarRol() {
-    const ruta = window.location.pathname;
+    const ruta = this.pathTabActual || this.router.url || '';
     const tieneSeller = this.authService.isSeller();
     const esGestor = this.authService.isGestor();
 
     // La ruta tiene prioridad: si estamos en tabs de vendedor/gestor, usar ese rol
-    if (ruta.includes('/vendedor-tab') && tieneSeller) {
+    if (ruta.includes('vendedor-tab') && tieneSeller) {
       this.rolActual = 'vendedor';
       localStorage.setItem('rolActual', 'vendedor');
       localStorage.setItem('esVendedor', 'true');
       return;
     }
-    if (ruta.includes('/gestor-tab') && esGestor) {
+    if (ruta.includes('gestor-tab') && esGestor) {
       this.rolActual = 'gestor';
       localStorage.setItem('rolActual', 'gestor');
       localStorage.setItem('esVendedor', 'false');
@@ -261,7 +272,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   selectEntity(entity: any) {
     this.selectedEntity = entity;
     this.showEntitySelection = false;
-    if (this.isGestor) {
+    if (this.usaFlujoGestor) {
       this.loadTacosGestor();
     } else {
       this.loadTacos();
@@ -296,9 +307,9 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     });
   }
 
-  /** Abre el detalle de un taco: como vendedor o como gestor (con seller_id) */
+  /** Abre el detalle de un taco: como vendedor (sellers/me) o como gestor (managers/me) según la pestaña actual. */
   openTaco(taco: any) {
-    if (this.isGestor && (taco.seller_id != null || taco.sellerId != null)) {
+    if (this.usaFlujoGestor && (taco.seller_id != null || taco.sellerId != null)) {
       const setId = taco.set_id ?? taco.setId;
       const bookNumber = taco.book_number ?? taco.bookNumber;
       const sellerId = taco.seller_id ?? taco.sellerId;
@@ -342,8 +353,13 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     }
   }
 
+  /** Status 'pagada' se comporta como vendida (pago ya registrado en gestor pago). */
+  private isSoldStatus(status: string): boolean {
+    return status === 'vendida' || status === 'pagada';
+  }
+
   getStatusBadgeClass(status: string, paymentMethod?: string): string {
-    if (status === 'vendida') {
+    if (this.isSoldStatus(status)) {
       if (paymentMethod === 'efectivo') return 'badge-efectivo';
       if (paymentMethod === 'bizum') return 'badge-bizum';
       if (paymentMethod === 'transferencia') return 'badge-transferencia';
@@ -354,6 +370,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   getStatusText(status: string, paymentMethod?: string): string {
+    if (status === 'pagada') return 'Pagada';
     if (status === 'vendida') {
       if (paymentMethod) {
         return paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1) + ' Vendida';
@@ -383,7 +400,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   getTacoSalesCount(): number {
-    return this.tacoParticipations.filter(p => p.status === 'vendida').length;
+    return this.tacoParticipations.filter(p => this.isSoldStatus(p.status)).length;
   }
 
   getTacoSalesAmount(): number {
@@ -414,7 +431,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     const breakdown: any = { efectivo: 0, bizum: 0, transferencia: 0, sin_registrar: 0 };
     
     this.tacoParticipations
-      .filter(p => p.status === 'vendida')
+      .filter(p => this.isSoldStatus(p.status))
       .forEach(p => {
         if (p.payment_method === 'efectivo') breakdown.efectivo += price;
         else if (p.payment_method === 'bizum') breakdown.bizum += price;
@@ -427,7 +444,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
 
   getTacoPaymentCount(method: string): number {
     return this.tacoParticipations.filter(p => 
-      p.status === 'vendida' && p.payment_method === method
+      this.isSoldStatus(p.status) && p.payment_method === method
     ).length;
   }
 

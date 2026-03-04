@@ -153,7 +153,7 @@ export class GestorDevolucionPage implements OnInit {
           this.entities = res.entities;
           if (this.entities.length === 0) {
             this.errorMessage = 'No tienes entidades asignadas para devoluciones.';
-          } else if (this.entities.length === 1) {
+          } else if (this.entities.length === 1 && this.isEntityActive(this.entities[0])) {
             this.selectEntity(this.entities[0]);
           }
         } else {
@@ -167,7 +167,15 @@ export class GestorDevolucionPage implements OnInit {
     });
   }
 
+  isEntityActive(entity: any): boolean {
+    return entity?.status === 'activo' || entity?.status === 1;
+  }
+
   selectEntity(entity: any) {
+    if (!this.isEntityActive(entity)) {
+      this.alertModal.show('Entidad inactiva', 'No puedes seleccionar una entidad inactiva para devoluciones.');
+      return;
+    }
     this.selectedEntity = entity;
     this.loadSellers();
     this.step = 'vendedores';

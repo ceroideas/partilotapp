@@ -312,3 +312,28 @@ ion-modal.modal-exito-pago .btn-aceptar-modal {
   min-height: 48px;
 }
 
+/* Modal de alertas (Error, Aviso, Éxito): mismo formato que "Pago registrado con éxito" — título, texto, botón; redondeado y centrado */
+ion-modal.alert-modal-box {
+  --width: 90%;
+  --max-width: 340px;
+  --height: auto;
+  --max-height: 80vh;
+  --border-radius: 20px;
+  --backdrop-opacity: 0.8;
+  --box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ion-modal.alert-modal-box::part(content) {
+  margin: auto;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 20px;
+}
+ion-modal.alert-modal-box app-alert-modal,
+ion-modal.alert-modal-box .ion-page {
+  background: #fff;
+  border-radius: 20px;
+}
+

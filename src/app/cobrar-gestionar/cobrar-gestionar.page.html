@@ -74,6 +74,7 @@
       <div 
         class="participacion-item" 
         [class.selected]="estaSeleccionada(participacion.id)"
+        [class.otra-entidad]="participacionesSeleccionadas.size > 0 && !puedeSeleccionarParticipacion(participacion)"
         *ngFor="let participacion of participaciones"
         (click)="toggleSeleccion(participacion, $event)">
         
@@ -93,18 +94,20 @@
         <div class="participacion-info">
           <div class="participacion-header">
             <span class="entidad">{{ participacion.entidad }}</span>
-            <span class="numero">{{ participacion.numero }}</span>
-          </div>
-          <div class="participacion-details">
-            <span class="fecha">
-              <ion-icon name="calendar-outline"></ion-icon>
-              {{ participacion.fechaSorteo }}
-            </span>
-            <span class="importe">€{{ (participacion.premio ?? participacion.importeTotal) | number:'1.2-2' }}</span>
+            <span class="numero-reservado">{{ participacion.numeroReservado || participacion.numero }}</span>
+            <span class="numero-participacion" *ngIf="participacion.numeroParticipacion">{{ participacion.numeroParticipacion }}</span>
           </div>
         </div>
         
-        <div class="participacion-actions">
+        <div class="participacion-right">
+          <div class="participacion-meta">
+            <span class="sorteo" *ngIf="participacion.sorteo">Sorteo: {{ participacion.sorteo }}</span>
+            <span class="fecha">
+              <ion-icon name="calendar-outline"></ion-icon>
+              {{ participacion.fechaSorteo || '—' }}
+            </span>
+            <span class="importe">€{{ (participacion.premio ?? participacion.importeTotal) | number:'1.2-2' }}</span>
+          </div>
           <ion-icon name="information-circle-outline" class="info-icon"></ion-icon>
         </div>
       </div>
@@ -118,7 +121,6 @@
       </div>
       <ion-button 
         class="action-footer-button" 
-        expand="block"
         (click)="modoCobro ? continuarCobro() : continuarDonacion()">
         {{ modoCobro ? 'Cobrar' : 'Donar / Generar' }}
       </ion-button>

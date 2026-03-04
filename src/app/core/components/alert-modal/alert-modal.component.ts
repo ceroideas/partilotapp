@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { AlertModalService } from '../../services/alert-modal.service';
+import { Component, Input } from '@angular/core';
+import { ModalController } from '@ionic/angular';
 
 @Component({
   selector: 'app-alert-modal',
@@ -8,27 +7,13 @@ import { AlertModalService } from '../../services/alert-modal.service';
   styleUrls: ['./alert-modal.component.scss'],
   standalone: false
 })
-export class AlertModalComponent implements OnInit, OnDestroy {
-  isOpen = false;
-  title = '';
-  message = '';
-  private sub?: Subscription;
+export class AlertModalComponent {
+  @Input() title = '';
+  @Input() message = '';
 
-  constructor(public alertModal: AlertModalService) {}
-
-  ngOnInit(): void {
-    this.sub = this.alertModal.current.subscribe((v) => {
-      this.isOpen = v !== null;
-      this.title = v?.title ?? '';
-      this.message = v?.message ?? '';
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
+  constructor(private modalCtrl: ModalController) {}
 
   cerrar(): void {
-    this.alertModal.dismiss();
+    this.modalCtrl.dismiss();
   }
 }

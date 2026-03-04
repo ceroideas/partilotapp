@@ -1,43 +1,32 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-
-export interface AlertOptions {
-  title: string;
-  message: string;
-}
+import { ModalController } from '@ionic/angular';
+import { AlertModalComponent } from '../components/alert-modal/alert-modal.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AlertModalService {
-  private resolveDismiss: (() => void) | null = null;
-  private readonly current$ = new BehaviorSubject<AlertOptions | null>(null);
-
-  readonly current = this.current$.asObservable();
-  get isOpen(): boolean {
-    return this.current$.value !== null;
-  }
-  get currentValue(): AlertOptions | null {
-    return this.current$.value;
-  }
+  constructor(private modalCtrl: ModalController) {}
 
   /**
-   * Muestra un modal de alerta (mismo estilo que el modal de éxito).
+   * Muestra un modal de alerta (mismo estilo que "Pago registrado con éxito").
+   * El modal solo existe mientras está abierto; al cerrar se destruye.
    * Retorna una promesa que se resuelve cuando el usuario pulsa Aceptar o cierra.
    */
   show(title: string, message: string): Promise<void> {
-    return new Promise((resolve) => {
-      this.resolveDismiss = resolve;
-      this.current$.next({ title, message });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const modal = await this.modalCtrl.create({
+          component: AlertModalComponent,
+          cssClass: 'alert-modal-box',
+          componentProps: { title, message },
+          backdropDismiss: true
+        });
+        await modal.present();
+        modal.onDidDismiss().then(() => resolve());
+      } catch (e) {
+        reject(e);
+      }
     });
-  }
-
-  /** Llamado por el componente al cerrar el modal (Aceptar o X). */
-  dismiss(): void {
-    this.current$.next(null);
-    if (this.resolveDismiss) {
-      this.resolveDismiss();
-      this.resolveDismiss = null;
-    }
   }
 }

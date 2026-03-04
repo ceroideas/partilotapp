@@ -1,18 +1,5 @@
-<ion-modal [isOpen]="isOpen" (didDismiss)="cerrar()">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>{{ title }}</ion-title>
-        <ion-buttons slot="end">
-          <ion-button fill="clear" (click)="cerrar()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <p class="alert-modal-message">{{ message }}</p>
-      <ion-button expand="block" class="btn-aceptar" (click)="cerrar()">Aceptar</ion-button>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+<div class="alert-modal-content">
+  <h2 class="alert-modal-titulo">{{ title }}</h2>
+  <p class="alert-modal-texto">{{ message }}</p>
+  <ion-button expand="block" class="alert-modal-btn-aceptar" (click)="cerrar()">Aceptar</ion-button>
+</div>

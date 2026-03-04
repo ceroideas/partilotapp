@@ -135,9 +135,9 @@
 }
 
 .participacion-image {
-  width: 60px;
-  height: 80px;
-  border-radius: 8px;
+  width: 100px;
+  height: 64px;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
   background: #E9ECEF;
@@ -164,7 +164,7 @@
     background: #E9ECEF;
     
     ion-icon {
-      font-size: 32px;
+      font-size: 36px;
       color: #6c757d;
     }
   }
@@ -178,7 +178,7 @@
 .participacion-header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   
   .entidad {
     font-size: 14px;
@@ -186,10 +186,15 @@
     color: #212529;
   }
   
-  .numero {
-    font-size: 18px;
+  .numero-reservado {
+    font-size: 14px;
     font-weight: bold;
     color: #212529;
+  }
+  
+  .numero-participacion {
+    font-size: 12px;
+    color: #495057;
   }
 }
 

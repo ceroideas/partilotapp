@@ -61,7 +61,7 @@ ion-back-button {
 .action-button {
   flex: 1;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 50px;
   font-weight: 500;
   text-transform: none;
   
@@ -157,6 +157,11 @@ ion-back-button {
     background: #E9ECEF;
     border-color: #F49200;
   }
+
+  &.otra-entidad {
+    opacity: 0.6;
+    pointer-events: auto; /* permitir click para mostrar mensaje */
+  }
   
   &:active {
     transform: scale(0.98);
@@ -164,9 +169,9 @@ ion-back-button {
 }
 
 .participacion-image {
-  width: 60px;
-  height: 80px;
-  border-radius: 8px;
+  width: 100px;
+  height: 64px;
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
   background: #E9ECEF;
@@ -193,7 +198,7 @@ ion-back-button {
     background: #E9ECEF;
     
     ion-icon {
-      font-size: 32px;
+      font-size: 36px;
       color: #6c757d;
     }
   }
@@ -201,15 +206,17 @@ ion-back-button {
 
 .participacion-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
 }
 
 .participacion-header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   
   .entidad {
     font-size: 14px;
@@ -217,17 +224,35 @@ ion-back-button {
     color: #212529;
   }
   
-  .numero {
-    font-size: 16px;
+  .numero-reservado {
+    font-size: 14px;
     font-weight: bold;
     color: #212529;
   }
+  
+  .numero-participacion {
+    font-size: 12px;
+    color: #495057;
+  }
 }
 
-.participacion-details {
+.participacion-right {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.participacion-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  
+  .sorteo {
+    font-size: 12px;
+    color: #6c757d;
+  }
   
   .fecha {
     display: flex;
@@ -248,11 +273,9 @@ ion-back-button {
   }
 }
 
-.participacion-actions {
-  .info-icon {
-    font-size: 24px;
-    color: #6c757d;
-  }
+.participacion-right .info-icon {
+  font-size: 22px;
+  color: #6c757d;
 }
 
 .footer-actions {
@@ -275,7 +298,8 @@ ion-back-button {
   gap: 4px;
   
   .total-label {
-    font-size: 12px;
+    font-size: 16px;
+    line-height: 2.2;
     color: #6c757d;
   }
   
@@ -289,11 +313,16 @@ ion-back-button {
 .action-footer-button {
   --background: #F49200;
   --color: #ffffff;
-  height: 56px;
+  height: 48px;
+  min-height: 48px;
   border-radius: 28px;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 14px;
   text-transform: none;
   min-width: 120px;
+  max-width: 200px;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 // Modales personalizados (como en vendedores) - Bottom sheet que queda detrás del tab-bar

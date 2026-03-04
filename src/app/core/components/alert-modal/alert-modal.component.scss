@@ -1,12 +1,33 @@
-.alert-modal-message {
-  margin: 0 0 20px 0;
-  color: var(--ion-text-color);
-  font-size: 15px;
-  line-height: 1.5;
+/* Mismo formato que modal "Pago registrado con éxito": título, texto, botón; centrado y redondeado */
+.alert-modal-content {
+  padding: 28px 24px;
+  text-align: center;
+  background: #fff;
+  min-height: 0;
 }
 
-.btn-aceptar {
+.alert-modal-titulo {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #212529;
+  text-align: center;
+}
+
+.alert-modal-texto {
+  margin: 0 0 28px 0;
+  color: #212529;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  font-weight: 400;
+}
+
+.alert-modal-btn-aceptar {
   --background: #e78307;
-  --color: #212529;
+  --color: #ffffff;
+  --border-radius: 9999px;
   font-weight: 600;
+  margin: 0;
+  min-height: 48px;
 }
