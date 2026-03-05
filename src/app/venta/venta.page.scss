@@ -449,14 +449,24 @@
           height: 48px;
           --border-radius: 50%;
           --background: #F5F6F7;
-          
+
+          .counter-icon-char {
+            font-size: 28px;
+            font-weight: 300;
+            line-height: 1;
+            color: #212529;
+          }
+
           ion-icon {
             font-size: 24px;
           }
-          
+
           &[disabled] {
             --color: #6c757d;
             opacity: 0.5;
+            .counter-icon-char {
+              color: #6c757d;
+            }
           }
         }
         

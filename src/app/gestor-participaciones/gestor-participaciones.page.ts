@@ -467,4 +467,13 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     const apiBaseUrl = environment.apiUrl.replace('/api', '');
     return `${apiBaseUrl}/uploads/${imagePath}`;
   }
+
+  /** Etiqueta del tipo de set para mostrar en lista y detalle (digital / físico / mixto). */
+  getSetTypeLabel(setType: string | undefined): string {
+    if (!setType) return '';
+    if (setType === 'digital') return 'Digital';
+    if (setType === 'fisico') return 'Físico';
+    if (setType === 'mixto') return 'Mixto';
+    return '';
+  }
 }

@@ -149,7 +149,10 @@
             <ion-icon name="ticket-outline"></ion-icon>
           </div>
           <div class="taco-info">
-            <div class="taco-title">Taco: {{ taco.set_number }}/{{ padNumber(taco.book_number, 3) }}</div>
+            <div class="taco-title-row">
+              <span class="taco-title">Taco: {{ taco.set_number }}/{{ padNumber(taco.book_number, 3) }}</span>
+              <span class="taco-type-badge" *ngIf="getSetTypeLabel(taco.set_type)" [class.badge-digital]="taco.set_type === 'digital'" [class.badge-fisico]="taco.set_type === 'fisico'" [class.badge-mixto]="taco.set_type === 'mixto'">{{ getSetTypeLabel(taco.set_type) }}</span>
+            </div>
             <div class="taco-subtitle">Particip.: {{ taco.participations_range }}</div>
             <div class="taco-vendedor" *ngIf="isGestor && taco.seller_name">
               Vendedor: {{ taco.seller_name }}
@@ -215,8 +218,17 @@
           <ion-icon name="ticket-outline"></ion-icon>
         </div>
         <div class="taco-detail-info">
-          <div class="taco-detail-title">N-{{ selectedTaco.set_number }}</div>
-          <div class="taco-detail-price">Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</div>
+          <div class="taco-detail-title-row">
+            <span class="taco-detail-title">N-{{ selectedTaco.set_number }}</span>
+            <span class="taco-detail-type-badge" *ngIf="getSetTypeLabel(selectedTaco.set_type)" [class.badge-digital]="selectedTaco.set_type === 'digital'" [class.badge-fisico]="selectedTaco.set_type === 'fisico'" [class.badge-mixto]="selectedTaco.set_type === 'mixto'">{{ getSetTypeLabel(selectedTaco.set_type) }}</span>
+          </div>
+          <div class="taco-detail-price">
+            <span>Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</span>
+            <span *ngIf="(selectedTaco.donation_per_participation ?? 0) > 0">, Donación: {{ selectedTaco.donation_per_participation | number:'1.2-2' }}€</span>
+          </div>
+          <div class="taco-detail-price">
+          <span>Total participación: {{ (selectedTaco.total_per_participation ?? selectedTaco.price_per_participation ?? 0) | number:'1.2-2' }}€</span>
+          </div>
           <div class="taco-detail-range">Taco: {{ selectedTaco.set_number }}/{{ padNumber(selectedTaco.book_number, 3) }} Particip.: {{ selectedTaco.participations_range }}</div>
           <div class="taco-detail-vendedor" *ngIf="isGestor && selectedTaco.seller_name">
             Vendedor: {{ selectedTaco.seller_name }}
