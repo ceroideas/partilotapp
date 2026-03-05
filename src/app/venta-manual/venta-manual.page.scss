@@ -122,23 +122,49 @@
     
     ion-segment {
       --background: #F5F6F7;
-      border-radius: 12px;
-      padding: 4px;
+      border-radius: 9999px;
+      padding: 6px;
+      gap: 12px;
+      display: flex;
       
       ion-segment-button {
         --indicator-color: transparent;
+        --border-radius: 9999px;
         --color: #6c757d;
-        --color-checked: #212529;
-        --background-checked: #212529;
         --color-checked: #ffffff;
-        min-height: 44px;
+        --background: transparent;
+        --background-checked: #212529;
+        --background-hover: transparent;
+        --background-activated: transparent;
+        min-height: 48px;
         font-size: 12px;
         font-weight: 500;
         text-transform: none;
+        border-radius: 9999px;
+        flex: 1;
+        
+        &::part(native) {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 8px;
+          padding-inline-start: 14px;
+          padding-inline-end: 14px;
+          text-align: left;
+        }
         
         ion-icon {
           font-size: 20px;
-          margin-bottom: 4px;
+          margin: 0;
+          flex-shrink: 0;
+        }
+        
+        ion-label {
+          text-align: left;
+          display: block;
+          flex: 1;
+          min-width: 0;
         }
       }
     }

@@ -58,12 +58,22 @@ export class AppComponent implements OnInit {
   actualizarUsuario() {
     const user = this.authService.getUser();
     if (user) {
-      this.userName = user.name || '';
+      this.userName = this.obtenerNombreCompleto(user);
       this.userEmail = user.email || '';
       this.userImage = this.getUserImageUrl(user.image);
     } else {
       this.userImage = null;
     }
+  }
+
+  /** Nombre para el menú: nombre + primer apellido (si existe). */
+  private obtenerNombreCompleto(user: { name?: string; last_name?: string; last_name2?: string; nombre?: string; apellido?: string }): string {
+    const nombre = (user.name || user.nombre || '').trim();
+    const primerApellido = (user.last_name || user.apellido || '').trim();
+    if (primerApellido) {
+      return `${nombre} ${primerApellido}`.trim();
+    }
+    return nombre || 'Usuario';
   }
 
   /** URL de la imagen del usuario (desde API). Las imágenes de usuario se sirven desde storage. */
