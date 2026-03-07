@@ -36,7 +36,7 @@
         class="rol-button"
         [class.active]="rolActual === 'usuario'"
         fill="clear"
-        (click)="rolActual = 'usuario'"
+        (click)="cambiarRol('usuario')"
         [disabled]="rolActual === 'usuario'">
         <ion-icon name="person-outline" slot="start"></ion-icon>
         Usuario
@@ -46,7 +46,7 @@
         class="rol-button"
         [class.active]="rolActual === 'vendedor'"
         fill="clear"
-        (click)="rolActual = 'vendedor'"
+        (click)="cambiarRol('vendedor')"
         [disabled]="rolActual === 'vendedor'">
         <ion-icon name="bag-outline" slot="start"></ion-icon>
         Vendedor
@@ -56,7 +56,7 @@
         class="rol-button"
         [class.active]="rolActual === 'gestor'"
         fill="clear"
-        (click)="rolActual = 'gestor'"
+        (click)="cambiarRol('gestor')"
         [disabled]="rolActual === 'gestor'">
         <ion-icon name="people-outline" slot="start"></ion-icon>
         Gestor
@@ -121,10 +121,10 @@
         </ion-item>
       </div>
 
-      <div class="card-block escaner-section">
+      <!-- Sets físicos: escáner y rango/unidad -->
+      <div class="card-block escaner-section" *ngIf="!isDigitalSet">
         <h3 class="block-title">Escáner</h3>
         <p class="block-subtitle">Gestiona la asignación por QR</p>
-
         <div class="participacion-block">
           <h4 class="participacion-label">Participación Unidad</h4>
         </div>
@@ -137,7 +137,6 @@
             Escanear QR
           </ion-button>
         </div>
-
         <div class="participaciones-rango-rows">
           <h4 class="participacion-label">Participaciones Por Rango</h4>
           <div class="rango-row">
@@ -159,9 +158,40 @@
             </ion-button>
           </div>
         </div>
-
         <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
           Asignar / Seguir
+        </ion-button>
+      </div>
+
+      <!-- Sets digitales: mismo estilo que venta digital (card, contador, disponibilidad, botón Asignar) -->
+      <div class="card-block asignacion-digital-card" *ngIf="isDigitalSet">
+        <div class="numero-participaciones-section">
+          <h3 class="counter-title">Número de Participaciones</h3>
+          <div class="counter-controls">
+            <ion-button
+              class="counter-button"
+              fill="clear"
+              (click)="disminuirParticipacionesDigital()"
+              [disabled]="cantidadDigitalNum <= 1">
+              <span class="counter-icon-char" aria-hidden="true">−</span>
+            </ion-button>
+            <div class="counter-value">{{ cantidadDigitalNum }}</div>
+            <ion-button
+              class="counter-button"
+              fill="clear"
+              (click)="aumentarParticipacionesDigital()"
+              [disabled]="cantidadDigitalNum >= disponiblesDigitalSet">
+              <span class="counter-icon-char" aria-hidden="true">+</span>
+            </ion-button>
+          </div>
+          <p class="disponibilidad">Disponibilidad: {{ disponiblesDigitalSet }}</p>
+        </div>
+        <ion-button
+          class="asignar-button"
+          expand="block"
+          (click)="validarYAsignar()"
+          [disabled]="loading || cantidadDigitalNum < 1 || cantidadDigitalNum > disponiblesDigitalSet">
+          Asignar
         </ion-button>
       </div>
 

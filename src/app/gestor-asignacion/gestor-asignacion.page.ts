@@ -42,6 +42,9 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
   rangoDesde = '';
   rangoHasta = '';
   unidadNumero = '';
+  /** Solo para sets digitales: cantidad a asignar (valor numérico para el contador) y disponibles en el set */
+  cantidadDigitalNum = 1;
+  disponiblesDigitalSet = 0;
   participacionesToAssign: AsignacionParticipation[] = [];
 
   signatureDataUrl: string | null = null;
@@ -87,6 +90,21 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     }
   }
 
+  cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
+    this.rolActual = rol;
+    localStorage.setItem('rolActual', rol);
+    if (rol === 'vendedor') {
+      localStorage.setItem('esVendedor', 'true');
+      this.router.navigate(['/tabs/vendedor-tab1']);
+    } else if (rol === 'usuario') {
+      localStorage.setItem('esVendedor', 'false');
+      this.router.navigate(['/tabs/tab3']);
+    } else if (rol === 'gestor') {
+      localStorage.setItem('esVendedor', 'false');
+      this.router.navigate(['/tabs/gestor-tab3']);
+    }
+  }
+
   loadLotteries() {
     if (!this.entityId) return;
     this.loading = true;
@@ -126,6 +144,9 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
         if (res.success && res.sets) {
           this.sets = res.sets;
           this.selectedSet = this.sets.length === 1 ? this.sets[0] : null;
+          if (this.sets.length === 1 && this.selectedSet && this.isDigitalSet && this.sellerId) {
+            this.cargarDisponiblesDigital();
+          }
           if (this.sets.length === 0) {
             this.errorMessage = 'No hay sets con participaciones para este sorteo.';
           }
@@ -144,14 +165,64 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     return a && b && a.id === b.id;
   }
 
+  /** True si el set seleccionado es solo digital (sin físicas) */
+  get isDigitalSet(): boolean {
+    const s = this.selectedSet;
+    if (!s) return false;
+    const dig = s.digital_participations ?? 0;
+    const fis = s.physical_participations ?? 0;
+    return dig > 0 && fis === 0;
+  }
+
   onSetChange(ev: any) {
     const v = ev?.detail?.value;
-    if (v != null) this.selectedSet = v;
+    if (v != null) {
+      this.selectedSet = v;
+      if (this.isDigitalSet && this.sellerId && this.selectedSet) {
+        this.cargarDisponiblesDigital();
+      } else {
+        this.disponiblesDigitalSet = 0;
+      }
+    }
+  }
+
+  /** Cargar cantidad disponible para set digital (cantidad=0) */
+  cargarDisponiblesDigital() {
+    if (!this.sellerId || !this.selectedSet?.id) return;
+    this.ventasService.validateAssignmentsByCantidad(this.sellerId, this.selectedSet.id, 0).subscribe({
+      next: (res) => {
+        if (res.success && res.disponibles_restantes !== undefined) {
+          this.disponiblesDigitalSet = res.disponibles_restantes;
+        }
+      },
+      error: () => { this.disponiblesDigitalSet = 0; }
+    });
+  }
+
+  disminuirParticipacionesDigital() {
+    if (this.cantidadDigitalNum > 1) this.cantidadDigitalNum--;
+  }
+
+  aumentarParticipacionesDigital() {
+    if (this.cantidadDigitalNum < this.disponiblesDigitalSet) this.cantidadDigitalNum++;
   }
 
   validarYAsignar() {
     if (!this.sellerId || !this.selectedSet) {
       this.mostrarAlerta('Falta selección', 'Selecciona set.');
+      return;
+    }
+    if (this.isDigitalSet) {
+      const cantidad = this.cantidadDigitalNum;
+      if (cantidad < 1) {
+        this.mostrarAlerta('Cantidad requerida', 'Indica cuántas participaciones asignar (mínimo 1).');
+        return;
+      }
+      if (cantidad > this.disponiblesDigitalSet) {
+        this.mostrarAlerta('No hay suficientes', `Solo hay ${this.disponiblesDigitalSet} disponibles.`);
+        return;
+      }
+      this.validarCantidadDigital(cantidad);
       return;
     }
     const desde = this.rangoDesde ? parseInt(this.rangoDesde, 10) : undefined;
@@ -165,6 +236,30 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     } else {
       this.mostrarAlerta('Datos requeridos', 'Indica un rango (desde y hasta) o un número de participación.');
     }
+  }
+
+  private validarCantidadDigital(cantidad: number) {
+    this.loading = true;
+    this.ventasService.validateAssignmentsByCantidad(this.sellerId!, this.selectedSet.id, cantidad).subscribe({
+      next: (res) => {
+        this.loading = false;
+        if (res.success && res.participations && res.participations.length > 0) {
+          this.agregarParticipacionesSinDuplicar(res.participations);
+          this.cantidadDigitalNum = 1;
+          if (res.disponibles_restantes !== undefined) {
+            this.disponiblesDigitalSet = res.disponibles_restantes;
+          }
+        } else if (res.success && res.disponibles_restantes !== undefined) {
+          this.disponiblesDigitalSet = res.disponibles_restantes;
+        } else {
+          this.mostrarAlerta('Sin resultados', res?.message || 'No se obtuvieron participaciones.');
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.mostrarAlerta('Error', err?.error?.message || 'Error al validar.');
+      }
+    });
   }
 
   private validarRango(desde: number, hasta: number) {

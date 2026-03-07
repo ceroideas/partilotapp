@@ -314,7 +314,8 @@ export class VentaPage implements OnInit {
     if (this.sets.length > 0) {
       this.setSeleccionado = this.sets[0];
       this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-      this.disponibilidad = Number(this.setSeleccionado.digital_participations ?? 0) || 120;
+      // Para digitales: usar participaciones asignadas al vendedor (digital_available_to_seller) si viene del API
+      this.disponibilidad = Number(this.setSeleccionado.digital_available_to_seller ?? this.setSeleccionado.digital_participations ?? 0) || (this.tipoParticipacion === 'digitales' ? 0 : 120);
     } else {
       this.setSeleccionado = null;
       this.disponibilidad = 0;
@@ -336,7 +337,8 @@ export class VentaPage implements OnInit {
     if (this.setSeleccionado) {
       this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
       if (this.tipoParticipacion === 'digitales') {
-        this.disponibilidad = Number(this.setSeleccionado.digital_participations ?? 0) || 0;
+        // Priorizar participaciones asignadas al vendedor (digital_available_to_seller) desde el API
+        this.disponibilidad = Number(this.setSeleccionado.digital_available_to_seller ?? this.setSeleccionado.digital_participations ?? 0) || 0;
       }
     }
   }

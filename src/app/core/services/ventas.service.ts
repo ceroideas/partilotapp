@@ -195,6 +195,21 @@ export class VentasService {
   }
 
   /**
+   * Gestor: validar/asignar por cantidad (solo sets digitales).
+   * cantidad=0 solo devuelve disponibles_restantes; cantidad>0 devuelve participaciones y disponibles_restantes.
+   */
+  validateAssignmentsByCantidad(
+    sellerId: number,
+    setId: number,
+    cantidad: number
+  ): Observable<{ success: boolean; participations?: any[]; disponibles_restantes?: number; message?: string }> {
+    return this.http.post<{ success: boolean; participations?: any[]; disponibles_restantes?: number; message?: string }>(
+      `${this.apiUrl}/sellers/validate-participations`,
+      { seller_id: sellerId, set_id: setId, cantidad }
+    );
+  }
+
+  /**
    * Gestor: guardar asignación de participaciones a un vendedor.
    * POST /api/sellers/save-assignments
    * Body: { seller_id, participations_json: JSON.stringify([{ id, number, set_id }]) }

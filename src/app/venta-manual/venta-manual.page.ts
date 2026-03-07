@@ -77,6 +77,7 @@ export class VentaManualPage implements OnInit {
       this.numeroSorteo = this.reserveSeleccionado?.lottery?.name || '';
       if (this.setSeleccionado) {
         this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+        this.actualizarDisponibilidadDigital();
       }
     } else {
       this.sets = [];
@@ -87,6 +88,13 @@ export class VentaManualPage implements OnInit {
   onSetChange() {
     if (this.setSeleccionado) {
       this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+      this.actualizarDisponibilidadDigital();
+    }
+  }
+
+  private actualizarDisponibilidadDigital() {
+    if (this.tipoParticipacion === 'digitales' && this.setSeleccionado) {
+      this.disponibilidad = Number(this.setSeleccionado.digital_available_to_seller ?? this.setSeleccionado.digital_participations ?? 0) || 0;
     }
   }
 
@@ -105,11 +113,11 @@ export class VentaManualPage implements OnInit {
   }
 
   cambiarTipoParticipacion() {
-    // Resetear campos al cambiar tipo
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
+    this.actualizarDisponibilidadDigital();
   }
 
   escanearQR() {

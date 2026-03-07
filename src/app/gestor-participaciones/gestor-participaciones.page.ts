@@ -476,4 +476,30 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
     if (setType === 'mixto') return 'Mixto';
     return '';
   }
+
+  /** Título de lista/detalle: para digital "Set Digital: {nombre}", para físico "Taco: set_number/book". */
+  getTacoOrSetTitle(taco: any): string {
+    if (!taco) return '';
+    if (taco.set_type === 'digital') {
+      const name = taco.set_name || 'Set';
+      return `Set Digital: ${name}`;
+    }
+    const setNum = taco.set_number ?? taco.setId ?? taco.set_id ?? '';
+    const bookNum = taco.book_number ?? taco.bookNumber ?? '';
+    return `Taco: ${setNum}/${this.padNumber(bookNum, 3)}`;
+  }
+
+  /** Rango de participaciones: para digital "de la N a la N", para físico el range tal cual (ej. 1/00001-1/00100). */
+  getParticipationsRangeDisplay(taco: any): string {
+    if (!taco || !taco.participations_range) return '';
+    if (taco.set_type === 'digital') {
+      const m = String(taco.participations_range).match(/(\d+)\/(\d+)-(\d+)\/(\d+)/);
+      if (m) {
+        const from = parseInt(m[2], 10);
+        const to = parseInt(m[4], 10);
+        return `de la ${from} a la ${to}`;
+      }
+    }
+    return taco.participations_range;
+  }
 }

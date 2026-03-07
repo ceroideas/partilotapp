@@ -109,37 +109,38 @@
   }
 }
 
+// Selección de entidades: mismo estilo que vendedor-tab1 (venta)
 .entities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  margin-top: 20px;
 }
 
 .entity-card {
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.2s;
 
   .entity-logo {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 8px;
-    border-radius: 12px;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
     overflow: hidden;
     img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
   }
 
   .entity-name {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     color: #212529;
   }
 }

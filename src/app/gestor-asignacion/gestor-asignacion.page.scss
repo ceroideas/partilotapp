@@ -249,6 +249,12 @@
       white-space: nowrap;
       ion-icon { font-size: 22px; margin-right: 6px; vertical-align: middle; }
     }
+    .disponibles-label {
+      align-self: center;
+      color: #6c757d;
+      font-size: 14px;
+      white-space: nowrap;
+    }
   }
   .participaciones-rango-rows {
     margin-bottom: 20px;
@@ -264,6 +270,72 @@
     font-size: 16px;
     text-transform: none;
     margin-top: 12px;
+  }
+}
+
+// Asignación digital: mismo estilo que venta de participaciones digitales
+.asignacion-digital-card {
+  .numero-participaciones-section {
+    .counter-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #212529;
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+      .counter-button {
+        --color: #212529;
+        width: 48px;
+        height: 48px;
+        --border-radius: 50%;
+        --background: #f5f6f7;
+        .counter-icon-char {
+          font-size: 28px;
+          font-weight: 300;
+          line-height: 1;
+          color: #212529;
+        }
+        &[disabled] {
+          --color: #6c757d;
+          opacity: 0.5;
+          .counter-icon-char { color: #6c757d; }
+        }
+      }
+      .counter-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #212529;
+        min-width: 60px;
+        text-align: center;
+      }
+    }
+    .disponibilidad {
+      text-align: center;
+      font-size: 14px;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+  .asignar-button {
+    --background: #212529;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 56px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 18px;
+    margin-top: 24px;
+    &[disabled] {
+      --background: #e9ecef;
+      --color: #6c757d;
+      opacity: 0.6;
+    }
   }
 }
 

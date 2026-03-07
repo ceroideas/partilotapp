@@ -161,20 +161,22 @@
 }
 
 // Entidades
+// Selecci?n de entidades: mismo estilo que vendedor-tab1 (venta)
 .entities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  margin-top: 20px;
 }
 
 .entity-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 
   &:active {
     transform: scale(0.98);
@@ -184,7 +186,6 @@
     width: 60px;
     height: 60px;
     margin: 0 auto 12px;
-    
     img {
       width: 100%;
       height: 100%;
