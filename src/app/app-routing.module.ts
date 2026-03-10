@@ -115,6 +115,11 @@ const routes: Routes = [
     loadChildren: () => import('./resultados/resultados.module').then( m => m.ResultadosPageModule)
   },
   {
+    path: 'comprobar-numero',
+    redirectTo: '/tabs/comprobar-numero',
+    pathMatch: 'full'
+  },
+  {
     path: 'loteria-social',
     loadChildren: () => import('./loteria-social/loteria-social.module').then( m => m.LoteriaSocialPageModule)
   },

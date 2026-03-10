@@ -1,0 +1,106 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title></ion-title>
+    <div class="header-content">
+      <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
+    </div>
+    <ion-buttons slot="end">
+      <ion-menu-button menu="main-menu" slot="end"></ion-menu-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="comprobar-content">
+  <div class="comprobar-container">
+    <div class="header-section">
+      <h1 class="page-title">
+        <ion-icon name="search-outline" class="title-icon"></ion-icon>
+        Comprobar número
+      </h1>
+      <p class="page-subtitle">Consulta si tu número tiene premio en un sorteo</p>
+    </div>
+
+    <ion-spinner *ngIf="loadingLotteries" name="crescent" class="loading-spinner"></ion-spinner>
+
+    <!-- Estado 1: Lista de sorteos (como gestor-devolucion: tarjetas con imagen, Sorteo: name, Fecha) -->
+    <div *ngIf="!loadingLotteries && !selectedLottery" class="lottery-list-section">
+      <div class="section-header">
+        <h1 class="section-title">Sorteos</h1>
+        <p class="section-subtitle">Selecciona el sorteo para comprobar un número</p>
+      </div>
+      <div class="lotteries-list" *ngIf="lotteries.length > 0">
+        <div class="lottery-card" *ngFor="let lot of lotteries" (click)="selectLottery(lot)">
+          <div class="lottery-header">
+            <div class="lottery-image-wrap" [class.no-image]="!lot.image">
+              <img *ngIf="lot.image" [src]="getImageUrl(lot.image)" [alt]="lot.name" (error)="onLotteryImageError(lot)">
+              <ion-icon *ngIf="!lot.image" name="ticket-outline" class="lottery-placeholder-icon"></ion-icon>
+            </div>
+            <div class="lottery-info">
+              <div class="lottery-title">Sorteo: {{ lot.name }}</div>
+              <div class="lottery-subtitle" *ngIf="lot.draw_date">Fecha: {{ lot.draw_date | date:'dd-MM-yyyy HH:mm' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="!loadingLotteries && lotteries.length === 0" class="empty-text">No hay sorteos con resultados disponibles.</p>
+    </div>
+
+    <!-- Estado 2: Sorteo elegido + número + Comprobar (sin botón Atrás en la tarjeta; el atrás del header vuelve a la lista) -->
+    <div *ngIf="!loadingLotteries && selectedLottery" class="form-section">
+      <div class="selected-lottery-card">
+        <div class="lottery-header">
+          <div class="lottery-image-wrap" [class.no-image]="!selectedLottery.image">
+            <img *ngIf="selectedLottery.image" [src]="getImageUrl(selectedLottery.image)" [alt]="selectedLottery.name" (error)="onLotteryImageError(selectedLottery)">
+            <ion-icon *ngIf="!selectedLottery.image" name="ticket-outline" class="lottery-placeholder-icon"></ion-icon>
+          </div>
+          <div class="lottery-info">
+            <div class="lottery-title">Sorteo: {{ selectedLottery.name }}</div>
+            <div class="lottery-subtitle" *ngIf="selectedLottery.draw_date">Fecha: {{ selectedLottery.draw_date | date:'dd-MM-yyyy HH:mm' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <ion-item lines="full" class="form-item">
+        <ion-label position="stacked">Número (0-99999)</ion-label>
+        <ion-input
+          [(ngModel)]="numero"
+          type="number"
+          min="0"
+          max="99999"
+          placeholder="Ej: 79432"
+          inputmode="numeric"></ion-input>
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        class="submit-btn"
+        (click)="comprobar()"
+        [disabled]="loading">
+        <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        <span *ngIf="!loading">Comprobar</span>
+      </ion-button>
+    </div>
+
+    <div *ngIf="errorMessage" class="result-box result-error">
+      <ion-icon name="close-circle-outline"></ion-icon>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="result && !errorMessage" class="result-box result-prize">
+      <h3>Tu número <strong>{{ result.number }}</strong> tiene premio</h3>
+      <p class="total-prize">Total al décimo: <strong>{{ result.total_prize | number:'1.2-2' }} €</strong></p>
+      <p class="prizes-note">Importes al décimo</p>
+      <div class="prizes-list" *ngIf="result.prizes?.length">
+        <div class="prize-row" *ngFor="let p of result.prizes">
+          <span class="category">{{ p.category }}</span>
+          <span class="amount">{{ p.amount | number:'1.2-2' }} €</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
