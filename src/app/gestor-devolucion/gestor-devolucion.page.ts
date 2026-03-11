@@ -32,7 +32,9 @@ export class GestorDevolucionPage implements OnInit {
   sellers: any[] = [];
   selectedSeller: any = null;
 
-  // Sets y participaciones
+  // Reservas, sets y participaciones
+  reserves: any[] = [];
+  selectedReserve: any = null;
   sets: any[] = [];
   selectedSet: any = null;
   rangoDesde = '';
@@ -206,7 +208,8 @@ export class GestorDevolucionPage implements OnInit {
 
   selectSorteo(lottery: any) {
     this.selectedLottery = lottery;
-    this.loadSets();
+    this.loadReserves();
+    this.loadSets(); // se mantiene para poder calcular liquidación por set cuando sea necesario
     this.step = 'participaciones';
   }
 
@@ -244,6 +247,33 @@ export class GestorDevolucionPage implements OnInit {
     this.selectedSeller = seller;
     this.loadSorteos();
     this.step = 'sorteos';
+  }
+
+  loadReserves() {
+    if (!this.selectedEntity || !this.selectedLottery) return;
+    this.loading = true;
+    this.errorMessage = '';
+    this.devolutionsService
+      .getReservesByEntityAndLottery(this.selectedEntity.id, this.selectedLottery.id)
+      .subscribe({
+        next: (res) => {
+          this.loading = false;
+          if (res.success && res.reserves) {
+            this.reserves = res.reserves;
+            this.selectedReserve = this.reserves.length === 1 ? this.reserves[0] : null;
+          } else {
+            this.reserves = [];
+            this.selectedReserve = null;
+            this.errorMessage = 'No hay reservas disponibles para este sorteo.';
+          }
+        },
+        error: (err) => {
+          this.loading = false;
+          this.reserves = [];
+          this.selectedReserve = null;
+          this.errorMessage = err?.error?.message || 'Error al cargar reservas.';
+        }
+      });
   }
 
   loadSets() {
@@ -284,8 +314,8 @@ export class GestorDevolucionPage implements OnInit {
   }
 
   validarYAsignar() {
-    if (!this.selectedEntity || !this.selectedLottery || !this.selectedSet) {
-      this.mostrarAlerta('Falta selección', 'Selecciona entidad, sorteo y set.');
+    if (!this.selectedEntity || !this.selectedLottery || !this.selectedReserve) {
+      this.mostrarAlerta('Falta selección', 'Selecciona entidad, sorteo y reserva.');
       return;
     }
     const desde = this.rangoDesde ? parseInt(this.rangoDesde, 10) : undefined;
@@ -306,7 +336,7 @@ export class GestorDevolucionPage implements OnInit {
     const params: any = {
       entity_id: this.selectedEntity.id,
       lottery_id: this.selectedLottery.id,
-      set_id: this.selectedSet.id,
+      reserve_id: this.selectedReserve.id,
       desde,
       hasta
     };
@@ -484,6 +514,57 @@ export class GestorDevolucionPage implements OnInit {
     return (this.summary?.available_participations ?? 0) * this.precioPorParticipacion;
   }
 
+  /** Solo devolución (sin liquidar), como en la web */
+  aceptarSoloDevolucion() {
+    if (!this.selectedEntity || !this.selectedLottery) {
+      this.mostrarAlerta('Falta selección', 'Selecciona entidad y sorteo.');
+      return;
+    }
+    if (this.participacionesAsignadas.length === 0) {
+      this.mostrarAlerta('Sin participaciones', 'Añade al menos una participación para devolver.');
+      return;
+    }
+
+    const ids = this.participacionesAsignadas.map(p => p.id);
+    const setId = this.participacionesAsignadas.length > 0
+      ? this.participacionesAsignadas[0].set_id
+      : this.selectedSet?.id;
+
+    this.procesando = true;
+    const storeBody: any = {
+      entity_id: this.selectedEntity.id,
+      lottery_id: this.selectedLottery.id,
+      set_id: setId ?? undefined,
+      return_reason: this.selectedSeller?.id ? 'Devolución de vendedor a entidad' : 'Devolución de entidad a administración',
+      solo_devolucion: true,
+      liquidacion: {
+        devolver: ids,
+        vender: [],
+        pagos: []
+      }
+    };
+    if (this.selectedSeller?.id) {
+      storeBody.seller_id = this.selectedSeller.id;
+      storeBody.tipo_devolucion = 'vendedor';
+    }
+
+    this.devolutionsService.storeDevolution(storeBody).subscribe({
+      next: (res) => {
+        this.procesando = false;
+        if (res.success) {
+          this.mostrarAlerta('Devolución registrada', 'Las participaciones se han devuelto correctamente (sin liquidar).');
+          this.reiniciarFlujo();
+        } else {
+          this.mostrarAlerta('Error', res.message || 'No se pudo procesar la devolución.');
+        }
+      },
+      error: (err) => {
+        this.procesando = false;
+        this.mostrarAlerta('Error', err?.error?.message || 'Error al procesar la devolución.');
+      }
+    });
+  }
+
   openLiquidationModal() {
     this.pagoEfectivo = '';
     this.pagoBizum = '';
@@ -558,7 +639,9 @@ export class GestorDevolucionPage implements OnInit {
     this.selectedEntity = null;
     this.selectedLottery = null;
     this.selectedSeller = null;
+    this.selectedReserve = null;
     this.selectedSet = null;
+    this.reserves = [];
     this.lotteries = [];
     this.sellers = [];
     this.sets = [];

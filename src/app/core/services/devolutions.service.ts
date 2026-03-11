@@ -23,6 +23,12 @@ export class DevolutionsService {
     });
   }
 
+  getReservesByEntityAndLottery(entityId: number, lotteryId: number): Observable<{ success: boolean; reserves: any[] }> {
+    return this.http.get<{ success: boolean; reserves: any[] }>(`${this.base}/reserves-by-entity`, {
+      params: { entity_id: entityId.toString(), lottery_id: lotteryId.toString() }
+    });
+  }
+
   getSellersByEntity(entityId: number): Observable<{ success: boolean; sellers: any[] }> {
     return this.http.get<{ success: boolean; sellers: any[] }>(`${this.base}/sellers`, {
       params: { entity_id: entityId.toString() }
@@ -39,6 +45,7 @@ export class DevolutionsService {
     entity_id: number;
     lottery_id: number;
     set_id?: number;
+    reserve_id?: number;
     desde?: number;
     hasta?: number;
     participation_id?: number;

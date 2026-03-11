@@ -178,18 +178,16 @@
       </div>
       <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-      <!-- Selector de Set (select como en venta/manual) -->
-      <div class="selector-section card-block" *ngIf="sets.length > 0">
+      <!-- Selector de Reserva (como en la web) -->
+      <div class="selector-section card-block" *ngIf="reserves.length > 0">
         <ion-item lines="none" class="input-item">
-          <ion-label position="stacked">Set</ion-label>
+          <ion-label position="stacked">Reserva</ion-label>
           <ion-select
-            [(ngModel)]="selectedSet"
-            (ionChange)="onSetChange($event)"
-            [compareWith]="compareSet"
-            placeholder="Selecciona set"
+            [(ngModel)]="selectedReserve"
+            placeholder="Selecciona reserva"
             interface="action-sheet">
-            <ion-select-option *ngFor="let s of sets" [value]="s">
-              {{ s.set_name || s.name || ('Set ' + s.set_number) }}
+            <ion-select-option *ngFor="let r of reserves" [value]="r">
+              {{ r.display_label || r.name || ('Reserva #' + r.id) }}
             </ion-select-option>
           </ion-select>
         </ion-item>
@@ -295,7 +293,7 @@
             <strong class="total-devueltas-value">{{ participacionesAsignadas.length }}</strong>
           </div>
           <div class="resumen-actions">
-            <ion-button class="btn-aceptar-resumen" (click)="aceptarResumenVolver()">
+            <ion-button class="btn-aceptar-resumen" (click)="aceptarSoloDevolucion()">
               Aceptar
             </ion-button>
             <ion-button class="btn-aceptar-liquidar" (click)="irALiquidacion()">
