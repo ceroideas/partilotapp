@@ -39,6 +39,8 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
   selectedLottery: any = null;
   sets: any[] = [];
   selectedSet: any = null;
+  /** Para sets físicos: texto "Disponibles: de la X a la Y" (como en la web) */
+  availableRangesText = '';
   rangoDesde = '';
   rangoHasta = '';
   unidadNumero = '';
@@ -147,6 +149,11 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
           if (this.sets.length === 1 && this.selectedSet && this.isDigitalSet && this.sellerId) {
             this.cargarDisponiblesDigital();
           }
+          if (this.selectedSet && !this.isDigitalSet) {
+            this.loadAvailableRangesForSet();
+          } else {
+            this.availableRangesText = '';
+          }
           if (this.sets.length === 0) {
             this.errorMessage = 'No hay sets con participaciones para este sorteo.';
           }
@@ -165,6 +172,15 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     return a && b && a.id === b.id;
   }
 
+  /** Etiqueta de la reserva a la que pertenece un set (ej. "Reserva #RS0001" o "Reserva #RS0001 (Sorteo X)") */
+  getReserveLabel(set: any): string {
+    if (!set?.reserve) return '';
+    const id = set.reserve.id;
+    const ref = '#' + String(id).padStart(4, '0');
+    const lotteryName = set.reserve.lottery?.name;
+    return lotteryName ? `Reserva ${ref} – ${lotteryName}` : `Reserva ${ref}`;
+  }
+
   /** True si el set seleccionado es solo digital (sin físicas) */
   get isDigitalSet(): boolean {
     const s = this.selectedSet;
@@ -180,10 +196,39 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
       this.selectedSet = v;
       if (this.isDigitalSet && this.sellerId && this.selectedSet) {
         this.cargarDisponiblesDigital();
+        this.availableRangesText = '';
       } else {
         this.disponiblesDigitalSet = 0;
+        if (this.selectedSet) {
+          this.loadAvailableRangesForSet();
+        } else {
+          this.availableRangesText = '';
+        }
       }
     }
+  }
+
+  /** Cargar texto "Disponibles: de la X a la Y" para set físico (como en la web) */
+  loadAvailableRangesForSet() {
+    if (!this.selectedSet?.id || this.isDigitalSet) {
+      this.availableRangesText = '';
+      return;
+    }
+    this.ventasService.getAvailableRangesForSet(this.selectedSet.id).subscribe({
+      next: (res) => {
+        if (res.success && res.available_ranges && res.available_ranges.length > 0) {
+          const parts = res.available_ranges.map((r: number[]) =>
+            r[0] === r[1] ? `de la ${r[0]}` : `de la ${r[0]} a la ${r[1]}`
+          );
+          this.availableRangesText = 'Disponibles: ' + parts.join(', ') + '.';
+        } else {
+          this.availableRangesText = 'No hay participaciones disponibles en este set.';
+        }
+      },
+      error: () => {
+        this.availableRangesText = '';
+      }
+    });
   }
 
   /** Cargar cantidad disponible para set digital (cantidad=0) */

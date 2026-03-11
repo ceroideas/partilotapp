@@ -29,6 +29,15 @@ export class DevolutionsService {
     });
   }
 
+  getAvailableRangesForReserve(reserveId: number, sellerId?: number): Observable<{ success: boolean; available_ranges: number[][] }> {
+    let params: { reserve_id: string; seller_id?: string } = { reserve_id: reserveId.toString() };
+    if (sellerId != null) params.seller_id = sellerId.toString();
+    return this.http.get<{ success: boolean; available_ranges: number[][] }>(
+      `${this.base}/available-ranges-reserve`,
+      { params: params as any }
+    );
+  }
+
   getSellersByEntity(entityId: number): Observable<{ success: boolean; sellers: any[] }> {
     return this.http.get<{ success: boolean; sellers: any[] }>(`${this.base}/sellers`, {
       params: { entity_id: entityId.toString() }

@@ -392,6 +392,16 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+.rango-disponibles-block {
+  padding: 12px 18px;
+  .rango-disponibles-text {
+    margin: 0;
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+  }
+}
+
 .block-title {
   font-size: 16px;
   font-weight: 600;

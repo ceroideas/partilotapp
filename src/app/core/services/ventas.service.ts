@@ -178,6 +178,17 @@ export class VentasService {
   }
 
   /**
+   * Gestor: rangos de participaciones disponibles en un set (para mostrar "Disponibles: de la X a la Y").
+   * GET /api/sellers/available-ranges-set?set_id=
+   */
+  getAvailableRangesForSet(setId: number): Observable<{ success: boolean; available_ranges: number[][] }> {
+    return this.http.get<{ success: boolean; available_ranges: number[][] }>(
+      `${this.apiUrl}/sellers/available-ranges-set`,
+      { params: { set_id: setId.toString() } }
+    );
+  }
+
+  /**
    * Gestor: validar participaciones disponibles para asignar a un vendedor.
    * POST /api/sellers/validate-participations
    * Para unidad: desde === hasta.

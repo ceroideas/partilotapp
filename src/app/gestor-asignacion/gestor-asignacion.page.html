@@ -115,10 +115,18 @@
             placeholder="Selecciona set"
             interface="action-sheet">
             <ion-select-option *ngFor="let s of sets" [value]="s">
-              {{ s.set_name || s.name || ('Set ' + s.set_number) }}
+              {{ s.set_name || s.name || ('Set ' + s.set_number) }} ({{ getReserveLabel(s) }})
             </ion-select-option>
           </ion-select>
         </ion-item>
+        <p class="reserva-set-info" *ngIf="selectedSet && getReserveLabel(selectedSet)">
+          Pertenece a la reserva: {{ getReserveLabel(selectedSet) }}
+        </p>
+      </div>
+
+      <!-- Disponibles por set físico (como en la web: "de la X a la Y") -->
+      <div class="card-block rango-disponibles-block" *ngIf="availableRangesText && !isDigitalSet">
+        <p class="rango-disponibles-text">{{ availableRangesText }}</p>
       </div>
 
       <!-- Sets físicos: escáner y rango/unidad -->
