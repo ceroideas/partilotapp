@@ -42,6 +42,12 @@ export class GestorDevolucionPage implements OnInit {
   unidadNumero = '';
   participacionesAsignadas: Array<{ id: number; number: number; participation_code: string; set_id: number; set_name: string }> = [];
 
+  // Participaciones disponibles para devolver (entidad o vendedor en la reserva seleccionada)
+  availableToReturn: number | null = null;
+  availableToReturnFisicas: number = 0;
+  availableToReturnDigitales: number = 0;
+  loadingAvailable = false;
+
   // Liquidación
   summary: any = null;
   pagoEfectivo = '';
@@ -253,6 +259,7 @@ export class GestorDevolucionPage implements OnInit {
     if (!this.selectedEntity || !this.selectedLottery) return;
     this.loading = true;
     this.errorMessage = '';
+    this.availableToReturn = null;
     this.devolutionsService
       .getReservesByEntityAndLottery(this.selectedEntity.id, this.selectedLottery.id)
       .subscribe({
@@ -261,6 +268,7 @@ export class GestorDevolucionPage implements OnInit {
           if (res.success && res.reserves) {
             this.reserves = res.reserves;
             this.selectedReserve = this.reserves.length === 1 ? this.reserves[0] : null;
+            this.loadAvailableToReturn();
           } else {
             this.reserves = [];
             this.selectedReserve = null;
@@ -274,6 +282,52 @@ export class GestorDevolucionPage implements OnInit {
           this.errorMessage = err?.error?.message || 'Error al cargar reservas.';
         }
       });
+  }
+
+  /** Cargar conteo de participaciones disponibles para devolver (entidad o vendedor en la reserva) */
+  loadAvailableToReturn() {
+    if (!this.selectedEntity || !this.selectedLottery || !this.selectedReserve) {
+      this.availableToReturn = null;
+      return;
+    }
+    const reserveId = typeof this.selectedReserve === 'object' ? this.selectedReserve?.id : this.selectedReserve;
+    if (!reserveId) {
+      this.availableToReturn = null;
+      return;
+    }
+    this.loadingAvailable = true;
+    const params: any = {
+      entity_id: this.selectedEntity.id,
+      lottery_id: this.selectedLottery.id,
+      reserve_id: reserveId,
+      participations: []
+    };
+    if (this.selectedSeller?.id) {
+      params.seller_id = this.selectedSeller.id;
+      params.tipo_devolucion = 'vendedor';
+    }
+    this.devolutionsService.getLiquidationSummary(params).subscribe({
+      next: (res) => {
+        this.loadingAvailable = false;
+        if (res.success && res.summary) {
+          const s = res.summary;
+          this.availableToReturn = s.available_to_return ?? s.available_participations ?? 0;
+          this.availableToReturnFisicas = s.available_to_return_fisicas ?? s.total_fisicas ?? 0;
+          this.availableToReturnDigitales = s.available_to_return_digitales ?? s.total_digitales ?? 0;
+        } else {
+          this.availableToReturn = null;
+        }
+      },
+      error: () => {
+        this.loadingAvailable = false;
+        this.availableToReturn = null;
+      }
+    });
+  }
+
+  /** Al cambiar la reserva en el selector, actualizar disponibles para devolver */
+  onReserveChange() {
+    this.loadAvailableToReturn();
   }
 
   loadSets() {

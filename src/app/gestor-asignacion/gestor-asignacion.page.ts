@@ -172,13 +172,16 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     return a && b && a.id === b.id;
   }
 
-  /** Etiqueta de la reserva a la que pertenece un set (ej. "Reserva #RS0001" o "Reserva #RS0001 (Sorteo X)") */
+  /** Etiqueta de la reserva: número(s) reservado(s) y sorteo (ej. "37428 - 076/25" o "37428 - 37429 - 076/25") */
   getReserveLabel(set: any): string {
     if (!set?.reserve) return '';
-    const id = set.reserve.id;
-    const ref = '#' + String(id).padStart(4, '0');
-    const lotteryName = set.reserve.lottery?.name;
-    return lotteryName ? `Reserva ${ref} – ${lotteryName}` : `Reserva ${ref}`;
+    const nums = set.reserve.reservation_numbers;
+    const numStr = Array.isArray(nums) ? (nums as string[]).join(' - ') : (nums != null ? String(nums) : '');
+    const lotteryName = set.reserve.lottery?.name ?? '';
+    if (numStr && lotteryName) return `${numStr} - ${lotteryName}`;
+    if (numStr) return numStr;
+    if (lotteryName) return lotteryName;
+    return '';
   }
 
   /** True si el set seleccionado es solo digital (sin físicas) */

@@ -185,12 +185,34 @@
           <ion-select
             [(ngModel)]="selectedReserve"
             placeholder="Selecciona reserva"
-            interface="action-sheet">
+            interface="action-sheet"
+            (ionChange)="onReserveChange()">
             <ion-select-option *ngFor="let r of reserves" [value]="r">
               {{ r.display_label || r.name || ('Reserva #' + r.id) }}
             </ion-select-option>
           </ion-select>
         </ion-item>
+      </div>
+
+      <!-- Participaciones disponibles para devolver (entidad o vendedor) -->
+      <div class="card-block disponibles-devolver-block" *ngIf="selectedReserve && (availableToReturn !== null || loadingAvailable)">
+        <div class="disponibles-devolver-header">
+          <ion-icon name="information-circle-outline" class="disponibles-devolver-icon"></ion-icon>
+          <div class="disponibles-devolver-titles">
+            <h3 class="disponibles-devolver-title">Participaciones disponibles para devolver</h3>
+            <p class="disponibles-devolver-subtitle">{{ selectedSeller ? 'Como vendedor en esta reserva' : 'Como entidad en esta reserva' }}</p>
+          </div>
+        </div>
+        <div class="disponibles-devolver-content" *ngIf="loadingAvailable">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Cargando...</span>
+        </div>
+        <div class="disponibles-devolver-content" *ngIf="!loadingAvailable && availableToReturn !== null">
+          <span class="disponibles-devolver-total">{{ availableToReturn }}</span>
+          <span class="disponibles-devolver-label"> total</span>
+          <span class="disponibles-devolver-desglose">({{ availableToReturnFisicas }} físicas, {{ availableToReturnDigitales }} digitales)</span>
+        </div>
+        <p class="disponibles-devolver-nota">No se pueden devolver las vendidas, donadas ni cobradas.</p>
       </div>
 
       <!-- Escáner: Gestiona la devolución por QR -->

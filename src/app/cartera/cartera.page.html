@@ -101,7 +101,10 @@
           <div class="participacion-info">
             <div class="participacion-header">
               <span class="entidad">{{ participacion.entidad || 'Entidad' }}</span>
-              <span class="numero-reservado">{{ participacion.numeroReservado || participacion.numero || participacion.id }}</span>
+              <div class="numero-reservado-row">
+                <span class="numero-reservado">{{ participacion.numeroReservado || participacion.numero || participacion.id }}</span>
+                <span class="status-badge digital-badge" *ngIf="participacion.is_digital">Digital</span>
+              </div>
               <span class="numero-participacion" *ngIf="participacion.numeroParticipacion">{{ participacion.numeroParticipacion }}</span>
             </div>
           </div>

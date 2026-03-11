@@ -50,12 +50,32 @@ export class VentasService {
   }
 
   /**
-   * Vender participaciones digitales a un usuario existente
+   * Total de participaciones digitales disponibles (pool entidad + sorteo). Las digitales no se asignan.
    */
-  sellDigital(setId: number, quantity: number, buyerEmail: string, paymentMethod?: string | null): Observable<any> {
-    const body: any = { set_id: setId, quantity, buyer_email: buyerEmail };
-    if (paymentMethod) {
-      body.payment_method = paymentMethod;
+  getTotalDigitalAvailable(entityId: number, lotteryId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/sellers/me/digital-available?entity_id=${entityId}&lottery_id=${lotteryId}`
+    );
+  }
+
+  /**
+   * Vender participaciones digitales. Con set_id (por set) o entity_id+lottery_id (pool de la entidad).
+   */
+  sellDigital(
+    params:
+      | { set_id: number; quantity: number; buyer_email: string; payment_method?: string | null }
+      | { entity_id: number; lottery_id: number; quantity: number; buyer_email: string; payment_method?: string | null }
+  ): Observable<any> {
+    const body: any = {
+      quantity: params.quantity,
+      buyer_email: params.buyer_email,
+      ...(params.payment_method != null && { payment_method: params.payment_method }),
+    };
+    if ('set_id' in params) {
+      body.set_id = params.set_id;
+    } else {
+      body.entity_id = params.entity_id;
+      body.lottery_id = params.lottery_id;
     }
     return this.http.post(`${this.apiUrl}/sales/digital`, body);
   }

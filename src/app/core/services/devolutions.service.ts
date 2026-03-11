@@ -71,6 +71,7 @@ export class DevolutionsService {
     entity_id: number;
     lottery_id: number;
     set_id?: number;
+    reserve_id?: number;
     participations?: number[];
     seller_id?: number;
     tipo_devolucion?: string;
@@ -80,6 +81,9 @@ export class DevolutionsService {
       .set('lottery_id', params.lottery_id.toString());
     if (params.set_id != null) {
       httpParams = httpParams.set('set_id', params.set_id.toString());
+    }
+    if (params.reserve_id != null) {
+      httpParams = httpParams.set('reserve_id', params.reserve_id.toString());
     }
     if (params.participations && params.participations.length > 0) {
       params.participations.forEach(id => {

@@ -533,9 +533,12 @@
 
 .vendedor-detail-content {
   display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 16px;
   margin-bottom: 0;
+  width: 100%;
 }
 
 .vendedor-detail-left {
@@ -543,6 +546,7 @@
   flex-direction: column;
   gap: 12px;
   flex-shrink: 0;
+  max-width: 120px;
 }
 
 .vendedor-ticket-image-container {
@@ -590,13 +594,13 @@
 
 .vendedor-detail-info {
   flex: 1;
+  min-width: 0;
   background: white;
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-width: 200px;
 }
 
 .vendedor-detail-row {

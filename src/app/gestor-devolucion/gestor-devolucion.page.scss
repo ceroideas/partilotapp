@@ -447,7 +447,65 @@
   }
 }
 
-// Escáner: unidad y rango con botones QR naranjas (más gruesos y redondeados)
+// Participaciones disponibles para devolver (entidad o vendedor)
+.disponibles-devolver-block {
+  border: 1px solid var(--ion-color-primary);
+  .disponibles-devolver-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    .disponibles-devolver-icon {
+      font-size: 24px;
+      color: var(--ion-color-primary);
+      flex-shrink: 0;
+    }
+    .disponibles-devolver-titles {
+      flex: 1;
+      .disponibles-devolver-title {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--ion-text-color);
+      }
+      .disponibles-devolver-subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+  .disponibles-devolver-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    ion-spinner {
+      margin-right: 8px;
+    }
+    .disponibles-devolver-total {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ion-color-primary);
+    }
+    .disponibles-devolver-label {
+      font-size: 15px;
+      color: var(--ion-color-medium);
+    }
+    .disponibles-devolver-desglose {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      margin-left: 4px;
+    }
+  }
+  .disponibles-devolver-nota {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Esc?ner: unidad y rango con botones QR naranjas (m?s gruesos y redondeados)
 .escaner-section {
   .block-title {
     font-size: 18px;

@@ -40,9 +40,10 @@ export class VentaPage implements OnInit {
   rangoDesde: string = '';
   rangoHasta: string = '';
   
-  // Para participaciones digitales
+  // Para participaciones digitales (pool entidad+sorteo; no hay selector de set)
   numeroParticipaciones: number = 1;
   disponibilidad: number = 120;
+  totalDigitalAvailable: number = 0;
   precioPorParticipacion: number = 0;
   
   // Modal de resumen
@@ -167,6 +168,9 @@ export class VentaPage implements OnInit {
     this.showLotteriesList = false;
     this.showVentaView = true;
     this.loadReservesAndSets();
+    if (this.tipoParticipacion === 'digitales' && this.selectedEntity?.id && lottery?.id) {
+      this.loadTotalDigitalAvailable();
+    }
   }
   
   async loadReservesAndSets() {
@@ -283,19 +287,43 @@ export class VentaPage implements OnInit {
   }
 
   cambiarTipoParticipacion() {
-    // Resetear campos al cambiar tipo
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
     this.setSeleccionado = null;
     this.applySetsFilter();
+    if (this.tipoParticipacion === 'digitales' && this.selectedEntity?.id && this.selectedLottery?.id) {
+      this.loadTotalDigitalAvailable();
+    } else {
+      this.totalDigitalAvailable = 0;
+    }
   }
 
-  /** Filtra sets por tipo físico o digital según tipoParticipacion */
+  loadTotalDigitalAvailable() {
+    if (!this.selectedEntity?.id || !this.selectedLottery?.id) return;
+    this.ventasService.getTotalDigitalAvailable(this.selectedEntity.id, this.selectedLottery.id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.totalDigitalAvailable = res.total_digital_available ?? 0;
+          if (res.price_per_participation != null) {
+            this.precioPorParticipacion = res.price_per_participation;
+          }
+        } else {
+          this.totalDigitalAvailable = 0;
+        }
+      },
+      error: () => { this.totalDigitalAvailable = 0; }
+    });
+  }
+
+  /** Filtra sets por tipo físico o digital. Digitales: no se muestra set (pool entidad+sorteo); disponibilidad viene de loadTotalDigitalAvailable. */
   applySetsFilter() {
     if (!this.allSets.length) {
       this.sets = [];
+      if (this.tipoParticipacion === 'digitales') {
+        this.setSeleccionado = null;
+      }
       return;
     }
     if (this.tipoParticipacion === 'fisicas') {
@@ -304,21 +332,18 @@ export class VentaPage implements OnInit {
         const dig = Number(s.digital_participations ?? 0);
         return phys > 0 && dig === 0;
       });
+      if (this.sets.length > 0) {
+        this.setSeleccionado = this.sets[0];
+        this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+        this.disponibilidad = 120;
+      } else {
+        this.setSeleccionado = null;
+        this.disponibilidad = 0;
+      }
     } else {
-      this.sets = this.allSets.filter((s: any) => {
-        const phys = Number(s.physical_participations ?? 0);
-        const dig = Number(s.digital_participations ?? 0);
-        return dig > 0 && phys === 0;
-      });
-    }
-    if (this.sets.length > 0) {
-      this.setSeleccionado = this.sets[0];
-      this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-      // Para digitales: usar participaciones asignadas al vendedor (digital_available_to_seller) si viene del API
-      this.disponibilidad = Number(this.setSeleccionado.digital_available_to_seller ?? this.setSeleccionado.digital_participations ?? 0) || (this.tipoParticipacion === 'digitales' ? 0 : 120);
-    } else {
+      this.sets = [];
       this.setSeleccionado = null;
-      this.disponibilidad = 0;
+      this.disponibilidad = this.totalDigitalAvailable;
     }
   }
 
@@ -336,10 +361,6 @@ export class VentaPage implements OnInit {
   onSetChange() {
     if (this.setSeleccionado) {
       this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-      if (this.tipoParticipacion === 'digitales') {
-        // Priorizar participaciones asignadas al vendedor (digital_available_to_seller) desde el API
-        this.disponibilidad = Number(this.setSeleccionado.digital_available_to_seller ?? this.setSeleccionado.digital_participations ?? 0) || 0;
-      }
     }
   }
 
@@ -368,8 +389,10 @@ export class VentaPage implements OnInit {
       const tieneRango = rangoDesdeStr.length > 0 && rangoHastaStr.length > 0;
       return tieneUnidad || tieneRango;
     }
-    // Digitales: set seleccionado + cantidad válida
-    return !!this.setSeleccionado && this.numeroParticipaciones > 0 && this.numeroParticipaciones <= this.disponibilidad;
+    // Digitales: entidad + sorteo + cantidad dentro del total disponible (pool; no hay set)
+    return !!this.selectedEntity?.id && !!this.selectedLottery?.id
+      && this.numeroParticipaciones > 0
+      && this.numeroParticipaciones <= this.totalDigitalAvailable;
   }
 
   calcularTotalParticipaciones(): number {
@@ -399,7 +422,8 @@ export class VentaPage implements OnInit {
 
   mostrarResumen() {
     this.totalParticipaciones = this.calcularTotalParticipaciones();
-    this.importeTotal = this.totalParticipaciones * this.precioPorParticipacion;
+    const precio = this.tipoParticipacion === 'digitales' ? this.precioPorParticipacion : (parseFloat(this.setSeleccionado?.played_amount as any) || 0);
+    this.importeTotal = this.totalParticipaciones * precio;
     this.formaPago = null;
     if (this.tipoParticipacion === 'digitales') {
       this.emailCliente = '';
@@ -460,18 +484,19 @@ export class VentaPage implements OnInit {
     }
 
     if (this.tipoParticipacion === 'digitales') {
-      if (!this.clienteEncontrado || !this.setSeleccionado) {
-        await this.mostrarAlerta('Error', 'Datos incompletos. Verifica el email y el set.');
+      if (!this.clienteEncontrado || !this.selectedEntity?.id || !this.selectedLottery?.id) {
+        await this.mostrarAlerta('Error', 'Datos incompletos. Verifica el email del cliente.');
         return;
       }
       this.loading = true;
       const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
-      this.ventasService.sellDigital(
-        this.setSeleccionado.id,
-        this.numeroParticipaciones,
-        this.clienteEncontrado.email,
-        paymentMethod
-      ).subscribe({
+      this.ventasService.sellDigital({
+        entity_id: this.selectedEntity.id,
+        lottery_id: this.selectedLottery.id,
+        quantity: this.numeroParticipaciones,
+        buyer_email: this.clienteEncontrado.email,
+        payment_method: paymentMethod,
+      }).subscribe({
         next: async (res: any) => {
           this.loading = false;
           if (res.success) {
@@ -480,6 +505,7 @@ export class VentaPage implements OnInit {
             this.cerrarModalResumen();
             this.mostrarModalExito = true;
             this.clienteEncontrado = null;
+            this.loadTotalDigitalAvailable();
           } else {
             await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
           }
@@ -609,7 +635,8 @@ export class VentaPage implements OnInit {
   }
 
   aumentarParticipaciones() {
-    if (this.numeroParticipaciones < this.disponibilidad) {
+    const max = this.tipoParticipacion === 'digitales' ? this.totalDigitalAvailable : this.disponibilidad;
+    if (this.numeroParticipaciones < max) {
       this.numeroParticipaciones++;
     }
   }
