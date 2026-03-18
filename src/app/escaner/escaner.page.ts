@@ -111,6 +111,7 @@ export class EscanerPage implements OnInit {
       }
       const referencia = this.extraerReferenciaDeQR(qrText);
       if (referencia) {
+        // Venta múltiple: acumular participaciones hasta pulsar "Vender"
         this.consultarYMostrarVentaIndividual(referencia);
       } else {
         mostrarVistaEscaneo = true;
@@ -187,8 +188,18 @@ export class EscanerPage implements OnInit {
     this.modoEscaneo = true;
   }
 
-  /** Tarea 2: consultar participación por referencia, validar y mostrar detalle + set para venta individual */
+  /**
+   * Modo vendedor (tab5): consultar participación por referencia y AÑADIRLA a la lista para venta múltiple.
+   * Permite escanear varias participaciones y venderlas juntas desde el resumen.
+   */
   private consultarYMostrarVentaIndividual(referencia: string) {
+    if (this.participacionesDigitalizadas.some(p => (p?.referencia || p?.reference) === referencia)) {
+      this.mostrarInfoDigitalizacion = true;
+      this.modoEscaneo = false;
+      this.mostrarAlerta('Ya añadida', 'Esta participación ya está en la lista.');
+      return;
+    }
+
     this.loading = true;
     this.loadingMessage = 'Buscando participación...';
     this.carteraService.checkByReference(referencia).subscribe({
@@ -200,20 +211,21 @@ export class EscanerPage implements OnInit {
           return;
         }
         const participation = checkRes.participation;
-        const set = participation?.set;
-        const lottery = set?.reserve?.lottery;
-        const participationNumber = participation?.participation_number ?? participation?.numero;
-        const importe = participation?.amount ?? participation?.played_amount ?? participation?.importeTotal ?? 0;
-        this.ventaPendienteVendedor = {
+
+        const item = {
+          id: Date.now(),
+          numero: participation?.participation_code || participation?.numero || referencia,
           referencia,
-          participacion: participation,
-          infoSet: {
-            setName: set?.set_name || `Set #${set?.set_number ?? ''}`,
-            lotteryName: lottery?.name || '',
-            participationNumber,
-            importePorParticipacion: importe
-          }
+          entidad: participation?.entity_name || participation?.entidad || participation?.set?.reserve?.entity?.name || '',
+          precio: participation?.amount ?? participation?.importeTotal ?? participation?.played_amount ?? 0,
+          fechaSorteo: participation?.draw_date || participation?.fechaSorteo || '',
+          imagen: participation?.image || participation?.snapshot_path || participation?.snapshotPath || null,
         };
+
+        this.participacionesDigitalizadas.push(item);
+        this.ventaPendienteVendedor = null;
+        this.mostrarInfoDigitalizacion = true;
+        this.modoEscaneo = false;
       },
       error: async (err) => {
         this.loading = false;

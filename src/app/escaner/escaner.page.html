@@ -156,7 +156,7 @@
     </div>
   </div>
 
-  <!-- Vista Info Digitalización (Modo Vendedor - múltiple) -->
+  <!-- Vista Venta múltiple (Modo Vendedor): lista de participaciones escaneadas -->
   <div class="info-digitalizacion-view" *ngIf="isVendedor && mostrarInfoDigitalizacion && !modoEscaneo && !ventaPendienteVendedor">
     <div class="info-digitalizacion-container">
       <!-- Header -->
@@ -167,11 +167,11 @@
           </ion-button>
         </ion-buttons>
         <ion-title>
-          <h2 class="info-title">Info Digitalización</h2>
+          <h2 class="info-title">Venta QR</h2>
         </ion-title>
       </div>
 
-      <!-- Lista de participaciones digitalizadas -->
+      <!-- Lista de participaciones escaneadas -->
       <div class="participaciones-digitalizadas-list">
         <div 
           class="participacion-digitalizada-item" 
@@ -195,7 +195,7 @@
           class="nueva-digitalizacion-button" 
           expand="block"
           (click)="nuevaDigitalizacion()">
-          Nueva Digitalización
+          Escanear otra
         </ion-button>
         
         <ion-button 
