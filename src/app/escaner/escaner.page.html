@@ -19,7 +19,7 @@
 <ion-content [fullscreen]="true" class="escaner-content">
 
   <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
-  <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+  <div class="rol-selector" *ngIf="!modoEscaneo && (authService.canCliente() || authService.canSeller() || authService.canManager())">
     <ion-button
       *ngIf="authService.canCliente()"
       class="rol-button"
@@ -228,16 +228,17 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="bottom-bar">
-          <div class="total-box">
-            <div class="total-label">Importe total</div>
-            <div class="total-value">€{{ calcularImporteTotal() | number:'1.2-2' }}</div>
-          </div>
-          <ion-button class="vender-button" (click)="mostrarResumen()" [disabled]="participacionesDigitalizadas.length === 0">
-            Vender
-          </ion-button>
+      <!-- Footer fijo (encima de tabs): Importe total + Vender -->
+      <div class="venta-footer">
+        <div class="total-box">
+          <div class="total-label">Importe total</div>
+          <div class="total-value">€{{ calcularImporteTotal() | number:'1.2-2' }}</div>
         </div>
+        <ion-button class="vender-button" (click)="mostrarResumen()" [disabled]="participacionesDigitalizadas.length === 0">
+          Vender
+        </ion-button>
       </div>
     </div>
   </div>

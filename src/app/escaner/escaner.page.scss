@@ -1,5 +1,5 @@
 .escaner-content {
-  --background: #212529;
+  --background: #F5F6F7;
 }
 
 .rol-selector {
@@ -199,6 +199,8 @@
       flex-direction: column;
       gap: 12px;
       margin-bottom: 18px;
+      /* espacio para el footer fijo (importe + vender) */
+      padding-bottom: 110px;
     }
 
     .participation-item {
@@ -265,15 +267,6 @@
       white-space: nowrap;
     }
 
-    .bottom-bar {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      background: #F5F6F7;
-      border-radius: 16px;
-      padding: 12px;
-    }
-
     .total-box {
       flex: 1;
       background: #ffffff;
@@ -306,6 +299,21 @@
       min-width: 140px;
     }
   }
+}
+
+/* Footer fijo de la vista de venta múltiple, justo encima de tabs */
+.venta-footer {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--ion-safe-area-bottom, 0px) + 64px);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #F5F6F7;
+  border-radius: 18px;
+  padding: 12px;
+  z-index: 20;
 }
 
 .comprobacion-container {
