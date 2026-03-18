@@ -18,6 +18,40 @@
 
 <ion-content [fullscreen]="true" class="escaner-content">
 
+  <!-- Selector de rol (Usuario/Vendedor/Gestor) - solo opciones permitidas -->
+  <div class="rol-selector" *ngIf="authService.canCliente() || authService.canSeller() || authService.canManager()">
+    <ion-button
+      *ngIf="authService.canCliente()"
+      class="rol-button"
+      [class.active]="isRolActivo('usuario')"
+      fill="clear"
+      [disabled]="isRolActivo('usuario')"
+      (click)="cambiarRol('usuario')">
+      <ion-icon name="person-outline" slot="start"></ion-icon>
+      Usuario
+    </ion-button>
+    <ion-button
+      *ngIf="authService.canViewVendedor()"
+      class="rol-button"
+      [class.active]="isRolActivo('vendedor')"
+      fill="clear"
+      [disabled]="isRolActivo('vendedor')"
+      (click)="cambiarRol('vendedor')">
+      <ion-icon name="bag-outline" slot="start"></ion-icon>
+      Vendedor
+    </ion-button>
+    <ion-button
+      *ngIf="authService.canManager()"
+      class="rol-button"
+      [class.active]="isRolActivo('gestor')"
+      fill="clear"
+      [disabled]="isRolActivo('gestor')"
+      (click)="cambiarRol('gestor')">
+      <ion-icon name="people-outline" slot="start"></ion-icon>
+      Gestor
+    </ion-button>
+  </div>
+
   <!-- Overlay de carga -->
   <div class="loading-overlay" *ngIf="loading">
     <div class="loading-section">
@@ -159,52 +193,51 @@
   <!-- Vista Venta múltiple (Modo Vendedor): lista de participaciones escaneadas -->
   <div class="info-digitalizacion-view" *ngIf="isVendedor && mostrarInfoDigitalizacion && !modoEscaneo && !ventaPendienteVendedor">
     <div class="info-digitalizacion-container">
-      <!-- Header -->
-      <div class="info-digitalizacion-header">
-        <ion-buttons slot="start">
-          <ion-button fill="clear" (click)="mostrarInfoDigitalizacion = false; modoEscaneo = true">
-            <ion-icon name="arrow-back"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-        <ion-title>
-          <h2 class="info-title">Venta QR</h2>
-        </ion-title>
-      </div>
-
-      <!-- Lista de participaciones escaneadas -->
-      <div class="participaciones-digitalizadas-list">
-        <div 
-          class="participacion-digitalizada-item" 
-          *ngFor="let participacion of participacionesDigitalizadas; let i = index">
-          <div class="participacion-info">
-            <span class="participacion-numero">Participación {{ i + 1 }}/{{ participacionesDigitalizadas.length }} {{ participacion.entidad }}</span>
+      <div class="venta-qr-card figma-card">
+        <div class="card-header">
+          <div class="header-text">
+            <h2 class="card-title">Venta QR</h2>
+            <p class="card-subtitle">Gestiona la venta de participaciones</p>
           </div>
-          <div class="participacion-precio">€{{ participacion.precio | number:'1.2-2' }}</div>
+          <ion-button fill="clear" class="close-button" (click)="mostrarInfoDigitalizacion = false; modoEscaneo = true">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
         </div>
-      </div>
 
-      <!-- Importe Total -->
-      <div class="importe-total-section">
-        <span class="importe-label">Importe total:</span>
-        <span class="importe-valor">€{{ calcularImporteTotal() | number:'1.2-2' }}</span>
-      </div>
+        <div class="top-actions">
+          <ion-button class="nueva-digitalizacion-button" expand="block" (click)="nuevaDigitalizacion()">
+            <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+            Nueva Digitalización
+          </ion-button>
+        </div>
 
-      <!-- Botones -->
-      <div class="actions-section-digitalizacion">
-        <ion-button 
-          class="nueva-digitalizacion-button" 
-          expand="block"
-          (click)="nuevaDigitalizacion()">
-          Escanear otra
-        </ion-button>
-        
-        <ion-button 
-          class="vender-button" 
-          expand="block"
-          *ngIf="participacionesDigitalizadas.length > 0"
-          (click)="mostrarResumen()">
-          Vender
-        </ion-button>
+        <div class="participations-list">
+          <div class="participation-item" *ngFor="let p of participacionesDigitalizadas; let i = index">
+            <div class="participation-icon">
+              <ion-icon name="ticket-outline"></ion-icon>
+            </div>
+            <div class="participation-info">
+              <div class="participation-code">Participación: {{ p.numero || (i+1) }}</div>
+              <div class="participation-date" *ngIf="p.scannedAt">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ p.scannedAt | date:'dd/MM/yyyy' }} - {{ p.scannedAt | date:'HH:mm' }}h
+              </div>
+            </div>
+            <div class="participation-status">
+              <span class="badge-disponible">{{ p.precio | number:'1.0-2' }} €</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-bar">
+          <div class="total-box">
+            <div class="total-label">Importe total</div>
+            <div class="total-value">€{{ calcularImporteTotal() | number:'1.2-2' }}</div>
+          </div>
+          <ion-button class="vender-button" (click)="mostrarResumen()" [disabled]="participacionesDigitalizadas.length === 0">
+            Vender
+          </ion-button>
+        </div>
       </div>
     </div>
   </div>

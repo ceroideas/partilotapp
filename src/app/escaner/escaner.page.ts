@@ -75,6 +75,27 @@ export class EscanerPage implements OnInit {
     this.detectarModoDesdeRuta();
   }
 
+  cambiarRol(rol: 'usuario' | 'vendedor' | 'gestor') {
+    if (rol === 'usuario') {
+      this.router.navigate(['/tabs/tab5'], { replaceUrl: true });
+      return;
+    }
+    if (rol === 'vendedor') {
+      this.router.navigate(['/tabs/vendedor-tab5'], { replaceUrl: true });
+      return;
+    }
+    if (rol === 'gestor') {
+      this.router.navigate(['/tabs/gestor-tab5'], { replaceUrl: true });
+    }
+  }
+
+  isRolActivo(rol: 'usuario' | 'vendedor' | 'gestor'): boolean {
+    const url = this.router.url || '';
+    if (rol === 'usuario') return url.includes('/tabs/tab5');
+    if (rol === 'vendedor') return url.includes('/tabs/vendedor-tab5');
+    return url.includes('/tabs/gestor-tab5');
+  }
+
   /** Modo según la pestaña actual: tab5 = usuario (digitalizar), vendedor-tab5 = vendedor (vender) */
   private detectarModoDesdeRuta() {
     const ruta = this.router.url;
@@ -220,6 +241,7 @@ export class EscanerPage implements OnInit {
           precio: participation?.amount ?? participation?.importeTotal ?? participation?.played_amount ?? 0,
           fechaSorteo: participation?.draw_date || participation?.fechaSorteo || '',
           imagen: participation?.image || participation?.snapshot_path || participation?.snapshotPath || null,
+          scannedAt: new Date().toISOString(),
         };
 
         this.participacionesDigitalizadas.push(item);
