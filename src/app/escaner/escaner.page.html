@@ -193,7 +193,7 @@
   <!-- Vista Venta múltiple (Modo Vendedor): lista de participaciones escaneadas -->
   <div class="info-digitalizacion-view" *ngIf="isVendedor && mostrarInfoDigitalizacion && !modoEscaneo && !ventaPendienteVendedor">
     <div class="info-digitalizacion-container">
-      <div class="venta-qr-card figma-card">
+      <div class="venta-qr-card">
         <div class="card-header">
           <div class="header-text">
             <h2 class="card-title">Venta QR</h2>
@@ -231,10 +231,12 @@
       </div>
 
       <!-- Footer fijo (encima de tabs): Importe total + Vender -->
-      <div class="venta-footer">
-        <div class="total-box">
+      <div class="venta-footer venta-qr-card">
+        <div style="width: 30%;">
           <div class="total-label">Importe total</div>
-          <div class="total-value">€{{ calcularImporteTotal() | number:'1.2-2' }}</div>
+          <div class="total-box">
+            <div class="total-value">€{{ calcularImporteTotal() | number:'1.2-2' }}</div>
+          </div>
         </div>
         <ion-button class="vender-button" (click)="mostrarResumen()" [disabled]="participacionesDigitalizadas.length === 0">
           Vender
