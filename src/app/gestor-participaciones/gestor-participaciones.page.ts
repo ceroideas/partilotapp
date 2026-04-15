@@ -404,7 +404,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   getTacoSalesAmount(): number {
-    const price = this.selectedTaco?.price_per_participation || 0;
+    const price = this.getPlayedAmount();
     return this.getTacoSalesCount() * price;
   }
 
@@ -413,7 +413,7 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   getTacoReturnedAmount(): number {
-    const price = this.selectedTaco?.price_per_participation || 0;
+    const price = this.getPlayedAmount();
     return this.getTacoReturnedCount() * price;
   }
 
@@ -422,12 +422,12 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
   }
 
   getTacoAvailableAmount(): number {
-    const price = this.selectedTaco?.price_per_participation || 0;
+    const price = this.getPlayedAmount();
     return this.getTacoAvailableCount() * price;
   }
 
   getTacoPaymentBreakdown(): any {
-    const price = this.selectedTaco?.price_per_participation || 0;
+    const price = this.getPlayedAmount();
     const breakdown: any = { efectivo: 0, bizum: 0, transferencia: 0, sin_registrar: 0 };
     
     this.tacoParticipations
@@ -440,6 +440,76 @@ export class GestorParticipacionesPage implements OnInit, OnDestroy {
       });
     
     return breakdown;
+  }
+
+  getPlayedAmount(): number {
+    return Number(
+      this.selectedTaco?.played_amount ??
+      this.selectedTaco?.price_per_participation ??
+      0
+    );
+  }
+
+  getDonationAmount(): number {
+    return Number(
+      this.selectedTaco?.donation_amount ??
+      this.selectedTaco?.donation_per_participation ??
+      0
+    );
+  }
+
+  getTotalParticipationAmount(): number {
+    return Number(
+      this.selectedTaco?.total_participation_amount ??
+      this.selectedTaco?.total_per_participation ??
+      (this.getPlayedAmount() + this.getDonationAmount())
+    );
+  }
+
+  getReservedNumberDisplay(): string {
+    const raw = this.selectedTaco?.reservation_numbers_display ?? this.selectedTaco?.reserved_number;
+    if (raw !== undefined && raw !== null && String(raw).trim() !== '') {
+      const asText = String(raw).trim();
+      if (/^\d+$/.test(asText)) {
+        return Number(asText).toLocaleString('es-ES');
+      }
+      return asText;
+    }
+    const fallback = this.selectedTaco?.set_number;
+    if (fallback !== '' && fallback !== null && fallback !== undefined) {
+      return Number(fallback).toLocaleString('es-ES');
+    }
+    return `${this.selectedTaco?.set_number ?? ''}.${this.padNumber(this.selectedTaco?.book_number ?? 0, 3)}`;
+  }
+
+  getSetSnapshotUrl(): string {
+    return this.getTacoSnapshotUrl(this.selectedTaco);
+  }
+
+  getTacoSnapshotUrl(taco: any): string {
+    const item = taco || {};
+    const raw =
+      item.design_snapshot_url ||
+      item.design_snapshot_path ||
+      item.design_snapshot ||
+      item.snapshot_path ||
+      item.snapshot ||
+      '';
+
+    if (raw) {
+      if (String(raw).startsWith('http://') || String(raw).startsWith('https://')) {
+        return raw;
+      }
+      const apiBaseUrl = environment.apiUrl.replace('/api', '');
+      const clean = String(raw).replace(/^\/+/, '');
+      if (clean.startsWith('storage/')) return `${apiBaseUrl}/${clean}`;
+      if (clean.includes('design_snapshots/')) return `${apiBaseUrl}/storage/${clean}`;
+      return `${apiBaseUrl}/storage/design_snapshots/${clean}`;
+    }
+
+    const setId = item.set_id ?? item.setId ?? item.set_number ?? 0;
+    const apiBaseUrl = environment.apiUrl.replace('/api', '');
+    return `${apiBaseUrl}/storage/design_snapshots/design_set_${setId}.png`;
   }
 
   getTacoPaymentCount(method: string): number {

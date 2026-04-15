@@ -148,54 +148,70 @@
 
 // Vista 2: Resumen y Lista de Tacos
 .summary-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #e8e9eb;
+  border-radius: 24px;
+  padding: 12px 10px;
+  margin-bottom: 10px;
+  box-shadow: none;
 }
 
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-
-  &:last-child {
-    border-bottom: none;
+.summary-card-participaciones {
+  .summary-total-line {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 6px;
+    margin-bottom: 8px;
+  }
+  .summary-total-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #212529;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .summary-total-value {
+    font-size: 17px;
+    font-weight: 800;
+    color: #212529;
+    text-align: left;
+    white-space: nowrap;
   }
 }
 
-.summary-label {
-  font-size: 14px;
-  color: #6c757d;
+.summary-card-pagos {
+  margin-top: 4px;
+  margin-bottom: 16px;
 }
 
-.summary-value {
-  font-size: 14px;
-  font-weight: 600;
+.summary-line {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 6px;
+  font-size: 12px;
+  line-height: 1.35;
   color: #212529;
-}
+  margin-bottom: 2px;
 
-.payment-breakdown {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 2px solid #f0f0f0;
-}
+  &:last-child {
+    margin-bottom: 0;
+  }
 
-.breakdown-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 8px;
-}
+  span {
+    text-align: right;
+    white-space: nowrap;
+  }
 
-.breakdown-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  font-size: 13px;
-  color: #6c757d;
+  strong {
+    font-weight: 800;
+    color: #212529;
+    text-align: left;
+    white-space: nowrap;
+    justify-self: start;
+  }
 }
 
 .tacos-list {
@@ -206,11 +222,13 @@
 
 .taco-card {
   background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  border: 1px solid #dfe4eb;
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(10, 20, 40, 0.08);
   cursor: pointer;
   transition: transform 0.2s;
+  position: relative;
 
   &:active {
     transform: scale(0.98);
@@ -219,27 +237,32 @@
 
 .taco-header {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
-.taco-ticket-icon {
-  width: 50px;
-  height: 50px;
+.taco-ticket-image {
+  width: 98px;
+  height: 52px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f0f0;
+  background: #f5f6f8;
   border-radius: 8px;
-  
-  ion-icon {
-    font-size: 28px;
-    color: #F49200;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
   }
 }
 
 .taco-info {
   flex: 1;
+  padding-right: 104px;
 }
 
 .taco-title-row {
@@ -252,7 +275,8 @@
 
 .taco-title {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.1;
   color: #212529;
 }
 
@@ -278,178 +302,254 @@
 }
 
 .taco-subtitle {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2f3749;
+  margin-bottom: 2px;
 }
 
 .taco-reservation {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
+  font-size: 11px;
+  color: #4d5568;
+  margin-bottom: 2px;
 }
 
 .taco-lottery {
-  font-size: 12px;
-  color: #6c757d;
+  font-size: 11px;
+  color: #2f3749;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .taco-vendedor {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
+  font-size: 11px;
+  color: #4d5568;
+  margin-bottom: 2px;
 }
 
 .taco-stats {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  gap: 2px;
+  margin-left: 108px;
 }
 
 .stat-item {
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .stat-label {
-  color: #6c757d;
+  color: #2f3749;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .stat-value {
-  font-weight: 600;
+  font-weight: 800;
   color: #212529;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .taco-action {
-  text-align: right;
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+
+  ion-button {
+    --background: #ffffff;
+    --border-color: #d8dee8;
+    --border-style: solid;
+    --border-width: 1px;
+    --border-radius: 999px;
+    --color: #1f2430;
+    --padding-start: 12px;
+    --padding-end: 8px;
+    height: 24px;
+    font-size: 12px;
+    min-height: 38px;
+    font-weight: 600;
+    text-transform: none;
+    margin: 0;
+    min-width: 82px;
+    box-shadow: none;
+  }
 }
 
 // Vista 3: Detalle del Taco
 .taco-detail-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
+  // background: #f5f6f7;
+  // border-radius: 20px;
+  // border: 1px solid #d7dbe3;
+  // padding: 14px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  // box-shadow: none;
 }
 
-.taco-detail-header {
+.taco-detail-top {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.taco-ticket-large {
-  width: 80px;
-  height: 80px;
+.taco-detail-top-text {
+  .taco-detail-main-title {
+    margin: 0;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #1f2430;
+  }
+  .taco-detail-main-subtitle {
+    margin: 2px 0 0;
+    font-size: 30px;
+    line-height: 1.3;
+    color: #4d566b;
+  }
+}
+
+.taco-detail-top-logo {
+  width: 90px;
+  flex-shrink: 0;
+  img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+}
+
+.taco-info-banner {
+  background: #e8eaee;
+  border-radius: 22px;
+  padding: 10px 12px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.taco-info-line {
+  color: #212529;
+  line-height: 1.25;
+}
+
+.taco-info-line-main {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.taco-info-line-meta {
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.taco-summary-layout {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+}
+
+.taco-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taco-image-box {
+  background: #e8eaee;
+  border-radius: 12px;
+  padding: 4px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f0f0;
+  img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+}
+
+.taco-price-box {
+  background: #e8eaee;
   border-radius: 12px;
-  
-  ion-icon {
-    font-size: 40px;
-    color: #F49200;
-  }
+  padding: 14px 8px;
+  text-align: center;
 }
 
-.taco-detail-info {
-  flex: 1;
-}
-
-.taco-detail-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
-.taco-detail-title {
-  font-size: 20px;
-  font-weight: bold;
+.taco-price-title {
+  font-size: 12px;
+  font-weight: 800;
   color: #212529;
+  line-height: 1.1;
+  margin-bottom: 2px;
 }
 
-.taco-detail-type-badge {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 14px;
-  text-transform: none;
-
-  &.badge-digital {
-    background: rgba(13, 110, 253, 0.15);
-    color: #0d6efd;
-  }
-  &.badge-fisico {
-    background: rgba(108, 117, 125, 0.2);
-    color: #495057;
-  }
-  &.badge-mixto {
-    background: rgba(13, 202, 240, 0.2);
-    color: #0aa2c0;
+.taco-price-text {
+  font-size: 11px;
+  color: #212529;
+  line-height: 1.2;
+  strong {
+    font-weight: 800;
   }
 }
 
-.taco-detail-price {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
-}
-
-.taco-detail-range {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
-}
-
-.taco-detail-reservation {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
-}
-
-.taco-detail-lottery {
-  font-size: 12px;
-  color: #6c757d;
-}
-
-.taco-detail-vendedor {
-  font-size: 13px;
-  color: #6c757d;
-  margin-bottom: 4px;
-}
-
-.taco-detail-summary {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.summary-stat {
+.taco-right-column {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  font-size: 14px;
-  
-  span:first-child {
-    color: #6c757d;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taco-resume-box {
+  background: #e8eaee;
+  border-radius: 16px;
+  padding: 8px 10px;
+}
+
+.resume-row {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 6px;
+  margin-bottom: 1px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #30384a;
+  span {
+    text-align: right;
+    white-space: nowrap;
   }
-  
-  span:last-child {
-    font-weight: 600;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  strong {
+    font-weight: 800;
     color: #212529;
+    text-align: left;
+    white-space: nowrap;
+    justify-self: start;
   }
 }
 
-.taco-payment-breakdown {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 2px solid #f0f0f0;
+@media (max-width: 420px) {
+  .taco-detail-top-text .taco-detail-main-title {
+    font-size: 34px;
+  }
+  .taco-detail-top-text .taco-detail-main-subtitle {
+    font-size: 24px;
+  }
+  .taco-summary-layout {
+    grid-template-columns: 120px 1fr;
+  }
 }
 
 // Lista de Participaciones Individuales

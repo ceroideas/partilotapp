@@ -37,6 +37,7 @@
     &.active {
       --background: #212529;
       --color: #ffffff;
+      opacity: 1;
     }
     
     ion-icon {
@@ -88,7 +89,7 @@
 }
 
 .tutorial-block {
-  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  background: linear-gradient(135deg, #f8e6c8 0%, #f1d7ab 100%);
   min-height: 120px;
   display: flex;
   align-items: center;
@@ -99,10 +100,18 @@
     text-align: center;
   }
   
-  .block-icon-large {
-    font-size: 64px;
-    color: #F49200;
+  .block-image-large {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
     margin-bottom: 8px;
+  }
+
+  .block-text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #1f2430;
   }
 }
 
@@ -114,46 +123,63 @@
 
 .cartera-block {
   flex: 1;
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  background: linear-gradient(135deg, #a9ddd3 0%, #95cfc4 100%);
   min-height: 150px;
   
   .block-title {
-    color: #2E7D32;
+    color: #1f2430;
+    font-size: 17px;
+  }
+
+  .block-description {
+    color: #1f2430;
+    font-size: 12px;
+    line-height: 1.35;
   }
   
   .block-illustration {
     margin-top: auto;
     text-align: center;
     
-    .illustration-icon {
-      font-size: 48px;
-      color: #4CAF50;
+    .illustration-image {
+      width: 120px;
+      margin-bottom: -8px;
+      max-width: 100%;
+      object-fit: contain;
     }
   }
 }
 
 .escaner-block {
   flex: 1;
-  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  background: linear-gradient(135deg, #f3c2c8 0%, #eaabb4 100%);
   min-height: 150px;
   
   .block-title {
-    color: #C62828;
+    color: #1f2430;
+    font-size: 17px;
+  }
+
+  .block-description {
+    color: #1f2430;
+    font-size: 12px;
+    line-height: 1.35;
   }
   
   .block-illustration {
     margin-top: auto;
-    text-align: center;
+    text-align: right;
     
-    .illustration-icon {
-      font-size: 48px;
-      color: #F44336;
+    .illustration-image {
+      width: 80px;
+      max-width: 100%;
+      object-fit: contain;
     }
   }
 }
 
 .loteria-social-block {
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  background: linear-gradient(135deg, #b6bfdc 0%, #9ea9ce 100%);
   min-height: 120px;
   
   .block-content {
@@ -167,16 +193,24 @@
   }
   
   .block-title {
-    color: #1565C0;
+    color: #1f2430;
+    font-size: 17px;
+  }
+
+  .block-description {
+    color: #1f2430;
+    font-size: 12px;
+    line-height: 1.35;
   }
   
   .block-illustration-right {
     flex-shrink: 0;
-    margin-left: 16px;
+    // margin-left: 16px;
     
-    .illustration-icon-large {
-      font-size: 64px;
-      color: #2196F3;
+    .illustration-image-large {
+      width: 138px;
+      max-width: 100%;
+      object-fit: contain;
     }
   }
 }

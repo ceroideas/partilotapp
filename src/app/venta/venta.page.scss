@@ -62,13 +62,29 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+
+  .entity-logo-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -217,208 +233,121 @@
 
 // Vista 3: Card de Venta
 .vender-card {
-  background: white;
+  background: #eef0f2;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  
-  .vender-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    
-    .vender-title-section {
-      flex: 1;
-      
-      .vender-title {
-        font-size: 20px;
-        font-weight: bold;
-        color: #212529;
-        margin: 0 0 4px 0;
-      }
-      
-      .vender-subtitle {
-        font-size: 14px;
-        color: #6c757d;
-        margin: 0;
-      }
-    }
-    
-    .vender-logo {
-      flex-shrink: 0;
-      margin-left: 16px;
-      
-      .entity-logo-small {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          border-radius: 8px;
-        }
-        
-        .entity-logo-fallback {
-          width: 40px;
-          height: 40px;
-          background: #DC3545;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 24px;
-        }
-      }
-    }
+
+  .participaciones-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
   }
-  
-  .tipo-participacion-selector {
-    margin-bottom: 24px;
-    
-    ion-segment {
-      --background: #F5F6F7;
-      border-radius: 9999px;
-      padding: 6px;
-      gap: 12px;
-      display: flex;
-      
-      ion-segment-button {
-        --indicator-color: transparent;
-        --border-radius: 9999px;
-        --color: #6c757d;
-        --color-checked: #ffffff;
-        --background: transparent;
-        --background-checked: #212529;
-        --background-hover: transparent;
-        --background-activated: transparent;
-        min-height: 48px;
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: none;
-        border-radius: 9999px;
-        flex: 1;
-        
-        &::part(native) {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 8px;
-          padding-inline-start: 14px;
-          padding-inline-end: 14px;
-          text-align: left;
-        }
-        
-        ion-icon {
-          font-size: 20px;
-          margin: 0;
-          flex-shrink: 0;
-        }
-        
-        ion-label {
-          text-align: left;
-          display: block;
-          flex: 1;
-          min-width: 0;
-        }
-      }
-    }
+
+  .participaciones-head-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #252c39;
+    line-height: 1;
   }
-  
-  .sorteo-info {
-    margin-bottom: 20px;
-    padding: 12px;
-    background: #F5F6F7;
-    border-radius: 8px;
-    
-    .sorteo-text {
-      font-size: 16px;
-      font-weight: 600;
-      color: #212529;
-    }
-  }
-  
-  .escaner-section {
-    margin-bottom: 24px;
-    
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #212529;
-      margin: 0 0 8px 0;
-    }
-    
-    .section-subtitle {
-      font-size: 14px;
-      color: #6c757d;
-      margin: 0 0 16px 0;
-    }
-    
-    .escanear-qr-button {
-      --background: #F49200;
-      --color: #ffffff;
-      --border-radius: 12px;
-      height: 48px;
-      font-weight: 500;
-      text-transform: none;
-    }
-  }
-  
-  .manual-section {
-    margin-bottom: 24px;
-    
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #212529;
-      margin: 0 0 8px 0;
-    }
-    
-    .section-subtitle {
-      font-size: 14px;
-      color: #6c757d;
-      margin: 0;
-    }
+
+  .participaciones-head-sorteo {
+    background: #f5f6f7;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #2d3441;
+    white-space: nowrap;
   }
   
   .participaciones-fisicas {
     .participacion-unidad,
     .participaciones-rango {
       margin-bottom: 20px;
+
+      .group-heading {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+
+      .group-heading-inline {
+        margin-bottom: 0;
+      }
+
+      .group-heading-main {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #2d3441;
+      }
+
+      .group-heading-sub {
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.15;
+        color: #3d4653;
+        margin-top: 1px;
+      }
       
       .input-label {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 500;
-        color: #212529;
+        color: #3d4653;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       
       .input-item {
-        --background: white;
-        --border-radius: 12px;
-        --padding-start: 16px;
-        --padding-end: 16px;
+        --background: #ffffff;
+        --border-radius: 999px;
+        --padding-start: 14px;
+        --padding-end: 14px;
         --inner-padding-end: 0;
-        border: 1px solid #E9ECEF;
+        --highlight-height: 0;
+        --inner-border-width: 0;
+        border: 0;
         margin-bottom: 12px;
+        box-shadow: none;
         
         ion-input {
-          font-size: 16px;
+          font-size: 15px;
         }
+
+        ion-label[position="stacked"] {
+          font-size: 11px;
+          color: #5a6473;
+          margin-bottom: 2px;
+        }
+      }
+    }
+
+    .participacion-unidad {
+      .unidad-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: center;
       }
     }
     
     .rango-inputs {
       display: flex;
       gap: 12px;
+
+      .rango-field {
+        flex: 1;
+
+        .small-range-label {
+          font-size: 12px;
+          font-style: italic;
+          margin-bottom: 4px;
+          text-transform: lowercase;
+          margin-left: 16px;
+        }
+      }
       
       .input-item {
         flex: 1;
@@ -491,7 +420,7 @@
   .vender-button {
     --background: #212529;
     --color: #ffffff;
-    --border-radius: 12px;
+    --border-radius: 50px;
     height: 56px;
     font-weight: 600;
     text-transform: none;
@@ -507,15 +436,36 @@
   
   .selector-section {
     margin-bottom: 20px;
+
+    > .input-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #3d4653;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    > .input-label.small-range-label {
+      font-size: 12px;
+      font-style: italic;
+      text-transform: lowercase;
+      color: #5a6473;
+      margin-bottom: 4px;
+      margin-left: 16px;
+    }
     
     .input-item {
-      --background: white;
-      --border-radius: 12px;
-      --padding-start: 16px;
-      --padding-end: 16px;
+      --background: #ffffff;
+      --border-radius: 999px;
+      --padding-start: 14px;
+      --padding-end: 14px;
       --inner-padding-end: 0;
-      border: 1px solid #E9ECEF;
+      --highlight-height: 0;
+      --inner-border-width: 0;
+      border: 0;
       margin-bottom: 12px;
+      box-shadow: none;
+
     }
     
     .set-info {
@@ -542,6 +492,102 @@
         font-size: 14px;
       }
     }
+  }
+}
+
+.tipo-participacion-selector {
+  margin-bottom: 24px;
+  
+  ion-segment {
+    --background: #F5F6F7;
+    border-radius: 9999px;
+    padding: 6px;
+    gap: 12px;
+    display: flex;
+    
+    ion-segment-button {
+      --indicator-color: transparent;
+      --border-radius: 9999px;
+      --color: #6c757d;
+      --color-checked: #ffffff;
+      --background: transparent;
+      --background-checked: #212529;
+      --background-hover: transparent;
+      --background-activated: transparent;
+      min-height: 48px;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: none;
+      border-radius: 9999px;
+      flex: 1;
+      
+      &::part(native) {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        padding-inline-start: 14px;
+        padding-inline-end: 14px;
+        text-align: left;
+      }
+      
+      ion-icon {
+        font-size: 20px;
+        margin: 0;
+        flex-shrink: 0;
+      }
+      
+      ion-label {
+        text-align: left;
+        display: block;
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+}
+
+.escaner-section {
+  margin-bottom: 24px;
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0 0 8px 0;
+  }
+  
+  .section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0 0 16px 0;
+  }
+  
+  .escanear-qr-button {
+    --background: #F49200;
+    --color: #ffffff;
+    --border-radius: 50px;
+    height: 48px;
+    font-weight: 500;
+    text-transform: none;
+  }
+}
+
+.manual-section {
+  margin-bottom: 14px;
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0 0 8px 0;
+  }
+  
+  .section-subtitle {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
   }
 }
 

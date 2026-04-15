@@ -46,7 +46,7 @@
 }
 
 .tutorial-card {
-  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  background: linear-gradient(135deg, #f8e6c8 0%, #f1d7ab 100%);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
@@ -60,20 +60,24 @@
   
   .tutorial-content {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
+    text-align: center;
     
-    .tutorial-icon {
-      font-size: 48px;
-      color: #F49200;
+    .tutorial-image {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
       flex-shrink: 0;
+      margin-bottom: 8px;
     }
     
     .tutorial-text {
       flex: 1;
       
       .tutorial-title {
-        font-size: 18px;
+        font-size: 1.25rem;
         font-weight: bold;
         color: #212529;
         margin: 0 0 8px 0;
@@ -87,6 +91,14 @@
       }
     }
   }
+}
+
+.block-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #1f2430;
+  margin-bottom: 0 !important;
 }
 
 .acciones-principales {
@@ -117,7 +129,8 @@
     height: 100%;
     
     .card-title {
-      font-size: 18px;
+      font-size: 17px;
+      line-height: 1.35;
       font-weight: bold;
       color: #212529;
       margin: 0 0 8px 0;
@@ -125,91 +138,85 @@
     
     .card-description {
       font-size: 12px;
-      color: #6c757d;
+      color: #1f2430;
       margin: 0 0 16px 0;
-      line-height: 1.4;
+      line-height: 1.35;
     }
     
     .card-illustration {
-      margin-top: auto;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
     }
+  }
+  .card-image {
+    width: 96px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .card-image-large {
+    width: 132px;
   }
   
   &.participaciones-card {
-    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    background: linear-gradient(135deg, #a9ddd3 0%, #95cfc4 100%);
     
     .card-title {
-      color: #2E7D32;
+      color: #1f2430;
     }
-    
-    .ticket-illustration {
-      background: white;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-      
-      .ticket-header {
-        font-size: 10px;
-        font-weight: 600;
-        color: #6c757d;
-        margin-bottom: 8px;
-        text-align: center;
-      }
-      
-      .ticket-number {
-        font-size: 20px;
-        font-weight: bold;
-        color: #212529;
-        text-align: center;
-      }
+
+    .card-image {
+      width: 88px;
     }
   }
   
   &.vendedores-card {
-    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    background: linear-gradient(135deg, #f3c2c8 0%, #eaabb4 100%);
     
     .card-title {
-      color: #C62828;
+      color: #1f2430;
     }
-    
-    .people-illustration {
-      .people-icon {
-        font-size: 48px;
-        color: #F44336;
-      }
+
+    .card-image {
+      width: 92px;
     }
   }
   
   &.devolucion-card {
-    background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+    background: linear-gradient(135deg, #cab0e6 0%, #ad8fd3 100%);
     
     .card-title {
-      color: #7B1FA2;
+      color: #1f2430;
     }
-    
-    .return-illustration {
-      .return-icon {
-        font-size: 48px;
-        color: #9C27B0;
+
+    .stack-illustration {
+      position: relative;
+      width: 112px;
+      height: 88px;
+      .stack-base {
+        width: 78px;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+      }
+      .stack-overlay {
+        width: 68px;
+        position: absolute;
+        right: 0px;
+        bottom: 6px;
       }
     }
   }
   
   &.pago-card {
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    background: linear-gradient(135deg, #9fb6ff 0%, #85a3f3 100%);
     
     .card-title {
-      color: #1565C0;
+      color: #1f2430;
     }
-    
-    .payment-illustration {
-      .payment-icon {
-        font-size: 48px;
-        color: #2196F3;
-      }
+
+    .card-image-large {
+      width: 110px;
     }
   }
 }

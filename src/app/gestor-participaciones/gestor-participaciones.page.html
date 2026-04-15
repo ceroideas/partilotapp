@@ -102,42 +102,42 @@
     </ion-button> -->
 
     <!-- Resumen General -->
-    <div class="summary-card" *ngIf="summary">
-      <div class="summary-row">
-        <span class="summary-label">Total Participaciones:</span>
-        <span class="summary-value">{{ summary.total_participations }} ({{ summary.total_amount | number:'1.2-2' }}€)</span>
+    <div class="summary-card summary-card-participaciones" *ngIf="summary">
+      <div class="summary-total-line">
+        <span class="summary-total-label">Total participaciones:</span>
+        <span class="summary-total-value">{{ summary.total_participations }} ({{ summary.total_amount | number:'1.2-2' }}€)</span>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Ventas registradas:</span>
-        <span class="summary-value">{{ summary.sales_registered }} ({{ summary.sales_amount | number:'1.2-2' }}€)</span>
+      <div class="summary-line">
+        <span>Ventas registradas:</span>
+        <strong>{{ summary.sales_registered }} ({{ summary.sales_amount | number:'1.2-2' }}€)</strong>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Participaciones Devueltas:</span>
-        <span class="summary-value">{{ summary.returned_participations }} ({{ summary.returned_amount | number:'1.2-2' }}€)</span>
+      <div class="summary-line">
+        <span>Participaciones devueltas:</span>
+        <strong>{{ summary.returned_participations }} ({{ summary.returned_amount | number:'1.2-2' }}€)</strong>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Disponibles:</span>
-        <span class="summary-value">{{ summary.available_participations }} ({{ summary.available_amount | number:'1.2-2' }}€)</span>
+      <div class="summary-line">
+        <span>Disponibles:</span>
+        <strong>{{ summary.available_participations }} ({{ summary.available_amount | number:'1.2-2' }}€)</strong>
       </div>
-      
-      <div class="payment-breakdown" *ngIf="summary.payment_breakdown">
-        <div class="breakdown-title">Desglose de Pagos:</div>
-        <div class="breakdown-row" *ngIf="summary.payment_breakdown.efectivo > 0">
-          <span>Pago Efectivo:</span>
-          <span>{{ getPaymentCount(summary.payment_breakdown.efectivo, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.efectivo | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="breakdown-row" *ngIf="summary.payment_breakdown.bizum > 0">
-          <span>Pago Bizum:</span>
-          <span>{{ getPaymentCount(summary.payment_breakdown.bizum, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.bizum | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="breakdown-row" *ngIf="summary.payment_breakdown.transferencia > 0">
-          <span>Pago Transferencia:</span>
-          <span>{{ getPaymentCount(summary.payment_breakdown.transferencia, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.transferencia | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="breakdown-row" *ngIf="summary.payment_breakdown.sin_registrar > 0">
-          <span>Pago Sin Registrar:</span>
-          <span>{{ getPaymentCount(summary.payment_breakdown.sin_registrar, summary.sales_amount, summary.sales_registered) }} ({{ summary.payment_breakdown.sin_registrar | number:'1.2-2' }}€)</span>
-        </div>
+    </div>
+
+    <!-- Resumen de pagos -->
+    <div class="summary-card summary-card-pagos" *ngIf="summary">
+      <div class="summary-line">
+        <span>Pago Efectivo:</span>
+        <strong>{{ getPaymentCount(summary.payment_breakdown?.efectivo || 0, summary.sales_amount, summary.sales_registered) }} ({{ (summary.payment_breakdown?.efectivo || 0) | number:'1.2-2' }}€)</strong>
+      </div>
+      <div class="summary-line">
+        <span>Pago Bizum:</span>
+        <strong>{{ getPaymentCount(summary.payment_breakdown?.bizum || 0, summary.sales_amount, summary.sales_registered) }} ({{ (summary.payment_breakdown?.bizum || 0) | number:'1.2-2' }}€)</strong>
+      </div>
+      <div class="summary-line">
+        <span>Pago Transferencia:</span>
+        <strong>{{ getPaymentCount(summary.payment_breakdown?.transferencia || 0, summary.sales_amount, summary.sales_registered) }} ({{ (summary.payment_breakdown?.transferencia || 0) | number:'1.2-2' }}€)</strong>
+      </div>
+      <div class="summary-line">
+        <span>Pago Sin Registrar:</span>
+        <strong>{{ getPaymentCount(summary.payment_breakdown?.sin_registrar || 0, summary.sales_amount, summary.sales_registered) }} ({{ (summary.payment_breakdown?.sin_registrar || 0) | number:'1.2-2' }}€)</strong>
       </div>
     </div>
 
@@ -145,8 +145,8 @@
     <div class="tacos-list" *ngIf="tacos.length > 0">
       <div class="taco-card" *ngFor="let taco of tacos" (click)="openTaco(taco)">
         <div class="taco-header">
-          <div class="taco-ticket-icon">
-            <ion-icon name="ticket-outline"></ion-icon>
+          <div class="taco-ticket-image">
+            <img [src]="getTacoSnapshotUrl(taco)" alt="Diseño del set">
           </div>
           <div class="taco-info">
             <div class="taco-title-row">
@@ -159,6 +159,12 @@
             </div>
             <div class="taco-reservation" *ngIf="taco.reservation_numbers_display">Reserva: {{ taco.reservation_numbers_display }}</div>
             <div class="taco-lottery">Sorteo: {{ taco.lottery_name }} - Fecha: {{ formatDate(taco.lottery_date) }}</div>
+          </div>
+          <div class="taco-action">
+            <ion-button fill="clear" size="small">
+              Ver más
+              <ion-icon name="chevron-forward" slot="end"></ion-icon>
+            </ion-button>
           </div>
         </div>
         <div class="taco-stats">
@@ -174,12 +180,6 @@
             <span class="stat-label">Disponibles:</span>
             <span class="stat-value">{{ taco.available_participations }}</span>
           </div>
-        </div>
-        <div class="taco-action">
-          <ion-button fill="clear" size="small">
-            Ver más
-            <ion-icon name="chevron-forward" slot="end"></ion-icon>
-          </ion-button>
         </div>
       </div>
     </div>
@@ -213,63 +213,48 @@
 
     <!-- Detalle del Taco Seleccionado -->
     <div class="taco-detail-card" *ngIf="selectedTaco">
-      <div class="taco-detail-header">
-        <div class="taco-ticket-large">
-          <ion-icon name="ticket-outline"></ion-icon>
+      <!-- <div class="taco-detail-top">
+        <div class="taco-detail-top-text">
+          <h1 class="taco-detail-main-title">Participaciones</h1>
+          <p class="taco-detail-main-subtitle">Gestiona tus participaciones asignadas.</p>
         </div>
-        <div class="taco-detail-info">
-          <div class="taco-detail-title-row">
-            <span class="taco-detail-title">{{ selectedTaco.set_type === 'digital' ? (selectedTaco.set_name || 'Set Digital') : 'N-' + selectedTaco.set_number }}</span>
-            <span class="taco-detail-type-badge" *ngIf="getSetTypeLabel(selectedTaco.set_type)" [class.badge-digital]="selectedTaco.set_type === 'digital'" [class.badge-fisico]="selectedTaco.set_type === 'fisico'" [class.badge-mixto]="selectedTaco.set_type === 'mixto'">{{ getSetTypeLabel(selectedTaco.set_type) }}</span>
-          </div>
-          <div class="taco-detail-price">
-            <span>Precio: {{ selectedTaco.price_per_participation | number:'1.2-2' }}€</span>
-            <span *ngIf="(selectedTaco.donation_per_participation ?? 0) > 0">, Donación: {{ selectedTaco.donation_per_participation | number:'1.2-2' }}€</span>
-          </div>
-          <div class="taco-detail-price">
-          <span>Total participación: {{ (selectedTaco.total_per_participation ?? selectedTaco.price_per_participation ?? 0) | number:'1.2-2' }}€</span>
-          </div>
-          <div class="taco-detail-range">{{ getTacoOrSetTitle(selectedTaco) }} · Particip.: {{ getParticipationsRangeDisplay(selectedTaco) }}</div>
-          <div class="taco-detail-vendedor" *ngIf="isGestor && selectedTaco.seller_name">
-            Vendedor: {{ selectedTaco.seller_name }}
-          </div>
-          <div class="taco-detail-reservation" *ngIf="selectedTaco.reservation_numbers_display">Reserva: {{ selectedTaco.reservation_numbers_display }}</div>
-          <div class="taco-detail-lottery">Sorteo: {{ selectedTaco.lottery_name }} - Fecha: {{ selectedTaco.lottery_date }}</div>
+        <div class="taco-detail-top-logo" *ngIf="selectedEntity?.image">
+          <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
         </div>
-      </div>
-      
-      <div class="taco-detail-summary">
-        <div class="summary-stat">
-          <span>Ventas registradas:</span>
-          <span>{{ getTacoSalesCount() }} ({{ getTacoSalesAmount() | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="summary-stat">
-          <span>Participaciones Devueltas:</span>
-          <span>{{ getTacoReturnedCount() }} ({{ getTacoReturnedAmount() | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="summary-stat">
-          <span>Disponibles:</span>
-          <span>{{ getTacoAvailableCount() }} ({{ getTacoAvailableAmount() | number:'1.2-2' }}€)</span>
-        </div>
+      </div> -->
+
+      <div class="taco-info-banner">
+        <div class="taco-info-line taco-info-line-main">Taco:{{ selectedTaco.set_number }}/{{ padNumber(selectedTaco.book_number, 3) }}</div>
+        <div class="taco-info-line taco-info-line-main">Particip.:{{ getParticipationsRangeDisplay(selectedTaco) }}</div>
+        <div class="taco-info-line taco-info-line-meta">Sorteo: {{ selectedTaco.lottery_name }} - Fecha {{ formatDate(selectedTaco.lottery_date) }}</div>
       </div>
 
-      <div class="taco-payment-breakdown" *ngIf="getTacoPaymentBreakdown()">
-        <div class="breakdown-title">Desglose de Pagos:</div>
-        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().efectivo > 0">
-          <span>Pago Efectivo:</span>
-          <span>{{ getTacoPaymentCount('efectivo') }} ({{ getTacoPaymentBreakdown().efectivo | number:'1.2-2' }}€)</span>
+      <div class="taco-summary-layout">
+        <div class="taco-left-column">
+          <div class="taco-image-box">
+            <img [src]="getSetSnapshotUrl()" alt="Diseño del set">
+          </div>
+          <div class="taco-price-box">
+            <div class="taco-price-title">N - {{ getReservedNumberDisplay() }}</div>
+            <div class="taco-price-text">
+              Precio <strong>{{ getPlayedAmount() | number:'1.2-2' }}</strong> + <strong>{{ getDonationAmount() | number:'1.2-2' }}</strong>
+              Total: <strong>{{ getTotalParticipationAmount() | number:'1.2-2' }}</strong>
+            </div>
+          </div>
         </div>
-        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().bizum > 0">
-          <span>Pago Bizum:</span>
-          <span>{{ getTacoPaymentCount('bizum') }} ({{ getTacoPaymentBreakdown().bizum | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().transferencia > 0">
-          <span>Pago Transferencia:</span>
-          <span>{{ getTacoPaymentCount('transferencia') }} ({{ getTacoPaymentBreakdown().transferencia | number:'1.2-2' }}€)</span>
-        </div>
-        <div class="breakdown-row" *ngIf="getTacoPaymentBreakdown().sin_registrar > 0">
-          <span>Pago Sin Registrar:</span>
-          <span>{{ getTacoPaymentCount('sin_registrar') }} ({{ getTacoPaymentBreakdown().sin_registrar | number:'1.2-2' }}€)</span>
+
+        <div class="taco-right-column">
+          <div class="taco-resume-box">
+            <div class="resume-row"><span>Ventas registradas:</span><strong>{{ getTacoSalesCount() }} ({{ getTacoSalesAmount() | number:'1.2-2' }}€)</strong></div>
+            <div class="resume-row"><span>Participaciones Devueltas:</span><strong>{{ getTacoReturnedCount() }} ({{ getTacoReturnedAmount() | number:'1.2-2' }}€)</strong></div>
+            <div class="resume-row"><span>Disponibles:</span><strong>{{ getTacoAvailableCount() }} ({{ getTacoAvailableAmount() | number:'1.2-2' }}€)</strong></div>
+          </div>
+          <div class="taco-resume-box">
+            <div class="resume-row"><span>Pago Efectivo:</span><strong>{{ getTacoPaymentCount('efectivo') }} ({{ getTacoPaymentBreakdown().efectivo | number:'1.2-2' }}€)</strong></div>
+            <div class="resume-row"><span>Pago Bizum:</span><strong>{{ getTacoPaymentCount('bizum') }} ({{ getTacoPaymentBreakdown().bizum | number:'1.2-2' }}€)</strong></div>
+            <div class="resume-row"><span>Pago Transferencia:</span><strong>{{ getTacoPaymentCount('transferencia') }} ({{ getTacoPaymentBreakdown().transferencia | number:'1.2-2' }}€)</strong></div>
+            <div class="resume-row"><span>Pago Sin Registrar:</span><strong>{{ getTacoPaymentCount('sin_registrar') }} ({{ getTacoPaymentBreakdown().sin_registrar | number:'1.2-2' }}€)</strong></div>
+          </div>
         </div>
       </div>
     </div>

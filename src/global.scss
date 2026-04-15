@@ -147,6 +147,76 @@ ion-buttons ion-button {
   margin: 0;
 }
 
+.home-block, .tutorial-card, .accion-card {
+  position: relative;
+}
+.home-block::after, .tutorial-card::after, .accion-card::after {
+border-radius: 16px;
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .2;
+  background: linear-gradient(to top, #000000 0%, transparent 20%);
+}
+
+/* Ajuste solicitado: fondo del perfil seleccionado */
+.rol-selector .rol-button.active {
+  --background: #212529 !important;
+  --color: #ffffff !important;
+  --border-radius: 50px !important;
+}
+
+/* Iconos de perfil con imágenes personalizadas */
+.rol-selector .rol-button ion-icon[name="person-outline"],
+.rol-selector .rol-button ion-icon[name="bag-outline"],
+.rol-selector .rol-button ion-icon[name="people-outline"] {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  color: transparent !important;
+  font-size: 22px;
+}
+
+.rol-selector .rol-button ion-icon[name="person-outline"]::after,
+.rol-selector .rol-button ion-icon[name="bag-outline"]::after,
+.rol-selector .rol-button ion-icon[name="people-outline"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 1;
+}
+
+.rol-button {  
+  &.active {
+    --background: #212529 !important;
+    opacity: 1;
+  }
+}
+
+
+.rol-selector .rol-button ion-icon[name="person-outline"]::after {
+  background-image: url('/assets/images/image_usuario.png');
+}
+
+.rol-selector .rol-button ion-icon[name="bag-outline"]::after {
+  background-image: url('/assets/images/image_vendedor.png');
+}
+
+.rol-selector .rol-button ion-icon[name="people-outline"]::after {
+  background-image: url('/assets/images/image_gestor.png');
+}
+
+.rol-selector .rol-button.active ion-icon[name="person-outline"]::after,
+.rol-selector .rol-button.active ion-icon[name="bag-outline"]::after,
+.rol-selector .rol-button.active ion-icon[name="people-outline"]::after {
+  filter: invert(1);
+}
+
 /* Clases legacy / diseño Figma (siguen aplicando pill) */
 .figma-button {
   --background: #212529;

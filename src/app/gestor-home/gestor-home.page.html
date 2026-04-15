@@ -45,12 +45,12 @@
     </div>
 
     <!-- Card de Tutorial -->
-    <div class="tutorial-card" (click)="verTutoriales()">
+    <div class="tutorial-card figma-card-" (click)="verTutoriales()">
       <div class="tutorial-content">
-        <ion-icon name="play-circle-outline" class="tutorial-icon"></ion-icon>
+        <img src="/assets/images/play.png" alt="Tutoriales" class="tutorial-image">
         <div class="tutorial-text">
-          <h3 class="tutorial-title">¿PARTILOT te guia?</h3>
-          <p class="tutorial-subtitle">Mira nuestros tutoriales y descubre lo puedes hacer en PARTILOT</p>
+          <h4 style="margin:0; font-weight: 700;" class="tutorial-title">¿PARTILOT te guia?</h4>
+          <p class="block-text">Mira nuestros tutoriales y descubre <br> lo puedes hacer en <b>PARTILOT</b></p>
         </div>
       </div>
     </div>
@@ -62,10 +62,7 @@
           <h3 class="card-title">Participaciones</h3>
           <p class="card-description">El control total del estado de tus participaciones</p>
           <div class="card-illustration">
-            <div class="ticket-illustration">
-              <div class="ticket-header">PARTICIPACIÓN DE LOTERÍA</div>
-              <div class="ticket-number">12345</div>
-            </div>
+            <img src="/assets/images/participaciones.png" alt="Participaciones" class="card-image">
           </div>
         </div>
       </div>
@@ -75,9 +72,7 @@
           <h3 class="card-title">Vendedores</h3>
           <p class="card-description">Gestiona y administra tus vendedores</p>
           <div class="card-illustration">
-            <div class="people-illustration">
-              <ion-icon name="people-outline" class="people-icon"></ion-icon>
-            </div>
+            <img src="/assets/images/vendedores.png" alt="Vendedores" class="card-image">
           </div>
         </div>
       </div>
@@ -87,8 +82,9 @@
           <h3 class="card-title">Devolución</h3>
           <p class="card-description">Gestiona las devoluciones de tus vendedores</p>
           <div class="card-illustration">
-            <div class="return-illustration">
-              <ion-icon name="return-down-back-outline" class="return-icon"></ion-icon>
+            <div class="stack-illustration">
+              <img src="/assets/images/participaciones.png" alt="Participaciones" class="card-image stack-base">
+              <img src="/assets/images/devolucion.png" alt="Devolucion" class="card-image stack-overlay">
             </div>
           </div>
         </div>
@@ -99,9 +95,7 @@
           <h3 class="card-title">Pago</h3>
           <p class="card-description">Controla los pagos de participaciones físicas</p>
           <div class="card-illustration">
-            <div class="payment-illustration">
-              <ion-icon name="cash-outline" class="payment-icon"></ion-icon>
-            </div>
+            <img src="/assets/images/pago.png" alt="Pago" class="card-image card-image-large">
           </div>
         </div>
       </div>

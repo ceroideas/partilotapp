@@ -131,70 +131,66 @@
       Volver a Sorteos
     </ion-button> -->
     
-    <!-- Card Vender -->
+    <!-- Selector de tipo de participación -->
+    <div class="section-header">
+      <h1 class="section-title">Vender</h1>
+      <p class="section-subtitle">Gestiona la venta de participaciones</p>
+      <div class="entity-logo-small" *ngIf="selectedEntity">
+        <img *ngIf="selectedEntity.image" [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
+        <div *ngIf="!selectedEntity.image" class="entity-logo-fallback">
+          {{ selectedEntity.name.charAt(0) }}
+        </div>
+      </div>
+    </div>
+    
+    <div class="tipo-participacion-selector">
+      <ion-segment [(ngModel)]="tipoParticipacion" (ionChange)="cambiarTipoParticipacion()">
+        <ion-segment-button value="fisicas">
+          <ion-icon name="document-text-outline"></ion-icon>
+          Participaciones <br> Físicas
+        </ion-segment-button>
+        <ion-segment-button value="digitales">
+          <ion-icon name="phone-portrait-outline"></ion-icon>
+          Participaciones <br> Digitales
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Sección Escáner (solo para físicas) -->
+    <div class="escaner-section" *ngIf="tipoParticipacion === 'fisicas'" style="text-align: center;">
+      <h3 class="section-title">Escaner</h3>
+      <p class="section-subtitle">Lee el código QR y registra la venta</p>
+      <ion-button class="escanear-qr-button" expand="block" (click)="irAVentaQR()">
+        Escanear QR
+      </ion-button>
+    </div>
+
+    <!-- Sección Manual -->
+    <div class="manual-section" style="text-align: center;">
+      <h3 class="section-title">Manual</h3>
+      <p class="section-subtitle">Registra la Venta</p>
+    </div>
+
+    <!-- Card Manual -->
     <div class="vender-card figma-card-">
-      <div class="vender-header">
-        <div class="vender-title-section">
-          <h2 class="vender-title">Vender</h2>
-          <p class="vender-subtitle">Gestiona la venta de participaciones</p>
-        </div>
-        <div class="vender-logo" *ngIf="selectedEntity">
-          <div class="entity-logo-small">
-            <img *ngIf="selectedEntity.image" [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
-            <div *ngIf="!selectedEntity.image" class="entity-logo-fallback">
-              {{ selectedEntity.name.charAt(0) }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Selector de tipo de participación -->
-      <div class="tipo-participacion-selector">
-        <ion-segment [(ngModel)]="tipoParticipacion" (ionChange)="cambiarTipoParticipacion()">
-          <ion-segment-button value="fisicas">
-            <ion-icon name="document-text-outline"></ion-icon>
-            Participaciones <br> Físicas
-          </ion-segment-button>
-          <ion-segment-button value="digitales">
-            <ion-icon name="phone-portrait-outline"></ion-icon>
-            Participaciones <br> Digitales
-          </ion-segment-button>
-        </ion-segment>
-      </div>
-
-      <!-- Información del sorteo seleccionado -->
-      <div class="sorteo-info" *ngIf="selectedLottery">
-        <span class="sorteo-text">Sorteo: {{ selectedLottery.name }}</span>
-      </div>
-
-      <!-- Sección Escáner (solo para físicas) -->
-      <div class="escaner-section" *ngIf="tipoParticipacion === 'fisicas'">
-        <h3 class="section-title">Escaner</h3>
-        <p class="section-subtitle">Lee el código QR y registra la venta</p>
-        <ion-button class="escanear-qr-button" expand="block" (click)="irAVentaQR()">
-          Escanear QR
-        </ion-button>
-      </div>
-
-      <!-- Sección Manual -->
-      <div class="manual-section">
-        <h3 class="section-title">Manual</h3>
-        <p class="section-subtitle">Registra la Venta</p>
+      <div class="participaciones-head" *ngIf="selectedLottery">
+        <div class="participaciones-head-title">Participaciones</div>
+        <div class="participaciones-head-sorteo">Sorteo: {{ selectedLottery.name }}</div>
       </div>
 
       <!-- Participaciones Físicas -->
       <div class="participaciones-fisicas" *ngIf="tipoParticipacion === 'fisicas'">
         <!-- Selector de Reserva/Set -->
         <div class="selector-section" *ngIf="reserves.length > 0 || sets.length > 0">
+          <ion-label *ngIf="reserves.length > 1" class="input-label">Sorteo / Reserva</ion-label>
           <ion-item *ngIf="reserves.length > 1" class="input-item">
-            <ion-label position="stacked">Sorteo / Reserva</ion-label>
             <ion-select [(ngModel)]="reserveSeleccionado" (ionChange)="onReserveChange()" name="reserve" placeholder="Selecciona">
               <ion-select-option *ngFor="let r of reserves" [value]="r">{{ r.lottery?.name || 'Reserva' }}</ion-select-option>
             </ion-select>
           </ion-item>
           <!-- Selector de Set - siempre mostrar si hay sets -->
+          <ion-label *ngIf="sets.length > 0" class="input-label small-range-label">Set</ion-label>
           <ion-item *ngIf="sets.length > 0" class="input-item">
-            <ion-label position="stacked">Set</ion-label>
             <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="set" placeholder="Selecciona set">
               <ion-select-option *ngFor="let s of sets" [value]="s">{{ s.set_name || 'Set' }}</ion-select-option>
             </ion-select>
@@ -206,42 +202,54 @@
         </div>
 
         <div class="participacion-unidad">
-          <ion-label class="input-label">Participación Unidad</ion-label>
-          <ion-item class="input-item">
-            <ion-input 
-              [(ngModel)]="participacionUnidad"
-              placeholder="1/0001">
-            </ion-input>
-          </ion-item>
-        </div>
-
-        <div class="participaciones-rango">
-          <ion-label class="input-label">Participaciones Por Rango</ion-label>
-          <div class="rango-inputs">
-            <ion-item class="input-item">
-              <ion-label position="stacked">desde</ion-label>
+          <div class="unidad-row">
+            <div class="group-heading group-heading-inline">
+              <div class="group-heading-main">Participación</div>
+              <div class="group-heading-sub">Por Unidad</div>
+            </div>
+            <ion-item class="input-item" style="margin-bottom: 0;">
               <ion-input 
-                [(ngModel)]="rangoDesde"
+                [(ngModel)]="participacionUnidad"
                 placeholder="1/0001">
               </ion-input>
             </ion-item>
-            <ion-item class="input-item">
-              <ion-label position="stacked">hasta</ion-label>
-              <ion-input 
-                [(ngModel)]="rangoHasta"
-                placeholder="1/0005">
-              </ion-input>
-            </ion-item>
+          </div>
+        </div>
+
+        <div class="participaciones-rango">
+          <div class="group-heading">
+            <div class="group-heading-main">Participaciones</div>
+            <div class="group-heading-sub">Por Rango</div>
+          </div>
+          <div class="rango-inputs">
+            <div class="rango-field">
+              <ion-label class="input-label small-range-label">desde</ion-label>
+              <ion-item class="input-item">
+                <ion-input 
+                  [(ngModel)]="rangoDesde"
+                  placeholder="1/0001">
+                </ion-input>
+              </ion-item>
+            </div>
+            <div class="rango-field">
+              <ion-label class="input-label small-range-label">hasta</ion-label>
+              <ion-item class="input-item">
+                <ion-input 
+                  [(ngModel)]="rangoHasta"
+                  placeholder="1/0005">
+                </ion-input>
+              </ion-item>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Participaciones Digitales (pool entidad + sorteo; no se asigna set) -->
       <div class="participaciones-digitales" *ngIf="tipoParticipacion === 'digitales'">
-        <div class="digital-pool-info" *ngIf="selectedEntity && selectedLottery">
+        <!-- <div class="digital-pool-info" *ngIf="selectedEntity && selectedLottery">
           <p class="disponibles-label">Disponibles (total entidad + sorteo): <strong>{{ totalDigitalAvailable }}</strong></p>
-        </div>
-        <div class="no-sets-message" *ngIf="totalDigitalAvailable === 0 && selectedLottery">
+        </div> -->
+        <div class="no-sets-message" *ngIf="totalDigitalAvailable === 0 && selectedLottery" style="text-align: center; margin-bottom: 12px; font-style: italic; color: #6c757d;">
           <ion-label class="input-label">No hay participaciones digitales disponibles para este sorteo</ion-label>
         </div>
         <div class="numero-participaciones-section" *ngIf="selectedEntity && selectedLottery">
