@@ -146,11 +146,11 @@
     <div class="tipo-participacion-selector">
       <ion-segment [(ngModel)]="tipoParticipacion" (ionChange)="cambiarTipoParticipacion()">
         <ion-segment-button value="fisicas">
-          <ion-icon name="document-text-outline"></ion-icon>
+          <img [src]="tipoParticipacion === 'fisicas' ? '/assets/images/fisicas_selected.png' : '/assets/images/fisicas.png'" alt="" class="tipo-segment-icon" />
           Participaciones <br> Físicas
         </ion-segment-button>
         <ion-segment-button value="digitales">
-          <ion-icon name="phone-portrait-outline"></ion-icon>
+          <img [src]="tipoParticipacion === 'digitales' ? '/assets/images/digitales_selected.png' : '/assets/images/digitales.png'" alt="" class="tipo-segment-icon" />
           Participaciones <br> Digitales
         </ion-segment-button>
       </ion-segment>

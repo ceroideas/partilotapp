@@ -434,6 +434,7 @@
 <!-- Action sheet: Formulario Vendedor Externo -->
 <div class="modal-overlay action-sheet-overlay" *ngIf="showExternalFormSheet" (click)="closeExternalFormSheet()">
   <div class="modal-container bottom-sheet-content action-sheet-container form-sheet" (click)="$event.stopPropagation()">
+    <div class="form-sheet-handle"></div>
     <div class="action-sheet-header">
       <h2>Datos Vendedor (Externo)</h2>
       <ion-button fill="clear" class="close-btn" (click)="closeExternalFormSheet()">
@@ -441,34 +442,34 @@
       </ion-button>
     </div>
     <form (ngSubmit)="saveExternalSeller()">
-      <ion-item lines="full">
-        <ion-label position="stacked">Nombre</ion-label>
-        <ion-input [(ngModel)]="externalForm.name" name="name" type="text"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">Primer Apellido</ion-label>
-        <ion-input [(ngModel)]="externalForm.last_name" name="last_name" type="text"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">Segundo Apellido</ion-label>
-        <ion-input [(ngModel)]="externalForm.last_name2" name="last_name2" type="text"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">Email</ion-label>
-        <ion-input [(ngModel)]="externalForm.email" name="email" type="email" required></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">Teléfono</ion-label>
-        <ion-input [(ngModel)]="externalForm.phone" name="phone" type="tel"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">Fecha de nacimiento</ion-label>
-        <ion-input [(ngModel)]="externalForm.birthday" name="birthday" type="date"></ion-input>
-      </ion-item>
-      <ion-item lines="full">
-        <ion-label position="stacked">NIF/NIE</ion-label>
-        <ion-input [(ngModel)]="externalForm.nif_cif" name="nif_cif" type="text"></ion-input>
-      </ion-item>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/name.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.name" name="name" type="text" placeholder="Nombre"></ion-input>
+      </div>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/main.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.last_name" name="last_name" type="text" placeholder="Primer Apellido"></ion-input>
+      </div>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/main.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.last_name2" name="last_name2" type="text" placeholder="Segundo Apellido"></ion-input>
+      </div>
+      <div class="external-field">
+        <ion-icon name="mail-outline" class="field-icon"></ion-icon>
+        <ion-input [(ngModel)]="externalForm.email" name="email" type="email" placeholder="email@example.com" required></ion-input>
+      </div>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/phone.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.phone" name="phone" type="tel" placeholder="Teléfono"></ion-input>
+      </div>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/birthday.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.birthday" name="birthday" type="date" placeholder="Fecha de nacimiento"></ion-input>
+      </div>
+      <div class="external-field">
+        <img src="/assets/images/vendedor/nif.png" alt="" class="field-icon-image" />
+        <ion-input [(ngModel)]="externalForm.nif_cif" name="nif_cif" type="text" placeholder="NIF / NIE"></ion-input>
+      </div>
       <ion-button type="submit" expand="block" class="submit-sheet-btn" [disabled]="savingExternal">
         {{ savingExternal ? 'Guardando...' : 'Guardar' }}
       </ion-button>

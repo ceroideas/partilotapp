@@ -96,8 +96,9 @@
     <div class="view-section" *ngIf="step === 'participaciones' && !loading">
       <div class="section-header devolucion-qr-header">
         <div class="header-titles">
-          <h1 class="section-title">Asignación Participaciones</h1>
-          <p class="section-subtitle">Gestiona la asignación por QR</p>
+          <h1 class="section-title">+ Asignación Participaciones</h1>
+          <p class="section-subtitle">Gestiona la asignación de participaciones</p>
+          <p class="section-subtitle" *ngIf="sellerName">Vendedor: {{ sellerName }}</p>
         </div>
         <div class="entity-logo-small" *ngIf="selectedEntity?.image">
           <img [src]="getImageUrl(selectedEntity.image)" [alt]="selectedEntity.name">
@@ -106,8 +107,8 @@
       <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>
 
       <div class="selector-section card-block" *ngIf="sets.length > 0">
+        <ion-label class="input-label small-range-label">set</ion-label>
         <ion-item lines="none" class="input-item">
-          <ion-label position="stacked">Set</ion-label>
           <ion-select
             [(ngModel)]="selectedSet"
             (ionChange)="onSetChange($event)"
@@ -119,9 +120,9 @@
             </ion-select-option>
           </ion-select>
         </ion-item>
-        <p class="reserva-set-info" *ngIf="selectedSet && getReserveLabel(selectedSet)">
+        <!-- <p class="reserva-set-info" *ngIf="selectedSet && getReserveLabel(selectedSet)">
           Pertenece a la reserva: {{ getReserveLabel(selectedSet) }}
-        </p>
+        </p> -->
       </div>
 
       <!-- Disponibles por set físico (como en la web: "de la X a la Y") -->
@@ -130,44 +131,129 @@
       </div>
 
       <!-- Sets físicos: escáner y rango/unidad -->
-      <div class="card-block escaner-section" *ngIf="!isDigitalSet">
-        <h3 class="block-title">Escáner</h3>
-        <p class="block-subtitle">Gestiona la asignación por QR</p>
-        <div class="participacion-block">
-          <h4 class="participacion-label">Participación Unidad</h4>
+      <ng-container *ngIf="!isDigitalSet">
+        <div class="manual-header" *ngIf="!showQrScannerView">
+          <h3 class="block-title">Manual</h3>
+          <p class="block-subtitle">Registra la asignación de manera manual</p>
         </div>
-        <div class="participacion-unidad-row">
-          <ion-item lines="none" class="input-item flex-item">
-            <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
-          </ion-item>
-          <ion-button class="btn-escaner-qr" (click)="escanearQRUnidad()" [disabled]="loading">
-            <ion-icon name="qr-code-outline"></ion-icon>
-            Escanear QR
+
+        <div class="card-block manual-asignacion-card" *ngIf="!showQrScannerView">
+          <div class="manual-top-row">
+            <h3 class="manual-card-title">Participaciones</h3>
+            <div class="manual-sorteo-pill">Sorteo: {{ selectedLottery?.name }}</div>
+          </div>
+
+          <div class="participacion-unidad">
+            <div class="unidad-row">
+              <div class="group-heading group-heading-inline">
+                <div class="group-heading-main">Participación</div>
+                <div class="group-heading-sub">Participación Unidad</div>
+              </div>
+              <ion-item lines="none" class="input-item">
+                <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+
+          <div class="participaciones-rango">
+            <div class="group-heading">
+              <div class="group-heading-main">Participaciones</div>
+              <div class="group-heading-sub">Por Rango</div>
+            </div>
+            <div class="rango-inputs">
+              <div class="rango-field">
+                <ion-label class="input-label small-range-label">desde</ion-label>
+                <ion-item lines="none" class="input-item">
+                  <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="1/0001"></ion-input>
+                </ion-item>
+              </div>
+              <div class="rango-field">
+                <ion-label class="input-label small-range-label">hasta</ion-label>
+                <ion-item lines="none" class="input-item">
+                  <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="1/0005"></ion-input>
+                </ion-item>
+              </div>
+            </div>
+          </div>
+
+          <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
+            Asignar / Seguir
+          </ion-button>
+          <ion-button expand="block" class="btn-terminar-manual" (click)="irAResumen()" [disabled]="participacionesToAssign.length === 0">
+            Terminar
           </ion-button>
         </div>
-        <div class="participaciones-rango-rows">
-          <h4 class="participacion-label">Participaciones Por Rango</h4>
-          <div class="rango-row">
-            <ion-item lines="none" class="input-item flex-item">
-              <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="desde"></ion-input>
-            </ion-item>
-            <ion-button class="btn-escaner-qr" (click)="escanearQRParaDesde()" [disabled]="loading">
-              <ion-icon name="qr-code-outline"></ion-icon>
-              Escanear QR
-            </ion-button>
-          </div>
-          <div class="rango-row">
-            <ion-item lines="none" class="input-item flex-item">
-              <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="hasta"></ion-input>
-            </ion-item>
-            <ion-button class="btn-escaner-qr" (click)="escanearQRParaHasta()" [disabled]="loading">
-              <ion-icon name="qr-code-outline"></ion-icon>
-              Escanear QR
-            </ion-button>
-          </div>
+
+        <div class="escaner-launch" *ngIf="!showQrScannerView">
+          <h3 class="block-title">Escaner</h3>
+          <p class="block-subtitle">Gestiona la asignación por QR</p>
+          <ion-button expand="block" class="btn-escanear-open" (click)="showQrScannerView = true">
+            Asignar QR
+          </ion-button>
         </div>
-        <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
-          Asignar / Seguir
+
+        <div class="scanner-header" *ngIf="showQrScannerView">
+          <h3 class="block-title">Escaner</h3>
+          <p class="block-subtitle">Gestiona la asignación por QR</p>
+        </div>
+
+        <div class="card-block escaner-section" *ngIf="showQrScannerView">
+          <div class="manual-top-row">
+            <h3 class="manual-card-title">Participaciones</h3>
+          </div>
+
+          <div class="scanner-title-row">
+            <div class="group-heading group-heading-inline">
+              <div class="group-heading-main">Participación</div>
+              <div class="group-heading-sub">Participación Unidad</div>
+            </div>
+            <ion-button class="btn-escaner-qr" (click)="escanearQRUnidad()" [disabled]="loading">
+              Escanear QR
+            </ion-button>
+          </div>
+          <ion-item lines="none" class="input-item scanner-single-input">
+            <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
+          </ion-item>
+
+          <div class="scanner-title-row scanner-rango-row">
+            <div class="group-heading group-heading-inline">
+              <div class="group-heading-main">Participaciones</div>
+              <div class="group-heading-sub">Por Rango</div>
+            </div>
+            <ion-button class="btn-escaner-qr" (click)="rangoDesde ? escanearQRParaHasta() : escanearQRParaDesde()" [disabled]="loading">
+              Escanear QR
+            </ion-button>
+          </div>
+
+          <div class="rango-inputs">
+            <div class="rango-field">
+              <ion-label class="input-label small-range-label">desde</ion-label>
+              <ion-item lines="none" class="input-item">
+                <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="1/0001"></ion-input>
+              </ion-item>
+            </div>
+            <div class="rango-field">
+              <ion-label class="input-label small-range-label">hasta</ion-label>
+              <ion-item lines="none" class="input-item">
+                <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="1/0005"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+
+          <ion-button expand="block" class="btn-devolver-seguir" (click)="validarYAsignar()" [disabled]="loading">
+            Asignar / Seguir
+          </ion-button>
+          <ion-button expand="block" class="btn-terminar-manual" (click)="irAResumen()" [disabled]="participacionesToAssign.length === 0">
+            Terminar
+          </ion-button>
+        </div>
+      </ng-container>
+
+      <div class="escaner-launch" *ngIf="showQrScannerView">
+        <h3 class="block-title">Manual</h3>
+        <p class="block-subtitle">Registra la asignación de manera manual</p>
+        <ion-button expand="block" class="btn-escanear-open" (click)="showQrScannerView = false">
+          Asignar Manual
         </ion-button>
       </div>
 
@@ -203,7 +289,7 @@
         </ion-button>
       </div>
 
-      <div class="asignadas-block card-block" *ngIf="participacionesToAssign.length > 0">
+      <div class="asignadas-block card-block" *ngIf="participacionesToAssign.length > 0 && !isDigitalSet">
         <h3 class="block-title">Participaciones a asignar ({{ participacionesToAssign.length }})</h3>
         <div class="asignadas-list">
           <div class="asignada-item" *ngFor="let p of participacionesToAssign">
@@ -213,9 +299,6 @@
             </ion-button>
           </div>
         </div>
-        <ion-button expand="block" class="btn-terminar" (click)="irAResumen()">
-          Terminar
-        </ion-button>
       </div>
     </div>
 

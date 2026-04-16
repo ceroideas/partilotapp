@@ -48,6 +48,7 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
   cantidadDigitalNum = 1;
   disponiblesDigitalSet = 0;
   participacionesToAssign: AsignacionParticipation[] = [];
+  showQrScannerView = false;
 
   signatureDataUrl: string | null = null;
   isDrawing = false;
@@ -133,6 +134,7 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
   selectSorteo(lottery: any) {
     this.selectedLottery = lottery;
     this.loadSets();
+    this.showQrScannerView = false;
     this.step = 'participaciones';
   }
 
@@ -466,11 +468,20 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
 
   closeSuccessModal() {
     this.showSuccessModal = false;
-    this.router.navigate(['/tabs/gestor-tab2'], { replaceUrl: true });
+    this.router.navigate(['/tabs/gestor-tab2'], {
+      replaceUrl: true,
+      state: {
+        refreshSellerDetail: true,
+        seller_id: this.sellerId,
+        entity_id: this.entityId,
+        seller_name: this.sellerName,
+      },
+    });
   }
 
   backToSorteos() {
     this.step = 'sorteos';
+    this.showQrScannerView = false;
     this.selectedLottery = null;
     this.sets = [];
     this.selectedSet = null;

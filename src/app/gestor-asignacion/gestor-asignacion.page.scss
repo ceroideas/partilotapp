@@ -83,7 +83,7 @@
     justify-content: space-between;
     gap: 12px;
     .header-titles { flex: 1; }
-    .section-title { font-size: 24px; font-weight: 800; }
+    .section-title { font-size: 22px; font-weight: 700; }
     .section-subtitle { font-size: 14px; margin-top: 2px; }
     .entity-logo-small {
       margin-top: 0;
@@ -177,7 +177,7 @@
 .lottery-action { display: flex; align-items: center; }
 
 .card-block {
-  background: white;
+  background: #eef0f2;
   border-radius: 20px;
   padding: 18px;
   margin-bottom: 18px;
@@ -208,11 +208,28 @@
 }
 
 .selector-section {
+  > .input-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #3d4653;
+    display: block;
+    font-style: italic;
+    margin-bottom: 4px;
+    margin-left: 16px;
+  }
+
   ion-item.input-item {
-    --background: #f8f9fa;
+    --background: #ffffff;
+    --border-radius: 999px;
     --padding-start: 14px;
     --padding-end: 14px;
-    border-radius: 20px;
+    --inner-padding-end: 0;
+    --highlight-height: 0;
+    --inner-border-width: 0;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+    min-height: 56px;
     margin-bottom: 0;
     ion-select { max-width: 100%; }
   }
@@ -223,69 +240,235 @@
   }
 }
 
-.escaner-section {
-  .block-title { font-size: 18px; font-weight: 700; }
-  .block-subtitle { margin-bottom: 18px; }
-  .participacion-block { margin-bottom: 4px; }
-  .participacion-label {
-    font-size: 16px;
+.manual-header,
+.escaner-launch,
+.scanner-header {
+  text-align: center;
+  .block-title {
+    font-size: 18px;
     font-weight: 700;
-    color: #212529;
-    margin: 0 0 2px 0;
+    margin: 0 0 4px;
   }
-  .participacion-unidad-row,
-  .rango-row {
+  .block-subtitle {
+    font-size: 14px;
+    margin: 0 0 12px;
+  }
+}
+
+.manual-asignacion-card {
+  .manual-top-row {
     display: flex;
-    align-items: stretch;
-    gap: 12px;
-    margin-bottom: 16px;
-    .flex-item {
-      flex: 1;
-      --background: #f8f9fa;
-      --padding-start: 14px;
-      --padding-end: 14px;
-      border-radius: 20px;
-      margin-bottom: 0;
-      min-height: 56px;
-    }
-    .btn-escaner-qr {
-      --background: #e78307;
-      --color: #fff;
-      --border-radius: 28px;
-      --box-shadow: none;
-      margin-bottom: 0;
-      min-height: 56px;
-      height: 56px;
-      padding-left: 20px;
-      // padding-right: 20px;
-      font-weight: 700;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .manual-card-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #252c39;
+    line-height: 1;
+  }
+
+  .manual-sorteo-pill {
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d3441;
+    white-space: nowrap;
+  }
+}
+
+.participacion-unidad,
+.participaciones-rango, .scanner-title-row {
+  margin-bottom: 18px;
+
+  .group-heading {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .group-heading-inline {
+    margin-bottom: 0;
+  }
+
+  .group-heading-main {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.05;
+    color: #2d3441;
+  }
+
+  .group-heading-sub {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.15;
+    color: #3d4653;
+    margin-top: 1px;
+  }
+
+  .input-item {
+    --background: #ffffff;
+    --border-radius: 999px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --inner-padding-end: 0;
+    --highlight-height: 0;
+    --inner-border-width: 0;
+    border: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+    min-height: 56px;
+
+    ion-input {
       font-size: 15px;
-      text-transform: none;
-      white-space: nowrap;
-      ion-icon { font-size: 22px; margin-right: 6px; vertical-align: middle; }
-    }
-    .disponibles-label {
-      align-self: center;
-      color: #6c757d;
-      font-size: 14px;
-      white-space: nowrap;
     }
   }
-  .participaciones-rango-rows {
-    margin-bottom: 20px;
-    .rango-row { margin-bottom: 14px; }
+}
+
+.participacion-unidad {
+  .unidad-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: center;
   }
-  .btn-devolver-seguir {
-    --background: #212529;
-    --color: #fff;
+}
+
+.rango-inputs {
+  display: flex;
+  gap: 12px;
+
+  .rango-field {
+    flex: 1;
+  }
+
+  .small-range-label {
+    font-size: 12px;
+    font-style: italic;
+    text-transform: lowercase;
+    color: #5a6473;
+    display: block;
+    margin-bottom: 4px;
+    margin-left: 16px;
+  }
+}
+
+.btn-terminar-manual {
+  margin-top: 12px;
+  --border-radius: 28px;
+  min-height: 56px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 16px;
+  --background: #f49200;
+  --color: #212529;
+  opacity: 1;
+
+  &[disabled] {
+    --background: #f4cb84;
+    --color: #9a8a66;
+    opacity: 1;
+  }
+}
+
+.btn-escanear-open {
+  --background: #f49200;
+  --color: #212529;
+  --border-radius: 28px;
+  min-height: 56px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+}
+
+.escaner-section {
+  .manual-top-row {
+    margin-bottom: 10px;
+  }
+
+  .scanner-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    .group-heading {
+      text-align: left;
+      margin-bottom: 0;
+    }
+  }
+
+  .scanner-rango-row {
+    margin-top: 6px;
+  }
+
+  .scanner-single-input {
+    margin: 0 0 14px;
+  }
+
+  .input-item {
+    --background: #ffffff;
+    --border-radius: 999px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --inner-padding-end: 0;
+    --highlight-height: 0;
+    --inner-border-width: 0;
+    border: 0;
+    box-shadow: none;
+    min-height: 56px;
+
+    ion-input {
+      font-size: 15px;
+    }
+  }
+
+  .btn-escaner-qr {
+    --background: #f49200;
+    --color: #212529;
+    --border-radius: 28px;
+    --box-shadow: none;
+    margin: 0;
+    min-height: 50px;
+    height: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: none;
+    white-space: nowrap;
+    --padding-start: 18px;
+    --padding-end: 18px;
+  }
+
+  .btn-back-manual {
+    margin-top: 12px;
+    --background: #f49200;
+    --color: #212529;
     --border-radius: 28px;
     min-height: 56px;
     height: 56px;
     font-weight: 700;
     font-size: 16px;
     text-transform: none;
-    margin-top: 12px;
   }
+}
+
+.btn-devolver-seguir {
+  --background: #212529;
+  --color: #fff;
+  --border-radius: 28px;
+  min-height: 56px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  margin-top: 12px;
 }
 
 // Asignación digital: mismo estilo que venta de participaciones digitales
@@ -355,10 +538,11 @@
 }
 
 .asignadas-block {
+  margin-top: 24px;
   .asignadas-list {
     max-height: 200px;
     overflow-y: auto;
-    margin-bottom: 12px;
+    // margin-bottom: 12px;
   }
   .asignada-item {
     display: flex;

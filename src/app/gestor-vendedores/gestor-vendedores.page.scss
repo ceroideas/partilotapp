@@ -160,8 +160,9 @@
     --background: #212529;
     --color: #fff;
     text-transform: none;
-    font-weight: 600;
+    font-weight: 400;
     margin: 0;
+    font-size: 14px;
   }
 
   .filter-buttons {
@@ -496,31 +497,37 @@
   .modal-email-input-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: #f0f0f0;
-    border-radius: 12px;
-    padding: 0 14px;
+    gap: 12px;
+    background: #eceef0;
+    border-radius: 999px;
+    padding: 0 16px;
+    min-height: 54px;
     margin-bottom: 16px;
   }
 
   .input-icon {
-    font-size: 20px;
-    color: #6c757d;
+    font-size: 22px;
+    color: #3b414c;
   }
 
   .modal-email-input {
     --padding-top: 12px;
     --padding-bottom: 12px;
     --padding-start: 0;
+    --padding-end: 0;
+    font-size: 15px;
+    color: #212529;
     flex: 1;
   }
 
   .btn-invitar-modal {
-    --background: #e8a64a;
+    --background: #f49200;
     --color: #212529;
     text-transform: none;
-    font-weight: 600;
-    --border-radius: 12px;
+    font-weight: 700;
+    --border-radius: 999px;
+    min-height: 52px;
+    font-size: 16px;
   }
 }
 
@@ -827,13 +834,103 @@
 }
 
 .form-sheet {
-  ion-item {
-    --padding-start: 0;
-    margin-bottom: 8px;
+  .form-sheet-handle {
+    width: 40px;
+    height: 5px;
+    border-radius: 999px;
+    background: #c5cad3;
+    margin: -6px auto 16px;
   }
-  ion-label[position="stacked"] {
-    font-size: 12px;
-    color: #6c757d;
+
+  .action-sheet-header {
+    margin-bottom: 14px;
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .close-btn {
+      --background: #000;
+      --border-radius: 999px;
+      width: 38px;
+      height: 38px;
+      --padding-start: 0;
+      --padding-end: 0;
+      min-width: 38px;
+      min-height: 38px;
+
+      ion-icon {
+        color: #fff;
+        font-size: 18px;
+      }
+    }
+  }
+
+  .external-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #eceef0;
+    border-radius: 999px;
+    padding: 0 16px;
+    min-height: 54px;
+    margin-bottom: 10px;
+  }
+
+  .field-icon-image {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
+
+  .field-icon {
+    font-size: 22px;
+    color: #3b414c;
+    flex-shrink: 0;
+  }
+
+  .external-field ion-input {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --padding-start: 0;
+    --padding-end: 0;
+    font-size: 15px;
+    color: #212529;
+  }
+
+  .external-field ion-input::part(native) {
+    font-size: 15px;
+  }
+
+  .external-field ion-input::part(placeholder) {
+    color: #7d838d;
+    opacity: 1;
+  }
+
+  .submit-sheet-btn {
+    --background: #f49200;
+    --color: #212529;
+    --border-radius: 999px;
+    min-height: 52px;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: none;
+    margin-top: 22px;
+  }
+
+  @media (max-width: 420px) {
+    .action-sheet-header h2 {
+      font-size: 18px;
+    }
+
+    .submit-sheet-btn {
+      font-size: 16px;
+      min-height: 50px;
+    }
   }
 }
 

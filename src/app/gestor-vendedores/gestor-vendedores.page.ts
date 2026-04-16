@@ -45,6 +45,9 @@ export class GestorVendedoresPage implements OnInit {
   showMatchModal = false;
   showNoMatchModal = false;
   showVerMasSheet = false;
+  pendingRefreshSellerId: number | null = null;
+  pendingRefreshEntityId: number | null = null;
+  pendingRefreshSellerName = '';
 
   partilotEmail = '';
   partilotEmailChecked: boolean | null = null;
@@ -185,6 +188,9 @@ export class GestorVendedoresPage implements OnInit {
   backToSellerList(): void {
     this.showSellerDetail = false;
     this.sellerDetail = null;
+    if (this.selectedEntity) {
+      this.loadSellers();
+    }
   }
 
   loadSellerDetail(): void {
@@ -286,16 +292,45 @@ export class GestorVendedoresPage implements OnInit {
 
   ngOnInit() {
     this.detectarRol();
+    this.restoreSellerDetailState();
     this.loadEntities();
   }
 
   ionViewWillEnter() {
     this.detectarRol();
+    this.restoreSellerDetailState();
+    if (this.showSellerDetail && this.sellerDetail?.seller?.id) {
+      this.loadSellerDetail();
+      if (this.selectedEntity) {
+        this.loadSellers();
+      }
+      return;
+    }
     if (this.selectedEntity && this.showSellersList) {
       this.loadSellers();
     } else if (!this.selectedEntity && this.entities.length > 0) {
       this.loadEntities();
     }
+  }
+
+  private restoreSellerDetailState(): void {
+    const state = (history.state || {}) as any;
+    if (!state?.refreshSellerDetail) return;
+    if (state.entity_id) this.pendingRefreshEntityId = Number(state.entity_id);
+    if (state.seller_id) this.pendingRefreshSellerId = Number(state.seller_id);
+    if (state.seller_name) this.pendingRefreshSellerName = String(state.seller_name);
+  }
+
+  private tryOpenPendingSellerDetail(): void {
+    if (!this.pendingRefreshSellerId) return;
+    const sellerId = this.pendingRefreshSellerId;
+    const seller =
+      this.sellers.find((s) => Number(s.id) === sellerId) ||
+      { id: sellerId, name: this.pendingRefreshSellerName || 'Vendedor' };
+    this.pendingRefreshSellerId = null;
+    this.pendingRefreshSellerName = '';
+    this.showSellerDetail = true;
+    this.openSellerDetail(seller);
   }
 
   loadEntities() {
@@ -305,6 +340,17 @@ export class GestorVendedoresPage implements OnInit {
         this.loading = false;
         if (res.success && res.entities) {
           this.entities = res.entities || [];
+          if (this.pendingRefreshEntityId) {
+            const entityMatch = this.entities.find((e: any) => Number(e.id) === this.pendingRefreshEntityId);
+            if (entityMatch) {
+              this.selectedEntity = entityMatch;
+              this.showEntitySelection = false;
+              this.showSellersList = true;
+              this.pendingRefreshEntityId = null;
+              this.loadSellers();
+              return;
+            }
+          }
           if (this.entities.length === 1) {
             this.selectedEntity = this.entities[0];
             this.loadSellers();
@@ -368,6 +414,7 @@ export class GestorVendedoresPage implements OnInit {
         if (res.success) {
           this.sellers = res.sellers || [];
           this.showSellersList = true;
+          this.tryOpenPendingSellerDetail();
         } else {
           this.showAlerta('Error', res.message || 'Error al cargar vendedores.');
         }
