@@ -9,6 +9,11 @@ const routes: Routes = [
     loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule)
   },
   {
+    path: 'biometric-unlock',
+    loadChildren: () =>
+      import('./biometric-unlock/biometric-unlock.module').then(m => m.BiometricUnlockPageModule),
+  },
+  {
     path: 'registro',
     loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule)
   },

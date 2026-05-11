@@ -12,7 +12,7 @@ import { AlertModalComponent } from './core/components/alert-modal/alert-modal.c
 
 @NgModule({
   declarations: [AppComponent, AlertModalComponent],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
+  imports: [BrowserModule, IonicModule.forRoot({ backButtonText: '', backButtonIcon: 'arrow-back' }), AppRoutingModule],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideHttpClient(withInterceptors([authInterceptor]))

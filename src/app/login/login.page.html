@@ -47,10 +47,14 @@
     </form>
 
     <div class="biometric-row">
-      <button type="button" class="btn-biometric" (click)="loginBiometrico()" aria-label="Acceso biométrico">
-        <ion-icon name="finger-print-outline"></ion-icon>
+      <button type="button" class="btn-biometric" (click)="loginBiometrico()" [disabled]="!biometricReady || loading" aria-label="Acceso biométrico">
+        <ion-icon [name]="biometricIcon"></ion-icon>
       </button>
     </div>
+    <ion-item lines="none" class="biometric-toggle-row" *ngIf="biometricReady">
+      <ion-label>Recordar acceso biométrico</ion-label>
+      <ion-toggle slot="end" [checked]="biometricEnabled" (ionChange)="onBiometricToggle($event)"></ion-toggle>
+    </ion-item>
 
     <p class="footer-registro">
       Aún no tienes cuenta? <a href="javascript:void(0)" class="link-registro" (click)="irARegistro()">Regístrate</a>

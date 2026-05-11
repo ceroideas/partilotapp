@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, map, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { BiometricService } from './biometric.service';
 
 export interface LoginResponse {
   success: boolean;
@@ -21,7 +22,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private biometricService: BiometricService
   ) {}
 
   /** Login perfil Vendedor (solo cuentas con rol seller). */
@@ -38,6 +40,7 @@ export class AuthService {
           }
           localStorage.setItem('rolActual', 'vendedor');
           localStorage.setItem('esVendedor', 'true');
+          this.biometricService.markBiometricUnlockSessionOk();
         }
       })
     );
@@ -60,6 +63,7 @@ export class AuthService {
           localStorage.removeItem('seller');
           localStorage.setItem('rolActual', 'usuario');
           localStorage.setItem('esVendedor', 'false');
+          this.biometricService.markBiometricUnlockSessionOk();
         }
       })
     );
@@ -98,6 +102,7 @@ export class AuthService {
             localStorage.setItem('rolActual', 'usuario');
             localStorage.setItem('esVendedor', 'false');
           }
+          this.biometricService.markBiometricUnlockSessionOk();
         }
       })
     );
@@ -124,8 +129,33 @@ export class AuthService {
     localStorage.removeItem('seller');
     localStorage.removeItem('manager');
     localStorage.removeItem('rolActual');
+    this.biometricService.clearStoredLoginCredentials();
+    this.biometricService.invalidateBiometricUnlockSession();
     // Recarga completa para descargar de caché todas las vistas de Ionic y evitar datos viejos
     window.location.href = '/login';
+  }
+
+  /** Navega al inicio por rol (tabs). Opcionalmente usa returnUrl si es una ruta interna. */
+  navigateToDefaultHome(returnUrl?: string | null): void {
+    const safe =
+      returnUrl &&
+      returnUrl.startsWith('/') &&
+      !returnUrl.startsWith('//') &&
+      !returnUrl.includes('://')
+        ? returnUrl
+        : null;
+    if (safe) {
+      this.router.navigateByUrl(safe, { replaceUrl: true });
+      return;
+    }
+    const rol = localStorage.getItem('rolActual') || 'usuario';
+    if (rol === 'gestor') {
+      this.router.navigate(['/tabs/gestor-tab3'], { replaceUrl: true });
+    } else if (rol === 'vendedor') {
+      this.router.navigate(['/tabs/vendedor-tab3'], { replaceUrl: true });
+    } else {
+      this.router.navigate(['/tabs/tab3'], { replaceUrl: true });
+    }
   }
 
   isLoggedIn(): boolean {

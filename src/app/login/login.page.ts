@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { AlertController } from '@ionic/angular';
+import { BiometricService } from '../core/services/biometric.service';
 
 @Component({
   selector: 'app-login',
@@ -15,12 +16,16 @@ export class LoginPage {
   returnUrl = '/tabs';
   loading = false;
   showPassword = false;
+  biometricReady = false;
+  biometricEnabled = false;
+  biometricIcon = 'finger-print-outline';
 
   constructor(
     public authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private biometricService: BiometricService
   ) {
     const returnUrl = this.route.snapshot.queryParams['returnUrl'];
     this.returnUrl = returnUrl || '/tabs';
@@ -28,19 +33,24 @@ export class LoginPage {
 
   ionViewDidEnter() {
     if (!this.authService.isLoggedIn()) return;
-    // Redirigir según el rol del usuario
+    if (this.biometricService.mustShowBiometricGate()) {
+      this.router.navigate(['/biometric-unlock'], {
+        replaceUrl: true,
+        queryParams: { returnUrl: this.returnUrl || '/tabs' },
+      });
+      return;
+    }
     this.navigateByRole();
   }
 
+  async ionViewWillEnter() {
+    this.biometricReady = await this.biometricService.isBiometryAvailable();
+    this.biometricEnabled = this.biometricService.isBiometricEnabled();
+    this.biometricIcon = await this.biometricService.getBiometricIconName();
+  }
+
   private navigateByRole() {
-    if (this.authService.isGestor()) {
-      // Usar gestor-tab3 que parece ser la ruta estándar según otros componentes
-      this.router.navigateByUrl(this.returnUrl || '/tabs/gestor-tab3');
-    } else if (this.authService.isSeller()) {
-      this.router.navigateByUrl(this.returnUrl || '/tabs/vendedor-tab3');
-    } else {
-      this.router.navigateByUrl(this.returnUrl || '/tabs');
-    }
+    this.authService.navigateToDefaultHome(this.returnUrl);
   }
 
   togglePassword() {
@@ -51,13 +61,46 @@ export class LoginPage {
     await this.mostrarAlerta('Recordar contraseña', 'Contacta con tu entidad o administrador para recuperar tu contraseña.');
   }
 
-  loginBiometrico() {
-    // Placeholder: integración con Capacitor Identity o similar
-    this.mostrarAlerta('Acceso biométrico', 'Próximamente disponible.');
+  async loginBiometrico() {
+    if (this.loading) return;
+    if (!this.biometricEnabled) {
+      await this.mostrarAlerta('Acceso biométrico', 'Activa "Recordar acceso biométrico" para usar esta opción.');
+      return;
+    }
+    const stored = this.biometricService.getStoredLoginCredentials();
+    if (!stored) {
+      await this.mostrarAlerta('Acceso biométrico', 'Inicia sesión manualmente una vez para activar el acceso biométrico.');
+      return;
+    }
+    const authorized = await this.biometricService.authenticate();
+    if (!authorized) return;
+
+    this.loading = true;
+    this.authService.loginUsuario(stored.email, stored.password).subscribe({
+      next: async (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.navigateByRole();
+        } else {
+          await this.mostrarAlerta('Error', response.message || 'No se pudo iniciar sesión biométrica.');
+        }
+      },
+      error: async (err) => {
+        this.loading = false;
+        const message = err.error?.message || 'Error de conexión. Verifica la URL de la API.';
+        await this.mostrarAlerta('Error', message);
+      },
+    });
   }
 
   irARegistro() {
     this.router.navigate(['/registro']);
+  }
+
+  onBiometricToggle(ev: CustomEvent) {
+    const enabled = !!ev.detail.checked;
+    this.biometricEnabled = enabled;
+    this.biometricService.setBiometricEnabled(enabled);
   }
 
   async onSubmit() {
@@ -72,6 +115,9 @@ export class LoginPage {
       next: async (response) => {
         this.loading = false;
         if (response.success) {
+          if (this.biometricReady && this.biometricEnabled) {
+            await this.biometricService.saveLoginCredentials(this.email.trim(), this.password);
+          }
           // Navegar según el rol detectado automáticamente
           this.navigateByRole();
         } else {

@@ -1,14 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button *ngIf="step === 'sorteos'" defaultHref="/tabs/gestor-tab2"></ion-back-button>
-      <ion-button *ngIf="step === 'participaciones'" fill="clear" (click)="backToSorteos()">
+      <ion-button class="header-back-btn" *ngIf="step === 'sorteos'" fill="clear" routerLink="/tabs/gestor-tab2">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button *ngIf="step === 'resumen'" fill="clear" (click)="step = 'participaciones'">
+      <ion-button class="header-back-btn" *ngIf="step === 'participaciones'" fill="clear" (click)="backToSorteos()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button *ngIf="step === 'firma'" fill="clear" (click)="step = 'resumen'">
+      <ion-button class="header-back-btn" *ngIf="step === 'resumen'" fill="clear" (click)="step = 'participaciones'">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button class="header-back-btn" *ngIf="step === 'firma'" fill="clear" (click)="step = 'resumen'">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { BiometricService } from '../core/services/biometric.service';
 
 @Component({
   selector: 'app-splash',
@@ -13,7 +14,8 @@ export class SplashPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private biometricService: BiometricService
   ) {}
 
   ngOnInit(): void {
@@ -28,14 +30,11 @@ export class SplashPage implements OnInit, OnDestroy {
 
   private navigateAfterSplash(): void {
     if (this.authService.isLoggedIn()) {
-      const rol = localStorage.getItem('rolActual') || 'usuario';
-      if (rol === 'gestor') {
-        this.router.navigate(['/tabs/gestor-tab3'], { replaceUrl: true });
-      } else if (rol === 'vendedor') {
-        this.router.navigate(['/tabs/vendedor-tab3'], { replaceUrl: true });
-      } else {
-        this.router.navigate(['/tabs/tab3'], { replaceUrl: true });
+      if (this.biometricService.mustShowBiometricGate()) {
+        this.router.navigate(['/biometric-unlock'], { replaceUrl: true });
+        return;
       }
+      this.authService.navigateToDefaultHome();
     } else {
       this.router.navigate(['/login'], { replaceUrl: true });
     }

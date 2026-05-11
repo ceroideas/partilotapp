@@ -151,10 +151,23 @@
 
 .list-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-end;
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 12px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 
   .btn-add-seller {
     --background: #212529;
@@ -163,15 +176,21 @@
     font-weight: 400;
     margin: 0;
     font-size: 14px;
+    --border-radius: 12px;
+    width: 115px;
+    flex-shrink: 0;
   }
 
   .filter-buttons {
     display: flex;
+    align-items: flex-end;
     gap: 6px;
     flex-wrap: nowrap;
+    flex: 0 0 auto;
   }
 
   .filter-btn {
+    flex-shrink: 0;
     --background: #fff;
     --color: #212529;
     --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -180,11 +199,19 @@
     font-size: 13px;
     font-weight: 500;
     margin: 0;
-    height: 38px;
+    /* Por debajo del min-height global de ion-button (48px en global.scss) */
+    min-height: 20px;
+    height: auto;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
     --padding-start: 10px;
     --padding-end: 10px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
+
+    &::part(native) {
+      min-height: 20px;
+    }
 
     ion-icon:first-of-type {
       font-size: 16px;
@@ -1030,7 +1057,7 @@
 
   .seller-detail-actions {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 8px;
     flex-shrink: 0;
   }
@@ -1044,6 +1071,7 @@
     margin: 0;
     font-size: 11px;
     min-height: 28px;
+    height: 28px;
     --padding-start: 12px;
     --padding-end: 12px;
     font-weight: 500;
@@ -1281,23 +1309,25 @@
 }
 
 .ver-mas-body {
-  .ver-mas-photo-wrap {
+  /* Foto a la izquierda; botón naranja + grupo apilados a la derecha (como diseño referencia) */
+  .ver-mas-profile-row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
     margin-bottom: 20px;
   }
 
   .ver-mas-photo {
-    width: 120px;
-    height: 120px;
-    border-radius: 16px;
+    width: 88px;
+    height: 88px;
+    border-radius: 14px;
     overflow: hidden;
     background: #e9ecef;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
     img {
       width: 100%;
@@ -1306,47 +1336,66 @@
     }
 
     &.no-image {
-      background: #495057;
+      background: #343a40;
 
       .ver-mas-photo-placeholder {
-        font-size: 56px;
-        color: rgba(255, 255, 255, 0.7);
+        font-size: 40px;
+        color: rgba(255, 255, 255, 0.85);
       }
     }
   }
 
-  .ver-mas-actions-row {
+  .ver-mas-profile-aside {
+    flex: 1;
+    min-width: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    justify-content: flex-start;
+    padding-top: 2px;
   }
 
   .ver-mas-btn-particip {
-    --background: #F49200;
+    --background: #f49200;
     --color: #fff;
-    --border-radius: 12px;
-    --padding-start: 16px;
-    --padding-end: 16px;
-    height: 44px;
-    font-weight: 600;
-    font-size: 14px;
+    --border-radius: 9999px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    width: 100%;
     margin: 0;
+    min-height: 0;
+    height: auto;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.25;
+    text-transform: none;
+    white-space: normal;
 
     ion-icon {
-      margin-right: 8px;
+      font-size: 18px;
+      margin-inline-end: 6px;
     }
   }
 
+  .ver-mas-grupo-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+
   .ver-mas-grupo-badge {
-    color: #e9ecef;
-    background: #495057;
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    margin: 4px;
+    display: inline-block;
+    color: #495057;
+    background: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #dee2e6;
   }
 
   .ver-mas-fields {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
@@ -12,7 +12,9 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./gestor-vendedores.page.scss'],
   standalone: false,
 })
-export class GestorVendedoresPage implements OnInit {
+export class GestorVendedoresPage implements OnInit, OnDestroy {
+  /** Fondo de ion-tabs mientras hay un overlay inferior (huecos laterales del menú pill). */
+  private static readonly TABS_STRIP_SHEET_CLASS = 'ion-tabs-strip-sheet';
   entities: any[] = [];
   selectedEntity: any = null;
   showEntitySelection = false;
@@ -224,11 +226,13 @@ export class GestorVendedoresPage implements OnInit {
     this.selectedLotteryForSettlement = list.length > 0 ? list[0] : null;
     this.liquidationForm = { efectivo: '', bizum: '', transferencia: '' };
     this.showLiquidationModal = true;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeLiquidationModal(): void {
     this.showLiquidationModal = false;
     this.selectedLotteryForSettlement = null;
+    this.syncTabsStripForBottomOverlays();
   }
 
   get liquidationImporteTotal(): number {
@@ -270,6 +274,7 @@ export class GestorVendedoresPage implements OnInit {
           this.closeLiquidationModal();
           if (res.success) {
             this.showLiquidationSuccessModal = true;
+            this.syncTabsStripForBottomOverlays();
           } else {
             this.showAlerta('Error', res.message || 'Error al registrar la liquidación.');
           }
@@ -283,6 +288,7 @@ export class GestorVendedoresPage implements OnInit {
 
   closeLiquidationSuccessModal(): void {
     this.showLiquidationSuccessModal = false;
+    this.syncTabsStripForBottomOverlays();
     this.loadSellerDetail();
   }
 
@@ -311,6 +317,33 @@ export class GestorVendedoresPage implements OnInit {
     } else if (!this.selectedEntity && this.entities.length > 0) {
       this.loadEntities();
     }
+  }
+
+  ionViewWillLeave(): void {
+    this.clearTabsStripSheetOverlay();
+  }
+
+  ngOnDestroy(): void {
+    this.clearTabsStripSheetOverlay();
+  }
+
+  private clearTabsStripSheetOverlay(): void {
+    document.querySelector('ion-tabs')?.classList.remove(GestorVendedoresPage.TABS_STRIP_SHEET_CLASS);
+  }
+
+  /** Rellena los laterales del menú pill con blanco cuando hay un sheet/modal inferior abierto. */
+  private syncTabsStripForBottomOverlays(): void {
+    const anyOpen =
+      this.showVerMasSheet ||
+      this.showLiquidationModal ||
+      this.showLiquidationSuccessModal ||
+      this.showSearchUserSheet ||
+      this.showExternalFormSheet ||
+      this.showMatchModal ||
+      this.showNoMatchModal;
+    const tabs = document.querySelector('ion-tabs');
+    if (!tabs) return;
+    tabs.classList.toggle(GestorVendedoresPage.TABS_STRIP_SHEET_CLASS, anyOpen);
   }
 
   private restoreSellerDetailState(): void {
@@ -405,6 +438,14 @@ export class GestorVendedoresPage implements OnInit {
     }
   }
 
+  goBackFromRoot(): void {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    this.router.navigate(['/tabs/gestor-tab3']);
+  }
+
   loadSellers() {
     if (!this.selectedEntity) return;
     this.loading = true;
@@ -439,6 +480,7 @@ export class GestorVendedoresPage implements OnInit {
     this.partilotEmail = '';
     this.partilotEmailChecked = null;
     this.showSearchUserSheet = true;
+    this.syncTabsStripForBottomOverlays();
   }
 
   openExternalForm() {
@@ -453,24 +495,29 @@ export class GestorVendedoresPage implements OnInit {
       nif_cif: '',
     };
     this.showExternalFormSheet = true;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeSearchUserSheet() {
     this.showSearchUserSheet = false;
     this.partilotEmail = '';
     this.partilotEmailChecked = null;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeExternalFormSheet() {
     this.showExternalFormSheet = false;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeMatchModal() {
     this.showMatchModal = false;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeNoMatchModal() {
     this.showNoMatchModal = false;
+    this.syncTabsStripForBottomOverlays();
   }
 
   invitePartilot() {
@@ -486,6 +533,7 @@ export class GestorVendedoresPage implements OnInit {
         } else {
           this.showNoMatchModal = true;
         }
+        this.syncTabsStripForBottomOverlays();
       },
       error: () => {
         this.showAlerta('Error', 'No se pudo comprobar el email.');
@@ -583,10 +631,12 @@ export class GestorVendedoresPage implements OnInit {
 
   openVerMasSheet(): void {
     this.showVerMasSheet = true;
+    this.syncTabsStripForBottomOverlays();
   }
 
   closeVerMasSheet(): void {
     this.showVerMasSheet = false;
+    this.syncTabsStripForBottomOverlays();
   }
 
   sellerLlamar(): void {

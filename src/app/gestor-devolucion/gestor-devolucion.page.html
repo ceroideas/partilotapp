@@ -215,47 +215,57 @@
         <p class="disponibles-devolver-nota">No se pueden devolver las vendidas, donadas ni cobradas.</p>
       </div>
 
-      <!-- Escáner: Gestiona la devolución por QR -->
-      <div class="card-block escaner-section">
+      <div class="scanner-header">
         <h3 class="block-title">Escáner</h3>
         <p class="block-subtitle">Gestiona la devolución por QR</p>
+      </div>
+
+      <!-- Escáner: Gestiona la devolución por QR -->
+      <div class="card-block escaner-section">
+        <div class="manual-top-row">
+          <h3 class="manual-card-title">Participaciones</h3>
+        </div>
 
         <!-- Participación Unidad -->
-        <div class="participacion-block">
-          <h4 class="participacion-label">Participación</h4>
-          <p class="participacion-sublabel">Participación Unidad</p>
-        </div>
-        <div class="participacion-unidad-row">
-          <ion-item lines="none" class="input-item flex-item">
-            <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
-          </ion-item>
+        <div class="scanner-title-row">
+          <div class="group-heading group-heading-inline">
+            <div class="group-heading-main">Participación</div>
+            <div class="group-heading-sub">Participación Unidad</div>
+          </div>
           <ion-button class="btn-escaner-qr" (click)="escanearQRUnidad()" [disabled]="loading">
-            <ion-icon name="qr-code-outline"></ion-icon>
+            <!-- <ion-icon name="qr-code-outline"></ion-icon> -->
             Escanear QR
           </ion-button>
         </div>
+        <ion-item lines="none" class="input-item scanner-single-input">
+          <ion-input type="number" [(ngModel)]="unidadNumero" placeholder="Nº participación"></ion-input>
+        </ion-item>
 
         <!-- Participaciones Por Rango -->
         <div class="participaciones-rango-rows">
-          <h4 class="participacion-label">Participaciones</h4>
-          <p class="participacion-sublabel">Por Rango</p>
-          <div class="rango-row">
-            <ion-item lines="none" class="input-item flex-item">
-              <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="desde"></ion-input>
-            </ion-item>
-            <ion-button class="btn-escaner-qr" (click)="escanearQRParaDesde()" [disabled]="loading">
-              <ion-icon name="qr-code-outline"></ion-icon>
+          <div class="scanner-title-row scanner-rango-row">
+            <div class="group-heading group-heading-inline">
+              <div class="group-heading-main">Participaciones</div>
+              <div class="group-heading-sub">Por Rango</div>
+            </div>
+            <ion-button class="btn-escaner-qr" (click)="rangoDesde ? escanearQRParaHasta() : escanearQRParaDesde()" [disabled]="loading">
+              <!-- <ion-icon name="qr-code-outline"></ion-icon> -->
               Escanear QR
             </ion-button>
           </div>
-          <div class="rango-row">
-            <ion-item lines="none" class="input-item flex-item">
-              <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="hasta"></ion-input>
-            </ion-item>
-            <ion-button class="btn-escaner-qr" (click)="escanearQRParaHasta()" [disabled]="loading">
-              <ion-icon name="qr-code-outline"></ion-icon>
-              Escanear QR
-            </ion-button>
+          <div class="rango-inputs">
+            <div class="rango-field">
+              <ion-label class="small-range-label">desde</ion-label>
+              <ion-item lines="none" class="input-item">
+                <ion-input type="number" [(ngModel)]="rangoDesde" placeholder="1/0001"></ion-input>
+              </ion-item>
+            </div>
+            <div class="rango-field">
+              <ion-label class="small-range-label">hasta</ion-label>
+              <ion-item lines="none" class="input-item">
+                <ion-input type="number" [(ngModel)]="rangoHasta" placeholder="1/0005"></ion-input>
+              </ion-item>
+            </div>
           </div>
         </div>
 

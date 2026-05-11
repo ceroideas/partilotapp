@@ -36,17 +36,68 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 // @import "@ionic/angular/css/palettes/dark.system.css";
 
+/*
+ * Barra inferior en píldora: scroll horizontal si no caben los botones.
+ * ::before / ::after flex reparten el hueco vacío y centran el bloque de tabs cuando cabe;
+ * si desborda, los flexibles se encogen a 0 y el scroll sigue funcionando.
+ */
 .tab-box {
 	--background: #333;
 	border-radius: 50px;
 	width: 90%;
-	margin-left: 5%;
-	margin-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-	padding-bottom: constant(safe-area-inset-bottom, 0px);
-	padding-bottom: env(safe-area-inset-bottom, 0px);
+	margin-left: 3.25%;
+	margin-bottom: calc(28px + 0px);
+	padding-bottom: 2px;
+	min-height: 75px;
 	height: 75px;
 	z-index: 1001 !important;
 	position: relative !important;
+	box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: hidden;
+	flex-wrap: nowrap !important;
+	justify-content: flex-start !important;
+	align-items: center;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	padding-inline: 8px;
+	/* Ionic pone contain:strict en el host; puede impedir scroll horizontal útil */
+	contain: none !important;
+}
+
+/*
+ * La tab-bar suele ir al ~90% de ancho: a los lados se ve el fondo del ion-tabs.
+ * Con un action sheet / modal claro abierto, ese hueco se nota oscuro o distinto.
+ * Activar la clase .ion-tabs-strip-sheet (desde TS al abrir/cerrar sheets) rellena con blanco.
+ */
+ ion-tabs.ion-tabs-strip-sheet::after {
+  content: "";
+  width: 100vw;
+  background: #ffffff !important;
+  bottom: 0;
+  height: 106px;
+  position: absolute;
+}
+
+ion-header ion-toolbar ion-buttons[slot=start] .header-back-btn {
+  --color: #000000 !important;
+}
+
+/* “Muelles” laterales: centran el grupo de pestañas si el contenedor es más ancho */
+ion-tab-bar.tab-box::before,
+ion-tab-bar.tab-box::after {
+	content: '';
+	flex: 1 1 0;
+	min-width: 0;
+	align-self: stretch;
+	pointer-events: none;
+}
+
+.tab-box::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
 }
 
 ion-tab-bar {
@@ -54,37 +105,80 @@ ion-tab-bar {
 	position: relative !important;
 }
 
-ion-tab-button {
-	font-weight: 500;
-	font-size: 10px;
-	max-width: 65px;
-	max-height: 65px;
-	margin: 0 6px;
-	color: #fff;
-	ion-icon {
-		padding: 6px 0;
-	}
-}
-
 .visible_selected {
 	display: none;
 }
 
-/* Selección circular: el tab seleccionado se muestra como círculo/pastilla redonda */
-.tab-selected {
-	background-color: #fff;
-	border-radius: 50px;
-	color: #212529;
-	--border: none !important;
-	max-width: 65px;
-	max-height: 65px;
-	width: 65px;
-	height: 65px;
+ion-tab-bar.tab-box ion-tab-button {
+	flex: 0 0 auto;
+	width: auto;
+	min-width: 58px;
+	max-width: none;
+	height: 60px;
+	max-height: 60px;
+	margin: 0 6px;
+	padding: 0;
+	font-weight: 500;
+	font-size: 10px;
+	line-height: 1.1;
+	color: #fff;
+	border-radius: 999px;
+	// --background: rgba(255, 255, 255, 0.1);
+	// --background-focused: rgba(255, 255, 255, 0.18);
+	--padding-top: 4px;
+	--padding-bottom: 4px;
+	--padding-start: 10px;
+	--padding-end: 10px;
+	overflow: visible;
+
+	ion-icon {
+		padding: 4px 0 2px;
+		font-size: 22px;
+		width: 24px;
+		height: 24px;
+	}
+
+	ion-label {
+		margin: 0;
+		white-space: nowrap;
+	}
+}
+
+ion-tab-bar.tab-box ion-tab-button::part(native) {
+	border-radius: 999px;
+	min-height: 100%;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+}
+
+/* Activo: círculo blanco (diseño original), no se comprime gracias al scroll */
+ion-tab-bar.tab-box ion-tab-button.tab-selected {
+	background: #fff !important;
+	color: #212529 !important;
+	--color: #212529;
+	--color-selected: #212529;
+	--background: #fff;
+	--ripple-color: rgba(33, 37, 41, 0.12);
+	border-radius: 999px;
+	min-width: 64px;
+	width: 64px;
+	height: 64px;
+	max-width: 64px;
+	max-height: 64px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
 	.hidden_selected {
 		display: none;
 	}
 	.visible_selected {
 		display: inline-block;
+	}
+
+	ion-icon,
+	ion-label {
+		color: #212529;
 	}
 }
 
@@ -131,6 +225,109 @@ ion-buttons ion-button {
   --padding-start: 10px;
   --padding-end: 10px;
   --border-radius: 12px;
+}
+
+/* Alineacion consistente para todos los botones de volver */
+ion-toolbar ion-buttons[slot='start'] {
+  padding-inline-start: 10px;
+  margin: 0;
+  min-width: 50px;
+  width: 50px;
+  flex: 0 0 50px;
+  justify-content: flex-start;
+}
+
+ion-toolbar ion-back-button {
+  --padding-start: 0;
+  --padding-end: 0;
+  margin: 0;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  --icon-font-size: 24px;
+  --color: #3a7bff !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-button {
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  margin: 0 !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] .header-back-btn {
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --color: #3a7bff !important;
+  margin: 0 !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-back-button {
+  --padding-start: 0 !important;
+  --padding-end: 0 !important;
+  --color: #3a7bff !important;
+  margin: 0 !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-back-button::part(icon) {
+  font-size: 24px !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-back-button::part(native),
+ion-toolbar ion-buttons[slot='start'] ion-button::part(native),
+ion-toolbar ion-buttons[slot='start'] .header-back-btn::part(native) {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  justify-content: center !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-button.button-has-icon-only.button-clear {
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+}
+
+ion-toolbar ion-buttons[slot='start'] ion-button ion-icon[name='arrow-back'] {
+  font-size: 24px;
+  // color: #3a7bff !important;
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+ion-toolbar ion-back-button::part(icon) {
+  color: #3a7bff !important;
+  opacity: 1 !important;
+}
+
+ion-toolbar ion-back-button::part(text) {
+  display: none !important;
 }
 
 /* Selector de rol (Usuario / Vendedor / Gestor): estilo original para que no se salga del contenedor */

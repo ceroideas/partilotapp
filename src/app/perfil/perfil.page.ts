@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { environment } from '../../environments/environment';
+import { BiometricService } from '../core/services/biometric.service';
 
 @Component({
   selector: 'app-perfil',
@@ -14,13 +15,17 @@ export class PerfilPage implements OnInit {
   usuario: any = {};
   esVendedor: boolean = false;
   usuarioImagenUrl: string | null = null;
+  biometricReady = false;
+  biometricEnabled = false;
+  biometricIcon = 'finger-print-outline';
 
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private biometricService: BiometricService
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     const user = this.authService.getUser();
     if (user) {
       this.usuario = {
@@ -40,6 +45,16 @@ export class PerfilPage implements OnInit {
     this.esVendedor = this.authService.isSeller() || 
                       this.usuario?.tipo === 'vendedor' || 
                       this.usuario?.rol === 'vendedor';
+
+    this.biometricReady = await this.biometricService.isBiometryAvailable();
+    this.biometricEnabled = this.biometricService.isBiometricEnabled();
+    this.biometricIcon = await this.biometricService.getBiometricIconName();
+  }
+
+  onBiometricToggle(ev: CustomEvent) {
+    const enabled = !!ev.detail.checked;
+    this.biometricEnabled = enabled;
+    this.biometricService.setBiometricEnabled(enabled);
   }
 
   private buildUserImageUrl(path: string | null | undefined): string | null {

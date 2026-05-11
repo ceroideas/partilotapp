@@ -385,7 +385,7 @@
 
 // Cards genéricos (más redondeados)
 .card-block {
-  background: white;
+  background: #eef0f2;
   border-radius: 20px;
   padding: 18px;
   margin-bottom: 18px;
@@ -505,75 +505,122 @@
   }
 }
 
-// Esc?ner: unidad y rango con botones QR naranjas (m?s gruesos y redondeados)
-.escaner-section {
+/* Encabezado externo del bloque escáner (como gestor-asignación) */
+.scanner-header {
+  text-align: center;
   .block-title {
     font-size: 18px;
     font-weight: 700;
+    margin: 0 0 4px;
   }
-
   .block-subtitle {
-    margin-bottom: 18px;
+    font-size: 14px;
+    margin: 0 0 12px;
+    color: #6c757d;
+  }
+}
+
+/* Escáner: distribución y jerarquía igual al patrón de gestor-asignación */
+.escaner-section {
+  .manual-top-row {
+    margin-bottom: 10px;
   }
 
-  .participacion-unidad-row,
-  .rango-row {
+  .manual-card-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #252c39;
+    line-height: 1;
+  }
+
+  .scanner-title-row {
     display: flex;
-    align-items: stretch;
-    gap: 12px;
-    margin-bottom: 16px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
 
-    .flex-item {
-      flex: 1;
-      --background: #f8f9fa;
-      --padding-start: 14px;
-      --padding-end: 14px;
-      border-radius: 20px;
+    .group-heading {
+      text-align: left;
       margin-bottom: 0;
-      min-height: 56px;
-    }
-
-    .btn-escaner-qr {
-      --background: #e78307;
-      --color: #fff;
-      --border-radius: 28px;
-      --box-shadow: none;
-      margin-bottom: 0;
-      min-height: 56px;
-      height: 56px;
-      padding-left: 20px;
-      // padding-right: 20px;
-      font-weight: 700;
-      font-size: 15px;
-      text-transform: none;
-      white-space: nowrap;
-
-      ion-icon {
-        font-size: 22px;
-        margin-right: 6px;
-        vertical-align: middle;
-      }
     }
   }
 
-  .participaciones-rango-rows {
+  .scanner-rango-row {
+    margin-top: 6px;
+  }
+
+  .group-heading-main {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.05;
+    color: #2d3441;
+  }
+
+  .group-heading-sub {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.15;
+    color: #3d4653;
+    margin-top: 1px;
+  }
+
+  .scanner-single-input {
+    margin: 0 0 14px;
+  }
+
+  .input-item {
+    --background: #ffffff;
+    --border-radius: 999px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --inner-padding-end: 0;
+    --highlight-height: 0;
+    --inner-border-width: 0;
+    border: 0;
+    box-shadow: none;
+    min-height: 56px;
+
+    ion-input {
+      font-size: 15px;
+    }
+  }
+
+  .rango-inputs {
+    display: flex;
+    gap: 12px;
     margin-bottom: 20px;
 
-    .participacion-label {
-      margin-bottom: 2px;
+    .rango-field {
+      flex: 1;
     }
 
-    .participacion-sublabel {
-      margin-bottom: 10px;
-    }
-
-    .rango-row {
-      margin-bottom: 14px;
+    .small-range-label {
+      font-size: 12px;
+      font-style: italic;
+      text-transform: lowercase;
+      color: #5a6473;
+      display: block;
+      margin-bottom: 4px;
+      margin-left: 16px;
     }
   }
 
-  .participacion-block + .participacion-unidad-row {
-    margin-top: 4px;
+  .btn-escaner-qr {
+    --background: #f49200;
+    --color: #212529;
+    --border-radius: 28px;
+    --box-shadow: none;
+    margin: 0;
+    min-height: 50px;
+    height: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: none;
+    white-space: nowrap;
+    --padding-start: 18px;
+    --padding-end: 18px;
   }
 
   .btn-devolver-seguir {
@@ -590,11 +637,11 @@
 
   .btn-liquidar-sin-devolver {
     --border-radius: 28px;
-    min-height: 48px;
+    min-height: 56px;
     font-weight: 600;
     font-size: 14px;
     text-transform: none;
-    margin-top: 8px;
+    margin-top: 12px;
     --color: #6c757d;
     --border-color: #6c757d;
   }

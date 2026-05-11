@@ -1,0 +1,20 @@
+<ion-content [fullscreen]="true" class="unlock-content">
+  <div class="unlock-container">
+    <div class="brand-section">
+      <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image" />
+      <h1 class="title">Desbloquear</h1>
+      <p class="subtitle">Confirma tu identidad para continuar</p>
+    </div>
+
+    <div class="biometric-area">
+      <ion-icon [name]="biometricIcon" class="biometric-icon" aria-hidden="true"></ion-icon>
+      <ion-button expand="block" class="unlock-btn" (click)="desbloquear()" [disabled]="desbloqueando">
+        {{ desbloqueando ? 'Comprobando…' : 'Desbloquear' }}
+      </ion-button>
+    </div>
+
+    <ion-button fill="clear" expand="block" color="medium" (click)="cerrarSesion()">
+      Cerrar sesión
+    </ion-button>
+  </div>
+</ion-content>

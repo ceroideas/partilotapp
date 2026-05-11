@@ -159,7 +159,7 @@
 .biometric-row {
   display: flex;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 10px;
 
   .btn-biometric {
     background: none;
@@ -171,6 +171,18 @@
     ion-icon {
       font-size: 2rem;
     }
+  }
+}
+
+.biometric-toggle-row {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 22px;
+
+  ion-label {
+    font-size: 0.9rem;
+    color: #5a5f67;
   }
 }
 

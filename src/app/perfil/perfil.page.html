@@ -67,6 +67,12 @@
 
     <!-- Menú de opciones Usuario -->
     <div class="menu-section" *ngIf="!esVendedor">
+      <ion-item class="menu-item biometric-setting-item" lines="none" *ngIf="biometricReady">
+        <ion-icon [name]="biometricIcon" slot="start"></ion-icon>
+        <ion-label>Acceso biométrico</ion-label>
+        <ion-toggle slot="end" [checked]="biometricEnabled" (ionChange)="onBiometricToggle($event)"></ion-toggle>
+      </ion-item>
+
       <ion-item button class="menu-item" (click)="goToDigitalizarParticipacion()">
         <ion-icon name="camera" slot="start"></ion-icon>
         <ion-label>Digitalizar Participación</ion-label>

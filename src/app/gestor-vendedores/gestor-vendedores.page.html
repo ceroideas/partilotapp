@@ -1,14 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button *ngIf="!showEntitySelection && selectedEntity && !showAddSellerScreen && !showSellerDetail"></ion-back-button>
-      <ion-button *ngIf="showSellersList && !showAddSellerScreen && !showSellerDetail && entities.length > 1" fill="clear" (click)="backToEntities()">
+      <ion-button class="header-back-btn" *ngIf="!showEntitySelection && selectedEntity && !showAddSellerScreen && !showSellerDetail" fill="clear" (click)="goBackFromRoot()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button *ngIf="showAddSellerScreen" fill="clear" (click)="closeAddSellerScreen()">
+      <ion-button class="header-back-btn" *ngIf="showSellersList && !showAddSellerScreen && !showSellerDetail && entities.length > 1" fill="clear" (click)="backToEntities()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button *ngIf="showSellerDetail" fill="clear" (click)="backToSellerList()">
+      <ion-button class="header-back-btn" *ngIf="showAddSellerScreen" fill="clear" (click)="closeAddSellerScreen()">
+        <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button class="header-back-btn" *ngIf="showSellerDetail" fill="clear" (click)="backToSellerList()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -352,20 +354,19 @@
       </ion-button>
     </div>
     <div class="ver-mas-body">
-      <div class="ver-mas-photo-wrap">
+      <div class="ver-mas-profile-row">
         <div class="ver-mas-photo" [class.no-image]="!sellerDetail?.seller?.image">
           <img *ngIf="sellerDetail?.seller?.image" [src]="getUserImageUrl(sellerDetail?.seller?.image)" [alt]="sellerDetail?.seller?.name ?? ''">
           <ion-icon *ngIf="!sellerDetail?.seller?.image" name="person-outline" class="ver-mas-photo-placeholder"></ion-icon>
         </div>
-        <div class="ver-mas-actions-row">
+        <div class="ver-mas-profile-aside">
           <ion-button class="ver-mas-btn-particip" fill="solid" disabled>
-            <ion-icon name="layers-outline"></ion-icon>
+            <ion-icon name="layers-outline" slot="start"></ion-icon>
             Participaciones Asignadas
           </ion-button>
-          <span *ngIf="sellerDetail?.seller?.group_name?.length">
-            <br>
-            <span class="ver-mas-grupo-badge" *ngFor="let group of sellerDetail?.seller?.group_name">{{ group }}</span>
-          </span>
+          <div class="ver-mas-grupo-wrap" *ngIf="(sellerDetail?.seller?.group_name || []).length">
+            <span class="ver-mas-grupo-badge" *ngFor="let group of (sellerDetail?.seller?.group_name || [])">{{ group }}</span>
+          </div>
         </div>
       </div>
       <div class="ver-mas-fields">

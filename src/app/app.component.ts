@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MenuController } from '@ionic/angular';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
-import { Capacitor } from '@capacitor/core';
+import { BiometricService } from './core/services/biometric.service';
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
+import { App } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { environment } from '../environments/environment';
 
@@ -13,17 +15,20 @@ import { environment } from '../environments/environment';
   styleUrls: ['app.component.scss'],
   standalone: false,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   currentRoute: string = '';
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'usuario';
   userName: string = '';
   userEmail: string = '';
   userImage: string | null = null;
 
+  private appStateListener: PluginListenerHandle | null = null;
+
   constructor(
     private menuController: MenuController,
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    private biometricService: BiometricService
   ) {
     // Detectar cambios de ruta
     this.router.events.pipe(
@@ -39,6 +44,46 @@ export class AppComponent implements OnInit {
     this.detectarRol();
     this.actualizarUsuario();
     await this.inicializarStatusBar();
+    await this.registrarListenerEstadoApp();
+  }
+
+  ngOnDestroy(): void {
+    void this.appStateListener?.remove();
+    this.appStateListener = null;
+  }
+
+  /** Al pasar a segundo plano se invalida el desbloqueo biométrico; al volver se exige de nuevo si aplica. */
+  private async registrarListenerEstadoApp(): Promise<void> {
+    if (!Capacitor.isNativePlatform()) return;
+    try {
+      this.appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
+        if (!isActive) {
+          this.biometricService.invalidateBiometricUnlockSession();
+        } else {
+          this.redirigirABiometricaSiCorresponde();
+        }
+      });
+    } catch (e) {
+      console.warn('App state listener no disponible:', e);
+    }
+  }
+
+  private redirigirABiometricaSiCorresponde(): void {
+    if (!this.biometricService.mustShowBiometricGate()) return;
+    const path = (this.router.url || '').split('?')[0];
+    if (this.rutaExentaBiometrica(path)) return;
+    this.router.navigate(['/biometric-unlock'], {
+      queryParams: { returnUrl: this.router.url },
+      replaceUrl: true,
+    });
+  }
+
+  private rutaExentaBiometrica(path: string): boolean {
+    const p = path || '';
+    if (p === '' || p === '/') return true;
+    if (p.startsWith('/login')) return true;
+    if (p.startsWith('/registro')) return true;
+    return false;
   }
 
   /**
