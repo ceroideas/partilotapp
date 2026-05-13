@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "io.ionic.starter"
+    namespace "com.partilot.app"
     compileSdk rootProject.ext.compileSdkVersion
     signingConfigs {
         release {
@@ -12,7 +12,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId "io.ionic.starter"
+        applicationId "com.partilot.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

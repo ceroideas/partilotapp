@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "536186972909",
+    "project_id": "partilot",
+    "storage_bucket": "partilot.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536186972909:android:9672d377903b7a8061bae4",
+        "android_client_info": {
+          "package_name": "com.partilot.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCur1MkhdmeUCNeYB_SGcuX7-o-49Dt2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
