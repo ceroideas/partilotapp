@@ -14,7 +14,7 @@
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -305,7 +305,7 @@
         <ion-icon name="mail-outline"></ion-icon>
         <div>
           <h2 class="modal-title">Email del cliente</h2>
-          <p class="modal-subtitle">Introduce el email de un usuario registrado</p>
+          <p class="modal-subtitle">Introduce el email o genera un código de vinculación</p>
         </div>
       </div>
       <ion-button fill="clear" class="close-button" (click)="cerrarModalEmail()">
@@ -317,10 +317,12 @@
         <ion-label position="stacked">Email</ion-label>
         <ion-input type="email" [(ngModel)]="emailCliente" placeholder="cliente@ejemplo.com"></ion-input>
       </ion-item>
-      <p class="modal-note">Solo se puede vender a usuarios que ya estén registrados en la aplicación.</p>
     </div>
     <ion-button class="registrar-button" expand="block" (click)="verificarEmailYContinuar()">
       Continuar
+    </ion-button>
+    <ion-button class="codigo-solo-button" expand="block" fill="outline" (click)="continuarConSoloCodigo()">
+      Solo generar código
     </ion-button>
   </div>
 </div>
@@ -409,6 +411,11 @@
     <h2 class="modal-title-exito">Venta registrada con éxito</h2>
     <div class="modal-content-exito">
       <p>Puedes consultar el detalle en el historial de ventas o continuar con una nueva venta.</p>
+      <p *ngIf="ultimoCodigoVinculacion" class="codigo-vinculacion-exito">
+        Código para el comprador: <strong>{{ ultimoCodigoVinculacion }}</strong><br>
+        <span class="codigo-vinculacion-hint" *ngIf="!ultimaVentaSinEmail">Guárdalo por si el email no llega o está mal escrito.</span>
+        <span class="codigo-vinculacion-hint" *ngIf="ultimaVentaSinEmail">El comprador lo usará en la app para vincular la venta.</span>
+      </p>
     </div>
     <ion-button 
       class="aceptar-button" 

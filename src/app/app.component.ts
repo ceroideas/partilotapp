@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
 import { BiometricService } from './core/services/biometric.service';
+import { PushNotificationsService } from './core/services/push-notifications.service';
 import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -28,7 +29,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private menuController: MenuController,
     private router: Router,
     public authService: AuthService,
-    private biometricService: BiometricService
+    private biometricService: BiometricService,
+    private pushNotificationsService: PushNotificationsService
   ) {
     // Detectar cambios de ruta
     this.router.events.pipe(
@@ -45,6 +47,12 @@ export class AppComponent implements OnInit, OnDestroy {
     this.actualizarUsuario();
     await this.inicializarStatusBar();
     await this.registrarListenerEstadoApp();
+    try {
+      await this.pushNotificationsService.initialize();
+      this.pushNotificationsService.syncTokenWithBackend();
+    } catch (e) {
+      console.warn('Push notifications init:', e);
+    }
   }
 
   ngOnDestroy(): void {
@@ -58,7 +66,9 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       this.appStateListener = await App.addListener('appStateChange', ({ isActive }) => {
         if (!isActive) {
-          this.biometricService.invalidateBiometricUnlockSession();
+          if (!this.biometricService.isNativeBarcodeScanInProgress()) {
+            this.biometricService.invalidateBiometricUnlockSession();
+          }
         } else {
           this.redirigirABiometricaSiCorresponde();
         }
@@ -151,7 +161,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.rolActual = 'vendedor';
     } else {
       // Detectar desde la ruta
-      if (this.currentRoute.includes('/gestor-tab') || this.currentRoute.includes('/gestor-home') || this.currentRoute.includes('/gestor-vendedores') || this.currentRoute.includes('/gestor-devolucion') || this.currentRoute.includes('/gestor-pago')) {
+      if (this.currentRoute.includes('/gestor-tab') || this.currentRoute.includes('/gestor-home') || this.currentRoute.includes('/gestor-vendedores') || this.currentRoute.includes('/gestor-asignacion') || this.currentRoute.includes('/gestor-devolucion') || this.currentRoute.includes('/gestor-pago')) {
         this.rolActual = 'gestor';
         localStorage.setItem('rolActual', 'gestor');
         localStorage.setItem('esVendedor', 'false');
@@ -175,5 +185,22 @@ export class AppComponent implements OnInit, OnDestroy {
 
   cerrarMenu() {
     this.menuController.close('main-menu');
+  }
+
+  /** Contador para el badge del menú lateral (notificaciones no leídas). */
+  get notificacionesNoLeidas(): number {
+    const server = localStorage.getItem('notificaciones_unread_server');
+    if (server !== null && server !== '') {
+      const n = parseInt(server, 10);
+      if (!Number.isNaN(n)) {
+        return n;
+      }
+    }
+    try {
+      const arr = JSON.parse(localStorage.getItem('notificaciones') || '[]') as { leida?: boolean }[];
+      return Array.isArray(arr) ? arr.filter((x) => !x.leida).length : 0;
+    } catch {
+      return 0;
+    }
   }
 }

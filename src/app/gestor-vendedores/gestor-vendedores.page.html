@@ -19,7 +19,7 @@
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -63,7 +63,7 @@
       </ion-button>
     </div>
 
-    <div class="loading-section" *ngIf="loading">
+    <div class="loading-section" *ngIf="loading && !showSellerDetail">
       <ion-spinner name="crescent"></ion-spinner>
       <p>Cargando...</p>
     </div>

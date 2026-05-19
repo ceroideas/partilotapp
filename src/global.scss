@@ -245,7 +245,7 @@ ion-toolbar ion-back-button {
   width: 40px;
   height: 40px;
   --icon-font-size: 24px;
-  --color: #3a7bff !important;
+  --color: #000000 !important;
   opacity: 1 !important;
   display: inline-flex !important;
 }
@@ -266,7 +266,7 @@ ion-toolbar ion-buttons[slot='start'] ion-button {
 ion-toolbar ion-buttons[slot='start'] .header-back-btn {
   --padding-start: 0 !important;
   --padding-end: 0 !important;
-  --color: #3a7bff !important;
+  --color: #000000 !important;
   margin: 0 !important;
   min-width: 40px !important;
   width: 40px !important;
@@ -280,7 +280,7 @@ ion-toolbar ion-buttons[slot='start'] .header-back-btn {
 ion-toolbar ion-buttons[slot='start'] ion-back-button {
   --padding-start: 0 !important;
   --padding-end: 0 !important;
-  --color: #3a7bff !important;
+  --color: #000000 !important;
   margin: 0 !important;
   min-width: 40px !important;
   width: 40px !important;
@@ -314,15 +314,16 @@ ion-toolbar ion-buttons[slot='start'] ion-button.button-has-icon-only.button-cle
   max-height: 40px !important;
 }
 
-ion-toolbar ion-buttons[slot='start'] ion-button ion-icon[name='arrow-back'] {
+ion-toolbar ion-buttons[slot='start'] ion-button ion-icon[name='arrow-back'], .sc-ion-buttons-md-s .button {
   font-size: 24px;
   // color: #3a7bff !important;
   color: #000000 !important;
+  --color: #000000 !important;
   opacity: 1 !important;
 }
 
 ion-toolbar ion-back-button::part(icon) {
-  color: #3a7bff !important;
+  color: #000000 !important;
   opacity: 1 !important;
 }
 
@@ -342,6 +343,10 @@ ion-toolbar ion-back-button::part(text) {
   --padding-bottom: 8px;
   flex: 1;
   margin: 0;
+}
+
+ion-button[expand=block] {
+  border-radius: 50px !important;
 }
 
 .home-block, .tutorial-card, .accion-card {

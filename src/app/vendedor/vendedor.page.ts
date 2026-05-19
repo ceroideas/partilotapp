@@ -18,13 +18,6 @@ export class VendedorPage implements OnInit {
   ngOnInit() {
   }
 
-  cerrarSesion() {
-    this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login'])
-    });
-  }
-
   cambiarRol(rol: string) {
     if (rol === 'usuario') {
       localStorage.setItem('rolActual', 'usuario');

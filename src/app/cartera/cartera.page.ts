@@ -23,6 +23,9 @@ export class CarteraPage implements OnInit, OnDestroy {
   mostrarModalExito = false;
   mensajeExitoRegalo = '';
   emailRegaladoA = '';
+  mostrarModalCodigoVinculacion = false;
+  codigoVinculacion = '';
+  vinculandoCodigo = false;
   private participacionesChangedSubscription?: Subscription;
 
   constructor(
@@ -125,6 +128,46 @@ export class CarteraPage implements OnInit, OnDestroy {
 
   agregarParticipacion() {
     this.router.navigate(['/tabs/digitalizar-participacion']);
+  }
+
+  abrirModalCodigoVinculacion() {
+    this.codigoVinculacion = '';
+    this.mostrarModalCodigoVinculacion = true;
+  }
+
+  cerrarModalCodigoVinculacion() {
+    this.mostrarModalCodigoVinculacion = false;
+    this.codigoVinculacion = '';
+  }
+
+  vincularPorCodigo() {
+    const code = this.codigoVinculacion.trim();
+    if (!code || this.vinculandoCodigo) {
+      return;
+    }
+    this.vinculandoCodigo = true;
+    this.carteraService.claimPendingDigitalByCode(code).subscribe({
+      next: async (res) => {
+        this.vinculandoCodigo = false;
+        if (res.success) {
+          this.cerrarModalCodigoVinculacion();
+          this.carteraService.notifyParticipacionesChanged();
+          this.loadParticipaciones();
+          const detalle = res.entity ? ` (${res.entity})` : '';
+          await this.alertModal.show(
+            'Participaciones vinculadas',
+            res.message || `Se han añadido ${res.quantity ?? ''} participación(es) a tu cartera${detalle}.`
+          );
+        } else {
+          await this.alertModal.show('Error', res.message || 'No se pudo vincular el código.');
+        }
+      },
+      error: async (err) => {
+        this.vinculandoCodigo = false;
+        const msg = err?.error?.message || 'Código no válido o ya utilizado.';
+        await this.alertModal.show('Error', msg);
+      },
+    });
   }
 
   irACobrarGestionar() {

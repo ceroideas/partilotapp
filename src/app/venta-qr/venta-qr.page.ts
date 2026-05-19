@@ -4,6 +4,7 @@ import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
+import { BiometricService } from '../core/services/biometric.service';
 
 @Component({
   selector: 'app-venta-qr',
@@ -55,7 +56,8 @@ export class VentaQRPage implements OnInit {
     private alertController: AlertController,
     private ventasService: VentasService,
     private carteraService: CarteraService,
-    public authService: AuthService
+    public authService: AuthService,
+    private biometricService: BiometricService
   ) { }
 
   canViewUsuario(): boolean { return this.authService.canViewUsuario(); }
@@ -109,11 +111,11 @@ export class VentaQRPage implements OnInit {
   async iniciarScanner() {
     this.mostrandoScanner = true;
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
       const scanText = this.modoVenta === 'rango' 
         ? (!this.primeraReferencia ? 'Escanea el código QR de la primera participación (Desde)' : 'Escanea el código QR de la última participación (Hasta)')
         : 'Escanea el código QR de la participación';
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: scanText
       });

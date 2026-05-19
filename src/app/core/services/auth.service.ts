@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, map, catchError, of } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { BiometricService } from './biometric.service';
+import { PushNotificationsService } from './push-notifications.service';
 
 export interface LoginResponse {
   success: boolean;
@@ -23,7 +25,8 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private biometricService: BiometricService
+    private biometricService: BiometricService,
+    private pushNotificationsService: PushNotificationsService
   ) {}
 
   /** Login perfil Vendedor (solo cuentas con rol seller). */
@@ -41,19 +44,47 @@ export class AuthService {
           localStorage.setItem('rolActual', 'vendedor');
           localStorage.setItem('esVendedor', 'true');
           this.biometricService.markBiometricUnlockSessionOk();
+          this.pushNotificationsService.syncTokenWithBackend();
         }
       })
     );
   }
 
-  /** Registro de cliente sencillo (email, password, fecha_nacimiento). */
-  register(email: string, password: string, fechaNacimiento: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, {
+  getSmsConfig(): Observable<{ enabled: boolean; code_length: number; resend_cooldown_seconds: number }> {
+    return this.http.get<{ enabled: boolean; code_length: number; resend_cooldown_seconds: number }>(
+      `${this.apiUrl}/auth/sms/config`
+    );
+  }
+
+  sendRegisterSmsCode(phone: string): Observable<{ success: boolean; message?: string }> {
+    return this.http.post<{ success: boolean; message?: string }>(`${this.apiUrl}/auth/sms/send-code`, { phone });
+  }
+
+  /** Registro de cliente (email, password; teléfono y SMS opcionales). */
+  register(
+    email: string,
+    password: string,
+    fechaNacimiento: string,
+    phone?: string,
+    smsCode?: string,
+    linkCode?: string
+  ): Observable<LoginResponse> {
+    const body: Record<string, unknown> = {
       email,
       password,
       fecha_nacimiento: fechaNacimiento,
       aceptar_condiciones: true,
-    }).pipe(
+    };
+    if (phone != null && phone !== '') {
+      body['phone'] = phone;
+    }
+    if (smsCode != null && smsCode !== '') {
+      body['sms_code'] = smsCode;
+    }
+    if (linkCode != null && linkCode.trim() !== '') {
+      body['link_code'] = linkCode.trim();
+    }
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/register`, body).pipe(
       tap(response => {
         if (response.success && response.token) {
           localStorage.setItem('token', response.token);
@@ -64,6 +95,7 @@ export class AuthService {
           localStorage.setItem('rolActual', 'usuario');
           localStorage.setItem('esVendedor', 'false');
           this.biometricService.markBiometricUnlockSessionOk();
+          this.pushNotificationsService.syncTokenWithBackend();
         }
       })
     );
@@ -103,6 +135,7 @@ export class AuthService {
             localStorage.setItem('esVendedor', 'false');
           }
           this.biometricService.markBiometricUnlockSessionOk();
+          this.pushNotificationsService.syncTokenWithBackend();
         }
       })
     );
@@ -111,12 +144,16 @@ export class AuthService {
   logout(): Observable<any> {
     const token = localStorage.getItem('token');
     if (token) {
-      return this.http.post(`${this.apiUrl}/auth/logout`, {}).pipe(
-        tap(() => this.clearSession()),
-        catchError(() => {
-          this.clearSession();
-          return of({});
-        })
+      return this.pushNotificationsService.unregisterFromBackend().pipe(
+        concatMap(() =>
+          this.http.post(`${this.apiUrl}/auth/logout`, {}).pipe(
+            tap(() => this.clearSession()),
+            catchError(() => {
+              this.clearSession();
+              return of({});
+            })
+          )
+        )
       );
     }
     this.clearSession();
@@ -131,6 +168,7 @@ export class AuthService {
     localStorage.removeItem('rolActual');
     this.biometricService.clearStoredLoginCredentials();
     this.biometricService.invalidateBiometricUnlockSession();
+    this.pushNotificationsService.clearLocalDeviceToken();
     // Recarga completa para descargar de caché todas las vistas de Ionic y evitar datos viejos
     window.location.href = '/login';
   }

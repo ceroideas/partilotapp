@@ -8,7 +8,7 @@
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -89,7 +89,7 @@
           </div>
           <div class="vendedor-item-main">
             <div class="vendedor-item-title-row">
-              <div class="vendedor-item-title">{{ getTituloTipo(item.tipo) }}</div>
+              <div class="vendedor-item-title">{{ getTituloTipo(item.tipo, item) }}</div>
               <div class="vendedor-item-right">
                 <div class="vendedor-item-date">
                   <ion-icon name="calendar-outline" class="vendedor-cal-icon"></ion-icon>
@@ -103,11 +103,11 @@
                 </div>
               </div>
             </div>
-            <div class="vendedor-item-subtitle">{{ getDescripcion(item) }}</div>
+            <div class="vendedor-item-subtitle vendedor-item-subtitle--scroll-">{{ getDescripcion(item) }}</div>
           </div>
         </div>
         
-        <!-- Detalle expandible: Venta (vendedor) -->
+        <!-- Detalle expandible: Venta / venta digital (vendedor) -->
         <div *ngIf="estaExpandido(item) && (item.tipo === 'venta' || item.tipo === 'venta-digital') && item.participacion" class="vendedor-item-detail">
           <div class="vendedor-detail-content">
             <div class="vendedor-detail-left">
@@ -131,7 +131,14 @@
                 </ion-button>
               </div>
             </div>
-            <div class="vendedor-detail-info">
+            <div class="vendedor-detail-info vendedor-detail-info--scroll">
+              <div class="vendedor-detail-badges" *ngIf="esParticipacionDigital(item)">
+                <span class="badge-tipo-participacion badge-tipo-participacion--digital">Digital</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="getSetLabel(item)">
+                <span class="vendedor-detail-label">Set:</span>
+                <span class="vendedor-detail-value">{{ getSetLabel(item) }}</span>
+              </div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
@@ -139,9 +146,34 @@
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.participacion.donativo"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ item.participacion.donativo | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
+              <div class="vendedor-detail-row vendedor-detail-row--long" *ngIf="esVentaDigitalPendiente(item) && item.participacion.clienteEmail">
+                <span class="vendedor-detail-label">Comprador:</span>
+                <span class="vendedor-detail-value vendedor-detail-value--long">{{ item.participacion.clienteEmail }}</span>
+              </div>
+              <div class="vendedor-detail-row vendedor-detail-row--long" *ngIf="esVentaDigitalPendiente(item) && (item.participacion.codigoVinculacion || item.codigoVinculacion)">
+                <span class="vendedor-detail-label">Código vinculación:</span>
+                <span class="vendedor-detail-value vendedor-detail-value--long codigo-vinculacion-valor">{{ item.participacion.codigoVinculacion || item.codigoVinculacion }}</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="esVentaDigitalPendiente(item)">
+                <span class="vendedor-detail-label">Estado:</span>
+                <span class="vendedor-detail-value">Pendiente de registro del comprador</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="esVentaDigitalPendiente(item) && (item.participacion.validUntil || item.valid_until)">
+                <span class="vendedor-detail-label">Válida hasta:</span>
+                <span class="vendedor-detail-value">{{ item.participacion.validUntil || (item.valid_until | date:'dd/MM/yy HH:mm') }}</span>
+              </div>
             </div>
           </div>
-          <div class="vendedor-detail-ref-section">
+          <div class="vendedor-whatsapp-actions" *ngIf="puedeEnviarWhatsApp(item)">
+            <ion-button
+              expand="block"
+              class="btn-whatsapp"
+              (click)="compartirVentaPorWhatsApp(item, $event)">
+              <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+              Enviar por WhatsApp
+            </ion-button>
+          </div>
+          <div class="vendedor-detail-ref-section" *ngIf="!esVentaDigitalPendiente(item)">
             <span class="vendedor-detail-ref-text">N°: {{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
           </div>
         </div>
@@ -167,7 +199,14 @@
                 <span class="vendedor-label">{{ item.participaciones.length }} part.</span>
               </div>
             </div>
-            <div class="vendedor-detail-info">
+            <div class="vendedor-detail-info vendedor-detail-info--scroll">
+              <div class="vendedor-detail-badges">
+                <span class="badge-tipo-participacion badge-tipo-participacion--digital">Digital</span>
+              </div>
+              <div class="vendedor-detail-row" *ngIf="getSetLabel(item)">
+                <span class="vendedor-detail-label">Set:</span>
+                <span class="vendedor-detail-value">{{ getSetLabel(item) }}</span>
+              </div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.entidad || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.sorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.fechaSorteo || '—' }}</span></div>
@@ -343,7 +382,7 @@
               </ion-icon>
             </div>
             <div class="item-info">
-              <span class="item-titulo">{{ getTituloTipo(item.tipo) }}</span>
+              <span class="item-titulo">{{ getTituloTipo(item.tipo, item) }}</span>
               <span class="item-descripcion">{{ getDescripcion(item) }}</span>
             </div>
             <div class="item-fecha-hora">

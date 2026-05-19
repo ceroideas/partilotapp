@@ -8,7 +8,7 @@
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -77,6 +77,13 @@
         (click)="irACobrarGestionar()">
         <ion-icon name="cash-outline" slot="start"></ion-icon>
         Cobrar / <br> Gestionar
+      </ion-button>
+      <ion-button
+        class="action-button codigo-button"
+        fill="outline"
+        (click)="abrirModalCodigoVinculacion()">
+        <ion-icon name="key-outline" slot="start"></ion-icon>
+        Vincular <br> con código
       </ion-button>
     </div>
 
@@ -227,6 +234,37 @@
       [disabled]="!emailDestinatario.trim()">
       <ion-icon name="gift-outline" slot="start"></ion-icon>
       Regalar
+    </ion-button>
+  </div>
+</div>
+
+<!-- Modal vincular código venta digital pendiente -->
+<div class="modal-overlay bottom-sheet" *ngIf="mostrarModalCodigoVinculacion" (click)="cerrarModalCodigoVinculacion()">
+  <div class="modal-container modal-regalo bottom-sheet-content" (click)="$event.stopPropagation()">
+    <div class="modal-regalo-header">
+      <h2 class="modal-regalo-title">Código de vinculación</h2>
+      <ion-button fill="clear" class="close-button" (click)="cerrarModalCodigoVinculacion()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </div>
+    <p class="modal-regalo-texto">Introduce el código que te dio el vendedor al comprar participaciones digitales.</p>
+    <p class="modal-regalo-aviso">No uses <strong>0</strong>, <strong>o</strong> ni <strong>O</strong>. Puedes escribirlo en mayúsculas o minúsculas.</p>
+    <ion-item lines="full" class="ion-no-padding modal-regalo-input">
+      <ion-icon name="key-outline" slot="start"></ion-icon>
+      <ion-input
+        type="text"
+        [(ngModel)]="codigoVinculacion"
+        placeholder="Ej. Ab3K9m"
+        autocapitalize="characters"
+        (keyup.enter)="vincularPorCodigo()"></ion-input>
+    </ion-item>
+    <ion-button
+      class="regalar-button-modal"
+      expand="block"
+      (click)="vincularPorCodigo()"
+      [disabled]="!codigoVinculacion.trim() || vinculandoCodigo">
+      <ion-spinner *ngIf="vinculandoCodigo" name="crescent"></ion-spinner>
+      <span *ngIf="!vinculandoCodigo">Vincular participaciones</span>
     </ion-button>
   </div>
 </div>

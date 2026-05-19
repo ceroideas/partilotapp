@@ -39,6 +39,25 @@ export class CarteraService {
     return this.http.post(`${this.apiUrl}/wallet/participations/link`, { referencia });
   }
 
+  /** Vincular venta digital pendiente por código (email erróneo o registro sin código). */
+  claimPendingDigitalByCode(linkCode: string): Observable<{
+    success: boolean;
+    message?: string;
+    quantity?: number;
+    entity?: string;
+    lottery?: string;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message?: string;
+      quantity?: number;
+      entity?: string;
+      lottery?: string;
+    }>(`${this.apiUrl}/wallet/digital-pending/claim`, {
+      link_code: linkCode.trim(),
+    });
+  }
+
   /** Regalar participación a otro usuario por email */
   gift(participationId: number, email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/wallet/participations/gift`, {

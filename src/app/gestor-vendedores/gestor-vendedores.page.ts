@@ -305,11 +305,10 @@ export class GestorVendedoresPage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.detectarRol();
     this.restoreSellerDetailState();
+    // Solo refrescar el detalle al volver a la pestaña; no volver a cargar el listado aquí
+    // (loadSellers pone `loading=true` y el spinner global se superpone al detalle ya cargado).
     if (this.showSellerDetail && this.sellerDetail?.seller?.id) {
       this.loadSellerDetail();
-      if (this.selectedEntity) {
-        this.loadSellers();
-      }
       return;
     }
     if (this.selectedEntity && this.showSellersList) {

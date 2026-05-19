@@ -1,7 +1,12 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button class="header-back-btn" *ngIf="step === 'sorteos'" fill="clear" routerLink="/tabs/gestor-tab2">
+      <ion-button
+        class="header-back-btn"
+        *ngIf="step === 'sorteos'"
+        fill="clear"
+        routerLink="/tabs/gestor-tab2"
+        (click)="clearPersistedAsignacionContext()">
         <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
       </ion-button>
       <ion-button class="header-back-btn" *ngIf="step === 'participaciones'" fill="clear" (click)="backToSorteos()">
@@ -22,7 +27,7 @@
       </div>
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -72,9 +77,21 @@
 
     <!-- Paso 1: Sorteos -->
     <div class="view-section" *ngIf="step === 'sorteos' && !loading">
-      <div class="section-header">
-        <h1 class="section-title">+ Asignación Participaciones</h1>
+      <div class="section-header sorteos-header-with-qr">
+        <div class="sorteos-title-row">
+          <h1 class="section-title">+ Asignación Participaciones</h1>
+          <ion-button
+            class="btn-qr-taco-sorteo"
+            fill="outline"
+            size="small"
+            (click)="escanearTacoParaAsignacion()"
+            [disabled]="loading || !sellerId || !entityId || lotteries.length === 0">
+            <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+            Taco
+          </ion-button>
+        </div>
         <p class="section-subtitle">Gestiona la asignación de participaciones</p>
+        <p class="section-subtitle hint-qr-taco">Escanea el QR de la portada del taco para cargar sorteo, set y participaciones libres del libro.</p>
         <p class="section-subtitle" *ngIf="sellerName">Vendedor: {{ sellerName }}</p>
       </div>
       <p class="error-msg" *ngIf="errorMessage">{{ errorMessage }}</p>

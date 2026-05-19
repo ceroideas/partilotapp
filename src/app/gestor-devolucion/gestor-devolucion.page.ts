@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DevolutionsService } from '../core/services/devolutions.service';
 import { AuthService } from '../core/services/auth.service';
+import { BiometricService } from '../core/services/biometric.service';
 import { AlertModalService } from '../core/services/alert-modal.service';
 import { DevolucionPreselectService } from '../core/services/devolucion-preselect.service';
 import { environment } from '../../environments/environment';
@@ -62,7 +63,8 @@ export class GestorDevolucionPage implements OnInit {
     private devolutionsService: DevolutionsService,
     public authService: AuthService,
     private alertModal: AlertModalService,
-    private devolucionPreselect: DevolucionPreselectService
+    private devolucionPreselect: DevolucionPreselectService,
+    private biometricService: BiometricService
   ) {}
 
   ngOnInit() {
@@ -782,8 +784,8 @@ export class GestorDevolucionPage implements OnInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación (unidad)'
       });
@@ -807,8 +809,8 @@ export class GestorDevolucionPage implements OnInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el QR de la primera participación (Desde)'
       });
@@ -832,8 +834,8 @@ export class GestorDevolucionPage implements OnInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el QR de la última participación (Hasta)'
       });

@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
 import { VentasService } from '../core/services/ventas.service';
 import { CarteraService } from '../core/services/cartera.service';
+import { BiometricService } from '../core/services/biometric.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -63,7 +64,8 @@ export class EscanerPage implements OnInit {
     private alertModal: AlertModalService,
     public authService: AuthService,
     private ventasService: VentasService,
-    private carteraService: CarteraService
+    private carteraService: CarteraService,
+    private biometricService: BiometricService
   ) { }
 
   ngOnInit() {
@@ -116,8 +118,8 @@ export class EscanerPage implements OnInit {
     this.modoEscaneo = true;
     let mostrarVistaEscaneo = false; // true = volver a mostrar escáner tras error/QR inválido
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el QR del taco o de la participación'
       });
@@ -456,8 +458,8 @@ export class EscanerPage implements OnInit {
     this.modoEscaneo = true;
     let mostrarVistaEscaneo = false;
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación'
       });

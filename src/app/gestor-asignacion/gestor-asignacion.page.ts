@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { DevolutionsService } from '../core/services/devolutions.service';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
+import { BiometricService } from '../core/services/biometric.service';
 import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
+import { finalize } from 'rxjs';
 
 type Step = 'sorteos' | 'participaciones' | 'resumen' | 'firma';
 
@@ -23,10 +24,15 @@ export interface AsignacionParticipation {
   standalone: false,
 })
 export class GestorAsignacionPage implements OnInit, AfterViewInit {
+  private static readonly SESSION_CTX_KEY = 'gestorAsignacionSellerCtx';
+
   @ViewChild('signatureCanvas', { static: false }) signatureCanvas!: ElementRef<HTMLCanvasElement>;
 
   step: Step = 'sorteos';
   loading = false;
+  /** Evita que dos peticiones solapadas dejen `loading` en false con la otra aún en curso (doble loader parpadeante). */
+  private loadLotteriesSeq = 0;
+  private loadSetsSeq = 0;
   errorMessage = '';
   rolActual: 'usuario' | 'vendedor' | 'gestor' = 'gestor';
 
@@ -59,25 +65,84 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private devolutionsService: DevolutionsService,
     private ventasService: VentasService,
     public authService: AuthService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private biometricService: BiometricService
   ) {}
 
   ngOnInit() {
     this.detectarRol();
     const nav = this.router.getCurrentNavigation();
     const state = nav?.extras?.state as { seller_id?: number; entity_id?: number; seller_name?: string } | undefined;
+
+    // Estado de navegación solo existe en la entrada desde el detalle; al volver de biometría (/biometric-unlock) se pierde.
     if (state?.seller_id != null && state?.entity_id != null) {
-      this.sellerId = state.seller_id;
-      this.entityId = state.entity_id;
-      this.sellerName = state.seller_name || 'Vendedor';
-      this.selectedEntity = { id: this.entityId, name: '' };
+      this.applySellerContext(state.seller_id, state.entity_id, state.seller_name);
+      this.persistSellerContext();
       this.loadLotteries();
-    } else {
-      this.errorMessage = 'Faltan datos del vendedor. Vuelve al detalle del vendedor.';
+      return;
     }
+
+    const stored = this.readSellerContextFromSession();
+    if (stored) {
+      this.applySellerContext(stored.seller_id, stored.entity_id, stored.seller_name);
+      this.errorMessage = '';
+      this.loadLotteries();
+      return;
+    }
+
+    this.errorMessage = 'Faltan datos del vendedor. Vuelve al detalle del vendedor.';
+  }
+
+  /** Llamar al salir al listado de vendedores para no reutilizar otro flujo con el mismo sessionStorage. */
+  clearPersistedAsignacionContext(): void {
+    try {
+      sessionStorage.removeItem(GestorAsignacionPage.SESSION_CTX_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private applySellerContext(seller_id: number, entity_id: number, seller_name?: string): void {
+    this.sellerId = seller_id;
+    this.entityId = entity_id;
+    this.sellerName = seller_name || 'Vendedor';
+    this.selectedEntity = { id: entity_id, name: '' };
+  }
+
+  private persistSellerContext(): void {
+    if (this.sellerId == null || this.entityId == null) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        GestorAsignacionPage.SESSION_CTX_KEY,
+        JSON.stringify({
+          seller_id: this.sellerId,
+          entity_id: this.entityId,
+          seller_name: this.sellerName,
+        })
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private readSellerContextFromSession(): { seller_id: number; entity_id: number; seller_name?: string } | null {
+    try {
+      const raw = sessionStorage.getItem(GestorAsignacionPage.SESSION_CTX_KEY);
+      if (!raw) {
+        return null;
+      }
+      const o = JSON.parse(raw) as { seller_id?: unknown; entity_id?: unknown; seller_name?: string };
+      if (typeof o.seller_id === 'number' && typeof o.entity_id === 'number') {
+        return { seller_id: o.seller_id, entity_id: o.entity_id, seller_name: o.seller_name };
+      }
+    } catch {
+      /* ignore */
+    }
+    return null;
   }
 
   ngAfterViewInit() {
@@ -108,13 +173,169 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
     }
   }
 
-  loadLotteries() {
-    if (!this.entityId) return;
+  /**
+   * Paso sorteos: escanear QR del taco (portada) y rellenar sorteo/set + lista de participaciones a asignar (rangos libres del libro).
+   */
+  async escanearTacoParaAsignacion(): Promise<void> {
+    if (!this.entityId || !this.sellerId) {
+      await this.mostrarAlerta('Falta dato', 'No hay entidad o vendedor.');
+      return;
+    }
+    if (this.lotteries.length === 0) {
+      await this.mostrarAlerta('Sin sorteos', 'No hay sorteos para esta entidad.');
+      return;
+    }
+    try {
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+        scanText: 'Escanea el QR de la portada del taco',
+      });
+      const qrText = result?.ScanResult?.trim() || null;
+      const tacoRef = this.extraerTacoRefDeQR(qrText);
+      if (!tacoRef) {
+        await this.mostrarAlerta('QR no válido', 'No se reconoce un código de taco (TACO-…).');
+        return;
+      }
+      this.loading = true;
+      this.errorMessage = '';
+      this.ventasService.getManagerTacoForAssign(this.entityId, this.sellerId, tacoRef).subscribe({
+        next: async (tacoRes: any) => {
+          this.loading = false;
+          if (!tacoRes?.success) {
+            await this.mostrarAlerta('Error', tacoRes?.message || 'No se pudo leer el taco.');
+            return;
+          }
+          const lot = this.lotteries.find((l) => l.id === tacoRes.lottery_id);
+          if (!lot) {
+            await this.mostrarAlerta('Sorteo', 'El taco no corresponde a un sorteo de esta entidad en la lista.');
+            return;
+          }
+          if (!tacoRes.rangos_disponibles?.length || (tacoRes.total_disponibles ?? 0) <= 0) {
+            await this.mostrarAlerta('Sin disponibles', tacoRes.message || 'No hay participaciones libres para asignar en este taco.');
+            return;
+          }
+          await this.aplicarTacoCompleto(lot, tacoRes);
+        },
+        error: async (err) => {
+          this.loading = false;
+          await this.mostrarAlerta('Error', err?.error?.message || 'Error al consultar el taco.');
+        },
+      });
+    } catch {
+      this.loading = false;
+      await this.mostrarAlerta('Error', 'No se pudo abrir el escáner.');
+    }
+  }
+
+  private extraerTacoRefDeQR(qrText: string | null): string | null {
+    if (!qrText) {
+      return null;
+    }
+    let value = qrText.trim();
+    if (value.includes('taco_ref=')) {
+      const match = value.match(/taco_ref=([^&\s#]+)/);
+      if (match) {
+        value = decodeURIComponent(match[1]).trim();
+      }
+    }
+    if (/^TACO-\d+-\d+-\d+-B\d+-[a-f0-9]{8}$/.test(value)) {
+      return value;
+    }
+    return null;
+  }
+
+  private async aplicarTacoCompleto(lot: any, tacoRes: any): Promise<void> {
+    this.selectedLottery = lot;
     this.loading = true;
     this.errorMessage = '';
-    this.devolutionsService.getLotteriesByEntity(this.entityId).subscribe({
-      next: (res) => {
+    this.ventasService.getManagerAssignmentSets(this.entityId!, lot.id).subscribe({
+      next: async (res) => {
         this.loading = false;
+        if (!res.success || !res.sets) {
+          await this.mostrarAlerta('Error', 'No se pudieron cargar los sets.');
+          return;
+        }
+        this.sets = res.sets;
+        const set = this.sets.find((s) => s.id === tacoRes.set_id);
+        if (!set) {
+          await this.mostrarAlerta('Set', 'No se encontró el set del taco en este sorteo (solo sets físicos).');
+          return;
+        }
+        this.selectedSet = set;
+        this.disponiblesDigitalSet = 0;
+        this.rangoDesde = '';
+        this.rangoHasta = '';
+        this.unidadNumero = '';
+        this.loadAvailableRangesForSet();
+        const ok = await this.aplicarRangosDelTacoSecuencial(tacoRes.rangos_disponibles || []);
+        if (ok) {
+          this.showQrScannerView = false;
+          this.step = 'participaciones';
+          const n = tacoRes.total_disponibles ?? 0;
+          const libro = tacoRes.book_number ?? '';
+          await this.mostrarAlerta(
+            'Taco registrado',
+            `Se añadieron ${n} participación(es) del libro ${libro}. Pulsa «Terminar» para ir al resumen o «Asignar / Seguir» para añadir más.`
+          );
+        }
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err?.error?.message || 'Error al cargar sets.');
+      },
+    });
+  }
+
+  private aplicarRangosDelTacoSecuencial(rangos: Array<{ desde: number; hasta: number }>): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (!this.sellerId || !this.selectedSet?.id) {
+        resolve(false);
+        return;
+      }
+      const run = (idx: number) => {
+        if (idx >= rangos.length) {
+          resolve(true);
+          return;
+        }
+        const r = rangos[idx];
+        this.loading = true;
+        this.ventasService.validateAssignments(this.sellerId!, this.selectedSet.id, r.desde, r.hasta).subscribe({
+          next: (resp) => {
+            this.loading = false;
+            if (resp.success && resp.participations && resp.participations.length > 0) {
+              this.agregarParticipacionesSinDuplicar(resp.participations);
+              run(idx + 1);
+            } else {
+              this.mostrarAlerta('Sin resultados', resp?.message || `Rango ${r.desde}-${r.hasta}`);
+              resolve(false);
+            }
+          },
+          error: (err) => {
+            this.loading = false;
+            this.mostrarAlerta('Error', err?.error?.message || 'Error al validar rango.');
+            resolve(false);
+          },
+        });
+      };
+      run(0);
+    });
+  }
+
+  loadLotteries() {
+    if (!this.entityId) return;
+    const seq = ++this.loadLotteriesSeq;
+    this.loading = true;
+    this.errorMessage = '';
+    this.ventasService.getManagerAssignmentLotteries(this.entityId).pipe(
+      finalize(() => {
+        if (seq === this.loadLotteriesSeq) {
+          this.loading = false;
+        }
+      })
+    ).subscribe({
+      next: (res) => {
+        if (seq !== this.loadLotteriesSeq) return;
         if (res.success && res.lotteries) {
           this.lotteries = res.lotteries;
           if (this.lotteries.length === 0) {
@@ -125,7 +346,7 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
         }
       },
       error: (err) => {
-        this.loading = false;
+        if (seq !== this.loadLotteriesSeq) return;
         this.errorMessage = err?.error?.message || 'Error al cargar sorteos.';
       }
     });
@@ -140,11 +361,18 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
 
   loadSets() {
     if (!this.entityId || !this.selectedLottery) return;
+    const seq = ++this.loadSetsSeq;
     this.loading = true;
     this.errorMessage = '';
-    this.devolutionsService.getSetsByEntityAndLottery(this.entityId, this.selectedLottery.id).subscribe({
+    this.ventasService.getManagerAssignmentSets(this.entityId, this.selectedLottery.id).pipe(
+      finalize(() => {
+        if (seq === this.loadSetsSeq) {
+          this.loading = false;
+        }
+      })
+    ).subscribe({
       next: (res) => {
-        this.loading = false;
+        if (seq !== this.loadSetsSeq) return;
         if (res.success && res.sets) {
           this.sets = res.sets;
           this.selectedSet = this.sets.length === 1 ? this.sets[0] : null;
@@ -164,7 +392,7 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
         }
       },
       error: (err) => {
-        this.loading = false;
+        if (seq !== this.loadSetsSeq) return;
         this.errorMessage = err?.error?.message || 'Error al cargar sets.';
       }
     });
@@ -468,6 +696,7 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
 
   closeSuccessModal() {
     this.showSuccessModal = false;
+    this.clearPersistedAsignacionContext();
     this.router.navigate(['/tabs/gestor-tab2'], {
       replaceUrl: true,
       state: {
@@ -512,8 +741,8 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación (unidad)'
       });
@@ -536,8 +765,8 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el QR de la primera participación (Desde)'
       });
@@ -560,8 +789,8 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
       return;
     }
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el QR de la última participación (Hasta)'
       });
@@ -580,11 +809,11 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
 
   private resolverReferenciaParaCampo(referencia: string, campo: 'desde' | 'hasta') {
     this.loading = true;
-    this.devolutionsService.validateParticipations({
-      entity_id: this.entityId!,
-      lottery_id: this.selectedLottery.id,
+    this.ventasService.validateManagerAssignmentReference(
+      this.entityId!,
+      this.selectedLottery.id,
       referencia
-    }).subscribe({
+    ).subscribe({
       next: (res) => {
         this.loading = false;
         if (res.success && res.participations && res.participations.length > 0) {
@@ -611,11 +840,11 @@ export class GestorAsignacionPage implements OnInit, AfterViewInit {
 
   private validarPorReferencia(referencia: string) {
     this.loading = true;
-    this.devolutionsService.validateParticipations({
-      entity_id: this.entityId!,
-      lottery_id: this.selectedLottery.id,
+    this.ventasService.validateManagerAssignmentReference(
+      this.entityId!,
+      this.selectedLottery.id,
       referencia
-    }).subscribe({
+    ).subscribe({
       next: (res) => {
         this.loading = false;
         if (res.success && res.participations && res.participations.length > 0) {

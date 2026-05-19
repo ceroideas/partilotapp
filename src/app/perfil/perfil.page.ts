@@ -82,7 +82,7 @@ export class PerfilPage implements OnInit {
   }
 
   goToNotificaciones() {
-    this.router.navigate(['/notificaciones']);
+    this.router.navigate(['/tabs/notificaciones']);
   }
 
   goToPreguntasFrecuentes() {

@@ -36,6 +36,58 @@
       </div>
 
       <div class="input-wrap">
+        <ion-icon name="call-outline" class="input-icon"></ion-icon>
+        <ion-input
+          type="tel"
+          [(ngModel)]="phone"
+          name="phone"
+          placeholder="Teléfono móvil (opcional)"
+          inputmode="tel"
+          class="input-field">
+        </ion-input>
+      </div>
+
+      <div class="sms-verify-block" *ngIf="smsVerificationEnabled && phone.trim()">
+        <p class="sms-hint">Si indicas teléfono, te enviaremos un SMS para confirmarlo.</p>
+        <ion-button
+          type="button"
+          fill="outline"
+          expand="block"
+          class="btn-sms"
+          [disabled]="smsSending || smsCooldown > 0 || !phone.trim()"
+          (click)="enviarCodigoSms()">
+          <ion-spinner *ngIf="smsSending" name="crescent"></ion-spinner>
+          <span *ngIf="!smsSending && smsCooldown <= 0">Enviar código por SMS</span>
+          <span *ngIf="!smsSending && smsCooldown > 0">Reenviar en {{ smsCooldown }} s</span>
+        </ion-button>
+        <div class="input-wrap sms-code-wrap">
+          <ion-icon name="chatbox-outline" class="input-icon"></ion-icon>
+          <ion-input
+            type="text"
+            [(ngModel)]="smsCode"
+            name="smsCode"
+            [placeholder]="'Código SMS (' + smsCodeLength + ' dígitos)'"
+            inputmode="numeric"
+            [maxlength]="smsCodeLength"
+            class="input-field">
+          </ion-input>
+        </div>
+      </div>
+
+      <div class="input-wrap">
+        <ion-icon name="key-outline" class="input-icon"></ion-icon>
+        <ion-input
+          type="text"
+          [(ngModel)]="linkCode"
+          name="linkCode"
+          placeholder="Código de vinculación (opcional)"
+          autocapitalize="characters"
+          class="input-field">
+        </ion-input>
+      </div>
+      <p class="link-code-hint">Si compraste participaciones digitales y el email no llegó, pide al vendedor el código o introdúcelo después en Mi cartera.</p>
+
+      <div class="input-wrap">
         <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
         <ion-input
           type="date"

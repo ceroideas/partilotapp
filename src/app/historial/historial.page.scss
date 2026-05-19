@@ -452,7 +452,13 @@
   color: #6C757D;
   line-height: 1.2;
   width: 100%;
-  // El subtítulo puede extenderse completamente, sin restricciones
+
+  &--scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    max-width: 100%;
+  }
 }
 
 .vendedor-item-right {
@@ -514,6 +520,31 @@
   padding-top: 20px;
   overflow: hidden;
   animation: slideDown 0.3s ease;
+}
+
+.vendedor-whatsapp-actions {
+  margin-top: 16px;
+
+  .btn-whatsapp {
+    --background: #25d366;
+    --background-activated: #1ebe57;
+    --background-hover: #20c75e;
+    --color: #ffffff;
+    --border-radius: 9999px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 15px;
+    margin: 0;
+
+    &::part(native) {
+      border-radius: 9999px;
+    }
+
+    ion-icon {
+      font-size: 22px;
+    }
+  }
 }
 
 @keyframes slideDown {
@@ -601,12 +632,42 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  &--scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+}
+
+.vendedor-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.badge-tipo-participacion {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+
+  &--digital {
+    background: rgba(13, 110, 253, 0.12);
+    color: #0d6efd;
+    border: 1px solid rgba(13, 110, 253, 0.35);
+  }
 }
 
 .vendedor-detail-row {
   display: flex;
   align-items: flex-start;
   margin-bottom: 4px;
+  min-width: min-content;
   
   .vendedor-detail-label {
     font-size: 14px;
@@ -614,6 +675,7 @@
     font-weight: 500;
     margin-right: 4px;
     white-space: nowrap;
+    flex-shrink: 0;
   }
   
   .vendedor-detail-value {
@@ -621,6 +683,16 @@
     color: #212529;
     font-weight: 600;
     flex: 1;
+    min-width: 0;
+  }
+
+  &--long {
+    flex-wrap: nowrap;
+
+    .vendedor-detail-value--long {
+      white-space: nowrap;
+      display: inline-block;
+    }
   }
 }
 

@@ -4,8 +4,17 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://127.0.0.1:8000/api'
-  // apiUrl: 'https://panel.partilot.es/api'
+  apiUrl: 'http://127.0.0.1:8000/api',
+  // apiUrl: 'https://panel.partilot.es/api',
+
+  /**
+   * Ruta relativa a `apiUrl` para registrar el token FCM (POST JSON `{ fcm_token }`).
+   * Laravel: `NotificationController::registerToken` bajo middleware `auth.api`.
+   */
+  fcmDeviceRegisterPath: 'notifications/register-token' as string | null,
+
+  /** POST JSON `{ fcm_token }` — quitar este dispositivo antes de cerrar sesión. */
+  fcmDeviceUnregisterPath: 'notifications/unregister-token' as string | null,
 };
 
 /*

@@ -45,6 +45,29 @@
   }
 }
 
+.sms-verify-block {
+  margin-bottom: 8px;
+
+  .sms-hint {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0 0 10px 4px;
+    line-height: 1.35;
+  }
+
+  .btn-sms {
+    --border-color: #f59200;
+    --color: #f59200;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    text-transform: none;
+  }
+
+  .sms-code-wrap {
+    margin-bottom: 16px;
+  }
+}
+
 .input-wrap {
   position: relative;
   display: flex;
@@ -149,6 +172,13 @@
   border-radius: 25px;
   text-transform: none;
   margin-bottom: 20px;
+}
+
+.link-code-hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin: -8px 0 12px 36px;
+  line-height: 1.35;
 }
 
 .footer-accede {

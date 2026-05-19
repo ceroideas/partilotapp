@@ -137,10 +137,10 @@
         <ion-label>Juego Responsable</ion-label>
       </ion-item>
       
-      <ion-item routerLink="/notificaciones" routerDirection="root" (click)="cerrarMenu()" style="margin-top: 10vh;">
+      <ion-item routerLink="/tabs/notificaciones" routerDirection="root" (click)="cerrarMenu()" style="margin-top: 10vh;">
         <ion-icon name="notifications-outline" slot="start"></ion-icon>
         <ion-label>Notificaciones</ion-label>
-        <ion-badge color="warning" slot="end">12</ion-badge>
+        <ion-badge *ngIf="notificacionesNoLeidas > 0" color="danger" slot="end">{{ notificacionesNoLeidas > 99 ? '99+' : notificacionesNoLeidas }}</ion-badge>
       </ion-item>
       
       <ion-item routerLink="/condiciones-legales" routerDirection="root" (click)="cerrarMenu()">
@@ -168,7 +168,15 @@
         <h2>{{ userName || 'Usuario' }}</h2>
         <p>{{ userEmail || '' }}</p>
       </ion-label>
-      <ion-icon name="log-out-outline" slot="end" (click)="logout($event)"></ion-icon>
+      <ion-button
+        slot="end"
+        class="user-info-logout-btn"
+        fill="clear"
+        (click)="logout($event)"
+        aria-label="Cerrar sesión"
+        title="Cerrar sesión">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-item>
   </div>
 </ion-menu>

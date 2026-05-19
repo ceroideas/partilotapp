@@ -759,7 +759,7 @@
           text-transform: none;
           justify-content: flex-start;
           --padding-start: 16px;
-          border: 1px solid #E9ECEF;
+          // border: 1px solid #E9ECEF;
           
           ion-icon {
             margin-right: 12px;
@@ -776,15 +776,29 @@
     }
   }
   
-  .registrar-button {
-    --background: #F49200;
-    --color: #ffffff;
-    --border-radius: 12px;
+  .registrar-button,
+  .codigo-solo-button {
+    --border-radius: 9999px;
     height: 48px;
     font-weight: 600;
     text-transform: none;
     font-size: 16px;
+
+    &::part(native) {
+      border-radius: 9999px;
+    }
+  }
+
+  .registrar-button {
+    --background: #F49200;
+    --color: #ffffff;
     margin-top: 24px;
+  }
+
+  .codigo-solo-button {
+    --border-color: #212529;
+    --color: #212529;
+    margin-top: 12px;
   }
 }
 

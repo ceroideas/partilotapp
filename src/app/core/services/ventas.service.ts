@@ -80,6 +80,28 @@ export class VentasService {
     return this.http.post(`${this.apiUrl}/sales/digital`, body);
   }
 
+  /**
+   * Reservar venta digital y enviar email de registro al comprador no registrado.
+   */
+  sellDigitalPending(
+    params:
+      | { set_id: number; quantity: number; buyer_email?: string; payment_method?: string | null }
+      | { entity_id: number; lottery_id: number; quantity: number; buyer_email?: string; payment_method?: string | null }
+  ): Observable<any> {
+    const body: any = {
+      quantity: params.quantity,
+      ...(params.buyer_email != null && params.buyer_email !== '' && { buyer_email: params.buyer_email }),
+      ...(params.payment_method != null && { payment_method: params.payment_method }),
+    };
+    if ('set_id' in params) {
+      body.set_id = params.set_id;
+    } else {
+      body.entity_id = params.entity_id;
+      body.lottery_id = params.lottery_id;
+    }
+    return this.http.post(`${this.apiUrl}/sales/digital/pending`, body);
+  }
+
   sellByQr(referencia: string, desde?: number, hasta?: number, paymentMethod?: string | null): Observable<any> {
     const body: any = { referencia };
     if (desde !== undefined && hasta !== undefined) {
@@ -113,6 +135,36 @@ export class VentasService {
     return this.http.get(`${this.apiUrl}/managers/me/entities`);
   }
 
+  /** Gestor: sorteos para asignación (permiso vendedores). */
+  getManagerAssignmentLotteries(entityId: number): Observable<{ success: boolean; lotteries: any[]; message?: string }> {
+    return this.http.get<{ success: boolean; lotteries: any[]; message?: string }>(
+      `${this.apiUrl}/managers/me/entities/${entityId}/assignment/lotteries`
+    );
+  }
+
+  /** Gestor: sets con participaciones disponibles para asignar. */
+  getManagerAssignmentSets(
+    entityId: number,
+    lotteryId: number
+  ): Observable<{ success: boolean; sets: any[]; message?: string }> {
+    return this.http.get<{ success: boolean; sets: any[]; message?: string }>(
+      `${this.apiUrl}/managers/me/entities/${entityId}/assignment/sets`,
+      { params: { lottery_id: String(lotteryId) } }
+    );
+  }
+
+  /** Gestor: resolver referencia QR para campo desde/hasta en asignación. */
+  validateManagerAssignmentReference(
+    entityId: number,
+    lotteryId: number,
+    referencia: string
+  ): Observable<{ success: boolean; participations?: any[]; message?: string }> {
+    return this.http.post<{ success: boolean; participations?: any[]; message?: string }>(
+      `${this.apiUrl}/managers/me/entities/${entityId}/assignment/validate-reference`,
+      { lottery_id: lotteryId, referencia }
+    );
+  }
+
   /** Gestor: vendedores de una entidad (listado con participaciones y monto por liquidar) */
   getManagerEntitySellers(entityId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/managers/me/entities/${entityId}/sellers`);
@@ -138,6 +190,20 @@ export class VentasService {
   /** Gestor: tacos de una entidad (con seller_id y seller_name en cada taco) */
   getManagerTacos(entityId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/managers/me/tacos`, { params: { entity_id: entityId } });
+  }
+
+  /**
+   * Gestor: leer QR del taco (portada) para asignación — devuelve sorteo, set y rangos de participaciones libres en el libro.
+   * GET /api/managers/me/taco-for-assign?entity_id=&seller_id=&taco_ref=
+   */
+  getManagerTacoForAssign(entityId: number, sellerId: number, tacoRef: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/managers/me/taco-for-assign`, {
+      params: {
+        entity_id: String(entityId),
+        seller_id: String(sellerId),
+        taco_ref: tacoRef,
+      },
+    });
   }
 
   /** Gestor: participaciones de un taco (set + book + seller) */

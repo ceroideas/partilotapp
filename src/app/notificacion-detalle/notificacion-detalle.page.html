@@ -1,14 +1,14 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
+      <ion-back-button defaultHref="/tabs/notificaciones"></ion-back-button>
     </ion-buttons>
     <ion-title></ion-title>
     <div class="header-content">
       <img src="/assets/logo_menu.svg" alt="PARTILOT" class="logo-image">
     </div>
     <ion-buttons slot="end">
-      <ion-button fill="clear">
+      <ion-button fill="clear" routerLink="/tabs/notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -17,70 +17,96 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="detalle-content">
-  <div class="detalle-container" *ngIf="notificacion">
-    <!-- Header con icono -->
-    <div class="header-card figma-card">
-      <div class="notificacion-icon-large" [ngSwitch]="notificacion.tipo">
-        <ion-icon *ngSwitchCase="'ganador'" name="trophy" color="warning"></ion-icon>
-        <ion-icon *ngSwitchCase="'cobro'" name="cash" color="success"></ion-icon>
-        <ion-icon *ngSwitchCase="'sorteo'" name="calendar" color="primary"></ion-icon>
-        <ion-icon *ngSwitchCase="'regalo'" name="gift" color="tertiary"></ion-icon>
-        <ion-icon *ngSwitchDefault name="notifications"></ion-icon>
+  <div class="detalle-wrap" *ngIf="notificacion && !loading">
+    <!-- Invitación vendedor (captura 4) -->
+    <div class="detalle-card figma-card invitacion-card" *ngIf="esInvitacionVendedor()">
+      <div class="invitacion-top-row">
+        <div class="entity-avatar" [class.no-img]="!notificacion.entity_image">
+          <img *ngIf="notificacion.entity_image" [src]="getImageUrl(notificacion.entity_image)" [alt]="notificacion.entidadNombre">
+          <ion-icon *ngIf="!notificacion.entity_image" name="business-outline"></ion-icon>
+        </div>
+        <div class="entity-meta">
+          <span class="entity-name">{{ notificacion.entidadNombre || notificacion.titulo }}</span>
+        </div>
+        <span class="fecha-pill">
+          <ion-icon name="calendar-outline"></ion-icon>
+          {{ notificacion.fecha | date:'dd/MM/yy' }}
+        </span>
       </div>
-      <h1>{{ notificacion.titulo }}</h1>
-      <p class="fecha">{{ notificacion.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+      <h1 class="invitacion-titulo">¡Has sido invitado como vendedor!</h1>
+      <p class="invitacion-texto">
+        Has sido invitado por la entidad <strong>{{ notificacion.invitadorTexto || notificacion.entidadNombre }}</strong>
+        para colaborar como vendedor en <strong>SIPART</strong>.
+      </p>
+      <p class="invitacion-legal">
+        Al continuar,
+        <button type="button" class="link-naranja" (click)="irCondicionesVendedor()">aceptas las condiciones de uso</button>
+        de la sección de vendedores de la plataforma.
+      </p>
+      <ion-button expand="block" fill="outline" class="btn-gestionar" (click)="irGestionInvitacion()">
+        <ion-icon name="list-outline" slot="start"></ion-icon>
+        Gestionar
+      </ion-button>
     </div>
 
-    <!-- Contenido -->
-    <div class="contenido-card figma-card">
-      <h3>Mensaje</h3>
-      <p class="mensaje">{{ notificacion.mensaje }}</p>
-      
-      <div class="detalle-info" *ngIf="notificacion.detalle">
-        <h3>Detalles</h3>
-        <p>{{ notificacion.detalle }}</p>
+    <!-- Genérico -->
+    <ng-container *ngIf="!esInvitacionVendedor()">
+      <div class="header-card figma-card">
+        <div class="notificacion-icon-large" [ngSwitch]="tipoUi">
+          <ion-icon *ngSwitchCase="'ganador'" name="trophy" color="warning"></ion-icon>
+          <ion-icon *ngSwitchCase="'cobro'" name="cash" color="success"></ion-icon>
+          <ion-icon *ngSwitchCase="'sorteo'" name="calendar" color="primary"></ion-icon>
+          <ion-icon *ngSwitchCase="'regalo'" name="gift" color="tertiary"></ion-icon>
+          <ion-icon *ngSwitchCase="'asignacion_participaciones'" name="ticket-outline" color="primary"></ion-icon>
+          <ion-icon *ngSwitchCase="'invitacion_vendedor'" name="person-add-outline" color="primary"></ion-icon>
+          <ion-icon *ngSwitchDefault name="notifications"></ion-icon>
+        </div>
+        <h1>{{ notificacion.titulo }}</h1>
+        <p class="fecha">{{ notificacion.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p class="detalle-kind-etiqueta">{{ etiquetaTipo() }}</p>
       </div>
-    </div>
 
-    <!-- Acciones -->
-    <div class="acciones-section" *ngIf="mostrarAcciones()">
-      <ion-button 
-        *ngIf="notificacion.tipo === 'cobro'"
-        class="figma-button" 
-        expand="block"
-        (click)="irACobros()">
-        <ion-icon name="cash" slot="start"></ion-icon>
-        Ir a cobros
-      </ion-button>
-      <ion-button 
-        *ngIf="notificacion.tipo === 'ganador'"
-        class="figma-button-accent" 
-        expand="block"
-        (click)="irAResultados()">
-        <ion-icon name="trophy" slot="start"></ion-icon>
-        Ver resultados
-      </ion-button>
-      <ion-button 
-        *ngIf="notificacion.tipo === 'regalo'"
-        class="figma-button" 
-        expand="block"
-        (click)="irACartera()">
-        <ion-icon name="wallet" slot="start"></ion-icon>
-        Ver cartera
-      </ion-button>
-      <ion-button 
-        *ngIf="notificacion.tipo === 'sorteo'"
-        class="figma-button-accent" 
-        expand="block"
-        (click)="irASorteo()">
-        <ion-icon name="calendar" slot="start"></ion-icon>
-        Participar
-      </ion-button>
-    </div>
+      <div class="contenido-card figma-card">
+        <h3>Mensaje</h3>
+        <p class="mensaje">{{ notificacion.mensaje }}</p>
+        <div class="detalle-info" *ngIf="notificacion.detalle">
+          <h3>Detalles</h3>
+          <p>{{ notificacion.detalle }}</p>
+        </div>
+      </div>
+
+      <div class="acciones-section" *ngIf="mostrarAcciones()">
+        <ion-button *ngIf="tipoUi === 'cobro'" class="figma-button" expand="block" (click)="irACobros()">
+          <ion-icon name="cash" slot="start"></ion-icon>
+          Ir a cobros
+        </ion-button>
+        <ion-button *ngIf="tipoUi === 'ganador'" class="figma-button-accent" expand="block" (click)="irAResultados()">
+          <ion-icon name="trophy" slot="start"></ion-icon>
+          Ver resultados
+        </ion-button>
+        <ion-button *ngIf="tipoUi === 'regalo'" class="figma-button" expand="block" (click)="irACartera()">
+          <ion-icon name="wallet" slot="start"></ion-icon>
+          Ver cartera
+        </ion-button>
+        <ion-button *ngIf="tipoUi === 'sorteo'" class="figma-button-accent" expand="block" (click)="irASorteo()">
+          <ion-icon name="calendar" slot="start"></ion-icon>
+          Participar
+        </ion-button>
+        <ion-button *ngIf="tipoUi === 'asignacion_participaciones'" class="figma-button-accent" expand="block" (click)="irParticipacionesVendedor()">
+          <ion-icon name="ticket-outline" slot="start"></ion-icon>
+          Ver participaciones
+        </ion-button>
+      </div>
+    </ng-container>
   </div>
 
-  <div class="loading-container" *ngIf="!notificacion">
+  <div class="loading-container" *ngIf="loading">
     <ion-spinner></ion-spinner>
     <p>Cargando notificación...</p>
+  </div>
+
+  <div class="error-state" *ngIf="!loading && errorMsg">
+    <p>{{ errorMsg }}</p>
+    <ion-button routerLink="/tabs/notificaciones">Volver</ion-button>
   </div>
 </ion-content>

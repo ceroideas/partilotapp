@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { VentasService } from '../core/services/ventas.service';
 import { Subscription } from 'rxjs';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
 import { environment } from '../../environments/environment';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-historial',
@@ -25,7 +27,8 @@ export class HistorialPage implements OnInit, OnDestroy {
     private router: Router,
     private ventasService: VentasService,
     private carteraService: CarteraService,
-    public authService: AuthService
+    public authService: AuthService,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -105,7 +108,9 @@ export class HistorialPage implements OnInit, OnDestroy {
         next: (res) => {
           this.loadingHistorial = false;
           if (res.success && Array.isArray(res.historial)) {
-            this.historial = this.normalizarFormaPagoEnHistorial(res.historial).sort((a: any, b: any) =>
+            this.historial = this.mergeHistorialVendedor(
+              this.normalizarFormaPagoEnHistorial(res.historial)
+            ).sort((a: any, b: any) =>
               new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
             );
             return;
@@ -286,7 +291,169 @@ export class HistorialPage implements OnInit, OnDestroy {
     return iconos[tipo] || 'document-outline';
   }
 
-  getTituloTipo(tipo: string): string {
+  esVentaDigitalPendiente(item: any): boolean {
+    return !!(item?.pendienteRegistro || item?.participacion?.pendienteRegistro);
+  }
+
+  /** Etiqueta «Digital» solo en participaciones digitales (venta digital, pool, recibidas). */
+  esParticipacionDigital(item: any): boolean {
+    if (!item) {
+      return false;
+    }
+    if (item.tipo === 'venta-digital' || item.tipo === 'venta_digital_recibida') {
+      return true;
+    }
+    if (item.esDigital === true || item.participacion?.esDigital === true) {
+      return true;
+    }
+    if (item.participacion?.is_digital === true) {
+      return true;
+    }
+    return false;
+  }
+
+  getSetLabel(item: any): string | null {
+    if (!item) {
+      return null;
+    }
+    const p = item.participacion;
+    const direct =
+      item.setLabel ??
+      p?.setLabel ??
+      p?.set_name ??
+      p?.setName;
+    if (direct != null && String(direct).trim() !== '') {
+      return String(direct).trim();
+    }
+    const num = p?.set_number ?? item.set_number;
+    if (num != null && num !== '') {
+      return `Set ${num}`;
+    }
+    return null;
+  }
+
+  puedeEnviarWhatsApp(item: any): boolean {
+    if (!this.esVentaDigitalPendiente(item)) {
+      return false;
+    }
+    return !!(item.participacion?.codigoVinculacion || item.codigoVinculacion);
+  }
+
+  getCantidadParticipacionesVenta(item: any): number {
+    if (item?.quantity != null) {
+      const q = Number(item.quantity);
+      if (Number.isFinite(q) && q > 0) {
+        return q;
+      }
+    }
+    const num = String(item?.participacion?.numero ?? '');
+    const match = num.match(/^(\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    return 1;
+  }
+
+  private buildMensajeWhatsAppVenta(item: any): string {
+    const qty = this.getCantidadParticipacionesVenta(item);
+    const entidad = item.participacion?.entidad;
+    const sorteo = item.participacion?.sorteo;
+    const code = item.participacion?.codigoVinculacion || item.codigoVinculacion;
+    const participacionesTexto =
+      qty === 1 ? '1 participación digital' : `${qty} participaciones digitales`;
+
+    let msg = `Hola. Te he vendido ${participacionesTexto}`;
+    if (entidad && entidad !== '—') {
+      msg += ` de ${entidad}`;
+    }
+    if (sorteo && sorteo !== '—') {
+      msg += ` (${sorteo})`;
+    }
+    msg += `.\n\nEl código para reclamarlas en la app Partilot es: ${code}`;
+    msg += '\n\nEn la app: Cartera → Vincular con código.';
+    return msg;
+  }
+
+  private normalizarTelefonoWhatsApp(raw: string): string | null {
+    let digits = (raw || '').replace(/\D/g, '');
+    if (!digits) {
+      return null;
+    }
+    if (digits.startsWith('00')) {
+      digits = digits.slice(2);
+    }
+    if (digits.length === 9 && /^[67]/.test(digits)) {
+      digits = `34${digits}`;
+    }
+    if (digits.length < 8 || digits.length > 15) {
+      return null;
+    }
+    return digits;
+  }
+
+  private abrirWhatsApp(telefono: string, mensaje: string): void {
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    if (Capacitor.isNativePlatform()) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank');
+    }
+  }
+
+  async compartirVentaPorWhatsApp(item: any, event?: Event): Promise<void> {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (!this.puedeEnviarWhatsApp(item)) {
+      return;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Enviar por WhatsApp',
+      message:
+        'Introduce el teléfono del comprador con prefijo internacional (ej. 34600111222).',
+      inputs: [
+        {
+          name: 'telefono',
+          type: 'tel',
+          placeholder: '34600111222',
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Abrir WhatsApp',
+          handler: (data) => {
+            const telefono = this.normalizarTelefonoWhatsApp(data?.telefono ?? '');
+            if (!telefono) {
+              void this.mostrarAlerta(
+                'Teléfono no válido',
+                'Introduce un número con prefijo internacional (ej. 34 para España).'
+              );
+              return false;
+            }
+            this.abrirWhatsApp(telefono, this.buildMensajeWhatsAppVenta(item));
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async mostrarAlerta(header: string, message: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['Aceptar'],
+    });
+    await alert.present();
+  }
+
+  getTituloTipo(tipo: string, item?: any): string {
+    if (tipo === 'venta-digital' && item && this.esVentaDigitalPendiente(item)) {
+      return 'Venta Digital (pendiente)';
+    }
     const titulos: { [key: string]: string } = {
       'venta': 'Venta',
       'venta-digital': 'Venta Digital',
@@ -340,8 +507,49 @@ export class HistorialPage implements OnInit, OnDestroy {
   getDescripcion(item: any): string {
     if (item.descripcion) return item.descripcion;
     const entidad = item.participacion?.entidad || item.entidad;
+    if (item.tipo === 'venta-digital' && this.esVentaDigitalPendiente(item)) {
+      const email = item.participacion?.clienteEmail;
+      const code = item.participacion?.codigoVinculacion || item.codigoVinculacion;
+      const base = entidad ? `Venta digital ${entidad}` : 'Venta digital';
+      if (code) {
+        return email ? `${base} · ${email} · Cód. ${code}` : `${base} · Cód. ${code}`;
+      }
+      return email ? `${base} · ${email}` : `${base} · Pendiente de registro`;
+    }
     if (entidad) return `Participación ${entidad}`;
     return 'Participación';
+  }
+
+  /** Fusiona API con entradas locales de ventas digitales pendientes aún no reflejadas en servidor. */
+  private mergeHistorialVendedor(apiItems: any[]): any[] {
+    let local: any[] = [];
+    try {
+      local = JSON.parse(localStorage.getItem('historial') || '[]');
+    } catch {
+      local = [];
+    }
+    const pendingApiIds = new Set(
+      apiItems.filter((i) => i.pending_id != null).map((i) => i.pending_id)
+    );
+    const merged = [...apiItems];
+    for (const item of local) {
+      if (item.tipo !== 'venta-digital' || !item.participacion?.pendienteRegistro) {
+        continue;
+      }
+      if (item.pending_id != null && pendingApiIds.has(item.pending_id)) {
+        continue;
+      }
+      const dup = apiItems.some(
+        (a) =>
+          a.tipo === 'venta-digital' &&
+          a.participacion?.clienteEmail === item.participacion?.clienteEmail &&
+          Math.abs(new Date(a.fecha).getTime() - new Date(item.fecha).getTime()) < 120000
+      );
+      if (!dup) {
+        merged.push(item);
+      }
+    }
+    return merged;
   }
 
   /** Fecha y hora para la cabecera del listado: "02/09/25 - 16:45h" */

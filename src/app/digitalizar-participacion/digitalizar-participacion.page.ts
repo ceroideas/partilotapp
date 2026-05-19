@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AlertModalService } from '../core/services/alert-modal.service';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
+import { BiometricService } from '../core/services/biometric.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -23,7 +24,8 @@ export class DigitalizarParticipacionPage implements OnInit {
   constructor(
     private alertModal: AlertModalService,
     private router: Router,
-    private carteraService: CarteraService
+    private carteraService: CarteraService,
+    private biometricService: BiometricService
   ) { }
 
   ngOnInit() {}
@@ -39,8 +41,8 @@ export class DigitalizarParticipacionPage implements OnInit {
   async abrirEscaner() {
     this.mostrandoScanner = true;
     try {
-      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
-      const result = await CapacitorBarcodeScanner.scanBarcode({
+      const { CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const result = await this.biometricService.scanBarcodeWithoutBiometricPause({
         hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
         scanText: 'Escanea el código QR de la participación'
       });

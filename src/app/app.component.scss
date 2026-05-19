@@ -242,10 +242,27 @@ ion-menu {
         margin: 0;
       }
     }
-    
-    ion-icon[slot="end"] {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 20px;
+
+    /* Área táctil mínima ~48px (antes solo ~20px el icono) */
+    .user-info-logout-btn {
+      --padding-start: 10px;
+      --padding-end: 10px;
+      --padding-top: 10px;
+      --padding-bottom: 10px;
+      min-width: 48px;
+      min-height: 48px;
+      margin: 0;
+      flex-shrink: 0;
+      --color: rgba(255, 255, 255, 0.9);
+      --background-hover: rgba(255, 255, 255, 0.12);
+      --background-activated: rgba(255, 255, 255, 0.18);
+      --border-radius: 12px;
+
+      ion-icon {
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+      }
     }
   }
 }

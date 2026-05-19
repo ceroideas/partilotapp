@@ -93,6 +93,15 @@ const routes: Routes = [
         loadChildren: () => import('../comprobar-numero/comprobar-numero.module').then(m => m.ComprobarNumeroPageModule)
       },
       {
+        path: 'notificaciones',
+        loadChildren: () => import('../notificaciones/notificaciones.module').then(m => m.NotificacionesPageModule)
+      },
+      {
+        path: 'notificacion-detalle',
+        loadChildren: () =>
+          import('../notificacion-detalle/notificacion-detalle.module').then(m => m.NotificacionDetallePageModule),
+      },
+      {
         path: '',
         redirectTo: '/tabs/tab3',
         pathMatch: 'full'

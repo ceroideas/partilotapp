@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { BiometricAuth, BiometryType } from '@aparajita/capacitor-biometric-auth';
+import type {
+  CapacitorBarcodeScannerOptions,
+  CapacitorBarcodeScannerScanResult,
+} from '@capacitor/barcode-scanner';
 
 interface StoredBiometricCredentials {
   email: string;
@@ -16,6 +20,12 @@ export class BiometricService {
   private readonly biometryTypeKey = 'biometric_type';
   /** sessionStorage: sesión desbloqueada con biometría en esta instancia de la WebView (se invalida al pasar a segundo plano). */
   private readonly unlockSessionKey = 'partilot_biometric_unlock_ok';
+
+  /**
+   * El escáner nativo de QR suele poner la app en `isActive: false`; sin esto se invalida el desbloqueo
+   * biométrico y al volver se fuerza /biometric-unlock perdiendo el flujo.
+   */
+  private nativeBarcodeScanDepth = 0;
 
   async isBiometryAvailable(): Promise<boolean> {
     if (!Capacitor.isNativePlatform()) return false;
@@ -97,6 +107,30 @@ export class BiometricService {
     localStorage.removeItem(this.enabledKey);
     localStorage.removeItem(this.credsKey);
     localStorage.removeItem(this.biometryTypeKey);
+  }
+
+  /** True mientras está abierto el lector nativo de códigos (no tratar ese “pause” como salida de la app). */
+  isNativeBarcodeScanInProgress(): boolean {
+    return this.nativeBarcodeScanDepth > 0;
+  }
+
+  /**
+   * Ejecuta el escáner nativo incrementando el contador **antes** de cualquier `await`
+   * (si no, `appStateChange` puede dispararse durante el `import()` y aún invalidar biometría).
+   */
+  scanBarcodeWithoutBiometricPause(
+    options: CapacitorBarcodeScannerOptions
+  ): Promise<CapacitorBarcodeScannerScanResult> {
+    this.nativeBarcodeScanDepth++;
+    const run = async (): Promise<CapacitorBarcodeScannerScanResult> => {
+      try {
+        const { CapacitorBarcodeScanner } = await import('@capacitor/barcode-scanner');
+        return await CapacitorBarcodeScanner.scanBarcode(options);
+      } finally {
+        this.nativeBarcodeScanDepth = Math.max(0, this.nativeBarcodeScanDepth - 1);
+      }
+    };
+    return run();
   }
 
   /** Al enviar la app a segundo plano: exigir biometría otra vez al volver. */

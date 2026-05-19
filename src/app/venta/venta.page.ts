@@ -54,11 +54,17 @@ export class VentaPage implements OnInit {
   
   // Modal de éxito
   mostrarModalExito: boolean = false;
+  ultimoCodigoVinculacion: string | null = null;
 
   // Modal email (para venta digital)
   mostrarModalEmail: boolean = false;
   emailCliente: string = '';
   clienteEncontrado: { id: number; email: string } | null = null;
+  /** Venta digital a email no registrado: cobro ahora, registro por correo después. */
+  ventaPendienteRegistro = false;
+  /** Venta digital pendiente sin email: solo código de vinculación. */
+  ventaSoloCodigo = false;
+  ultimaVentaSinEmail = false;
 
   loading = false;
 
@@ -428,6 +434,8 @@ export class VentaPage implements OnInit {
     if (this.tipoParticipacion === 'digitales') {
       this.emailCliente = '';
       this.clienteEncontrado = null;
+      this.ventaPendienteRegistro = false;
+      this.ventaSoloCodigo = false;
       this.mostrarModalEmail = true;
     } else {
       this.mostrarModalResumen = true;
@@ -438,6 +446,16 @@ export class VentaPage implements OnInit {
     this.mostrarModalEmail = false;
     this.emailCliente = '';
     this.clienteEncontrado = null;
+    this.ventaSoloCodigo = false;
+  }
+
+  continuarConSoloCodigo() {
+    this.clienteEncontrado = null;
+    this.emailCliente = '';
+    this.ventaPendienteRegistro = true;
+    this.ventaSoloCodigo = true;
+    this.mostrarModalEmail = false;
+    this.mostrarModalResumen = true;
   }
 
   async verificarEmailYContinuar() {
@@ -448,16 +466,19 @@ export class VentaPage implements OnInit {
     }
     this.loading = true;
     this.ventasService.checkUserExists(email).subscribe({
-      next: (res: any) => {
+      next: async (res: any) => {
         this.loading = false;
         if (res.exists && res.user_id) {
           this.clienteEncontrado = { id: res.user_id, email };
+          this.ventaPendienteRegistro = false;
           this.mostrarModalEmail = false;
           this.mostrarModalResumen = true;
+        } else if (res.can_offer_registration) {
+          await this.ofrecerVentaConRegistroPorEmail(email);
         } else {
-          this.mostrarAlerta(
+          await this.mostrarAlerta(
             'Usuario no registrado',
-            'El correo no está registrado en la aplicación. Por ahora solo puedes vender participaciones digitales a usuarios que ya tengan cuenta.'
+            'El correo no está registrado en la aplicación.'
           );
         }
       },
@@ -469,8 +490,32 @@ export class VentaPage implements OnInit {
     });
   }
 
+  private async ofrecerVentaConRegistroPorEmail(email: string) {
+    const alert = await this.alertController.create({
+      header: 'Usuario no registrado',
+      message:
+        'El correo no tiene cuenta en Partilot. ¿Quieres cobrar la venta ahora y enviarle un correo para que se registre en la web y reciba sus participaciones?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Sí, enviar correo',
+          handler: () => {
+            this.clienteEncontrado = null;
+            this.ventaPendienteRegistro = true;
+            this.emailCliente = email;
+            this.mostrarModalEmail = false;
+            this.mostrarModalResumen = true;
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
   cerrarModalResumen() {
     this.mostrarModalResumen = false;
+    this.ventaPendienteRegistro = false;
+    this.ventaSoloCodigo = false;
   }
 
   seleccionarFormaPago(forma: 'efectivo' | 'bizum' | 'transferencia' | 'omitir') {
@@ -484,27 +529,49 @@ export class VentaPage implements OnInit {
     }
 
     if (this.tipoParticipacion === 'digitales') {
-      if (!this.clienteEncontrado || !this.selectedEntity?.id || !this.selectedLottery?.id) {
-        await this.mostrarAlerta('Error', 'Datos incompletos. Verifica el email del cliente.');
+      if (!this.selectedEntity?.id || !this.selectedLottery?.id) {
+        await this.mostrarAlerta('Error', 'Datos incompletos. Selecciona entidad y sorteo.');
         return;
+      }
+      const buyerEmail = (this.clienteEncontrado?.email || this.emailCliente || '').trim().toLowerCase();
+      if (!this.ventaSoloCodigo) {
+        if (!buyerEmail) {
+          await this.mostrarAlerta('Error', 'Datos incompletos. Verifica el email del cliente.');
+          return;
+        }
+        if (!this.clienteEncontrado && !this.ventaPendienteRegistro) {
+          await this.mostrarAlerta('Error', 'Confirma el email del cliente antes de continuar.');
+          return;
+        }
       }
       this.loading = true;
       const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
-      this.ventasService.sellDigital({
+      const digitalBase = {
         entity_id: this.selectedEntity.id,
         lottery_id: this.selectedLottery.id,
         quantity: this.numeroParticipaciones,
-        buyer_email: this.clienteEncontrado.email,
         payment_method: paymentMethod,
-      }).subscribe({
+      };
+      const sale$ = this.ventaPendienteRegistro
+        ? this.ventasService.sellDigitalPending(
+            this.ventaSoloCodigo ? digitalBase : { ...digitalBase, buyer_email: buyerEmail }
+          )
+        : this.ventasService.sellDigital({ ...digitalBase, buyer_email: buyerEmail });
+      sale$.subscribe({
         next: async (res: any) => {
           this.loading = false;
           if (res.success) {
-            this.guardarVentaDigitalEnHistorial(res);
+            const soloCodigo = this.ventaSoloCodigo;
+            this.guardarVentaDigitalEnHistorial(res, soloCodigo ? undefined : buyerEmail);
+            this.ultimoCodigoVinculacion = res.link_code ?? null;
+            this.ultimaVentaSinEmail = soloCodigo;
             this.ventasService.notifyVentasChanged();
             this.cerrarModalResumen();
             this.mostrarModalExito = true;
             this.clienteEncontrado = null;
+            this.emailCliente = '';
+            this.ventaPendienteRegistro = false;
+            this.ventaSoloCodigo = false;
             this.loadTotalDigitalAvailable();
           } else {
             await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
@@ -562,7 +629,22 @@ export class VentaPage implements OnInit {
     });
   }
 
-  guardarVentaDigitalEnHistorial(res: any): void {
+  private getSetLabelParaHistorial(): string | null {
+    const s = this.setSeleccionado;
+    if (!s) {
+      return null;
+    }
+    const name = (s.set_name || s.name || '').trim();
+    if (name) {
+      return name;
+    }
+    if (s.set_number != null && s.set_number !== '') {
+      return `Set ${s.set_number}`;
+    }
+    return null;
+  }
+
+  guardarVentaDigitalEnHistorial(res: any, buyerEmail?: string): void {
     const lottery = this.selectedLottery;
     const entidad = this.selectedEntity?.name || '—';
     const drawDate = lottery?.draw_date
@@ -570,18 +652,35 @@ export class VentaPage implements OnInit {
       : '—';
     const historial = JSON.parse(localStorage.getItem('historial') || '[]');
     historial.unshift({
-      id: Date.now(),
+      id: res.pending_id ? `p-${res.pending_id}` : Date.now(),
+      pending_id: res.pending_id ?? null,
       tipo: 'venta-digital',
       fecha: new Date().toISOString(),
       formaPago: this.formaPago === 'omitir' ? null : this.formaPago,
-      descripcion: `Venta digital ${entidad}`,
+      descripcion: this.ventaSoloCodigo
+        ? `Venta digital ${entidad} · Solo código`
+        : this.ventaPendienteRegistro
+          ? `Venta digital ${entidad} · Pendiente de registro`
+          : `Venta digital ${entidad}`,
+      pendienteRegistro: this.ventaPendienteRegistro,
+      soloCodigo: this.ventaSoloCodigo,
+      quantity: this.numeroParticipaciones,
+      valid_until: res.valid_until ?? null,
+      codigoVinculacion: res.link_code ?? null,
+      setLabel: this.getSetLabelParaHistorial(),
       participacion: {
         entidad,
+        sorteo: lottery?.name || lottery?.lottery_type || '—',
         numero: `${this.numeroParticipaciones} dig.`,
         fechaSorteo: drawDate,
         importeJugado: this.precioPorParticipacion,
         importeTotal: this.importeTotal,
-        clienteEmail: this.clienteEncontrado?.email,
+        clienteEmail: buyerEmail || this.clienteEncontrado?.email,
+        codigoVinculacion: res.link_code ?? null,
+        pendienteRegistro: this.ventaPendienteRegistro,
+        esDigital: true,
+        setLabel: this.getSetLabelParaHistorial(),
+        set_number: this.setSeleccionado?.set_number ?? null,
       }
     });
     localStorage.setItem('historial', JSON.stringify(historial));
@@ -620,6 +719,8 @@ export class VentaPage implements OnInit {
 
   cerrarModalExito() {
     this.mostrarModalExito = false;
+    this.ultimoCodigoVinculacion = null;
+    this.ultimaVentaSinEmail = false;
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';

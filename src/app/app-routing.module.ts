@@ -41,7 +41,8 @@ const routes: Routes = [
   },
   {
     path: 'notificaciones',
-    loadChildren: () => import('./notificaciones/notificaciones.module').then( m => m.NotificacionesPageModule)
+    redirectTo: '/tabs/notificaciones',
+    pathMatch: 'full'
   },
   {
     path: 'notificacion-detalle',
