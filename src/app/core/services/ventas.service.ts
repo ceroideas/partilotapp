@@ -3,6 +3,20 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface BuyerNotifyConfigResponse {
+  success: boolean;
+  historial?: any[];
+  sms_enabled?: boolean;
+  /** Siempre false: ya no se usa Twilio WhatsApp. */
+  whatsapp_enabled?: boolean;
+  buyer_notify_channel?: 'sms' | 'manual';
+  notify_auto_enabled?: boolean;
+  buyer_sms_max_resends?: number;
+  buyer_sms_sent_count?: number;
+  buyer_sms_can_send?: boolean;
+  buyer_sms_sends_remaining?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -252,8 +266,49 @@ export class VentasService {
   /**
    * Obtener historial de ventas del vendedor autenticado desde la API Partilot.
    */
-  getHistorial(): Observable<{ success: boolean; historial: any[] }> {
-    return this.http.get<{ success: boolean; historial: any[] }>(`${this.apiUrl}/sales/me`);
+  getHistorial(): Observable<BuyerNotifyConfigResponse> {
+    return this.http.get<BuyerNotifyConfigResponse>(`${this.apiUrl}/sales/me`);
+  }
+
+  /**
+   * SMS o WhatsApp al comprador (prioridad SMS en servidor; código + enlace).
+   */
+  sendPendingDigitalNotify(
+    pendingId: number,
+    phone: string
+  ): Observable<{
+    success: boolean;
+    message: string;
+    channel?: string;
+    message_sid?: string;
+    buyer_sms_sent_count?: number;
+    buyer_sms_sends_remaining?: number;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      message: string;
+      channel?: string;
+      message_sid?: string;
+      buyer_sms_sent_count?: number;
+      buyer_sms_sends_remaining?: number;
+    }>(
+      `${this.apiUrl}/sales/digital/pending/${pendingId}/notify`,
+      { phone }
+    );
+  }
+
+  /** @deprecated Usar sendPendingDigitalNotify */
+  sendPendingDigitalWhatsApp(pendingId: number, phone: string) {
+    return this.sendPendingDigitalNotify(pendingId, phone);
+  }
+
+  getBuyerNotifyConfig(): Observable<BuyerNotifyConfigResponse> {
+    return this.http.get<BuyerNotifyConfigResponse>(`${this.apiUrl}/sales/notify/config`);
+  }
+
+  /** @deprecated Usar getBuyerNotifyConfig */
+  getWhatsAppConfig(): Observable<BuyerNotifyConfigResponse> {
+    return this.getBuyerNotifyConfig();
   }
 
   /**

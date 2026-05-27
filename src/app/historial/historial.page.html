@@ -80,31 +80,34 @@
         *ngFor="let item of historialParaLista; let i = index"
         class="vendedor-historial-item-wrapper">
         <div class="vendedor-historial-item">
-          <div class="vendedor-item-icon" [style.background-color]="getColorTipo(item.tipo) + 'E6'">
-            <ion-icon 
-              [name]="getIconoTipo(item.tipo)"
-              class="vendedor-icon"
-              [style.color]="rolActual === 'vendedor' ? 'white' : getColorTipo(item.tipo)">
-            </ion-icon>
-          </div>
-          <div class="vendedor-item-main">
-            <div class="vendedor-item-title-row">
-              <div class="vendedor-item-title">{{ getTituloTipo(item.tipo, item) }}</div>
-              <div class="vendedor-item-right">
-                <div class="vendedor-item-date">
-                  <ion-icon name="calendar-outline" class="vendedor-cal-icon"></ion-icon>
-                  <span>{{ formatearFechayHora(item.fecha) }}</span>
-                </div>
-                <div 
-                  class="vendedor-item-arrow" 
-                  [class.expanded]="estaExpandido(item)"
-                  (click)="toggleDetalleVenta(item, $event)">
-                  <ion-icon [name]="estaExpandido(item) ? 'chevron-down-outline' : 'chevron-forward-outline'"></ion-icon>
+          <div class="vendedor-historial-item-body">
+            <div class="vendedor-item-icon" [style.background-color]="getColorTipo(item.tipo) + 'E6'">
+              <ion-icon 
+                [name]="getIconoTipo(item.tipo)"
+                class="vendedor-icon"
+                [style.color]="rolActual === 'vendedor' ? 'white' : getColorTipo(item.tipo)">
+              </ion-icon>
+            </div>
+            <div class="vendedor-item-main">
+              <div class="vendedor-item-title-row">
+                <div class="vendedor-item-title">{{ getTituloTipo(item.tipo, item) }}</div>
+                <div class="vendedor-item-right">
+                  <div class="vendedor-item-date">
+                    <ion-icon name="calendar-outline" class="vendedor-cal-icon"></ion-icon>
+                    <span>{{ formatearFechayHora(item.fecha) }}</span>
+                  </div>
+                  <div 
+                    class="vendedor-item-arrow" 
+                    [class.expanded]="estaExpandido(item)"
+                    (click)="toggleDetalleVenta(item, $event)">
+                    <ion-icon [name]="estaExpandido(item) ? 'chevron-down-outline' : 'chevron-forward-outline'"></ion-icon>
+                  </div>
                 </div>
               </div>
+              <div class="vendedor-item-subtitle vendedor-item-subtitle--scroll-">{{ getDescripcion(item) }}</div>
             </div>
-            <div class="vendedor-item-subtitle vendedor-item-subtitle--scroll-">{{ getDescripcion(item) }}</div>
           </div>
+          <span *ngIf="esVentaDigitalPendiente(item)" class="historial-etiqueta-pendiente">Pendiente</span>
         </div>
         
         <!-- Detalle expandible: Venta / venta digital (vendedor) -->
@@ -127,7 +130,7 @@
               <div class="vendedor-forma-pago-block">
                 <span class="vendedor-label">Forma de Pago</span>
                 <ion-button fill="outline" size="small" class="vendedor-btn-forma-pago">
-                  {{ getFormaPagoTexto(item.formaPago || 'efectivo') }}
+                  {{ getFormaPagoTexto(item.formaPago || 'efectivo') }} <br> {{item.id}}
                 </ion-button>
               </div>
             </div>
@@ -140,19 +143,15 @@
                 <span class="vendedor-detail-value">{{ getSetLabel(item) }}</span>
               </div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialFechaSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.participacion.donativo"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ item.participacion.donativo | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row vendedor-detail-row--long" *ngIf="esVentaDigitalPendiente(item) && item.participacion.clienteEmail">
                 <span class="vendedor-detail-label">Comprador:</span>
                 <span class="vendedor-detail-value vendedor-detail-value--long">{{ item.participacion.clienteEmail }}</span>
-              </div>
-              <div class="vendedor-detail-row vendedor-detail-row--long" *ngIf="esVentaDigitalPendiente(item) && (item.participacion.codigoVinculacion || item.codigoVinculacion)">
-                <span class="vendedor-detail-label">Código vinculación:</span>
-                <span class="vendedor-detail-value vendedor-detail-value--long codigo-vinculacion-valor">{{ item.participacion.codigoVinculacion || item.codigoVinculacion }}</span>
               </div>
               <div class="vendedor-detail-row" *ngIf="esVentaDigitalPendiente(item)">
                 <span class="vendedor-detail-label">Estado:</span>
@@ -168,11 +167,15 @@
             <ion-button
               expand="block"
               class="btn-whatsapp"
+              [disabled]="enviandoNotificacion"
               (click)="compartirVentaPorWhatsApp(item, $event)">
-              <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
-              Enviar por WhatsApp
+              <ion-icon [name]="buyerNotifyChannel === 'sms' ? 'chatbubble-outline' : 'logo-whatsapp'" slot="start"></ion-icon>
+              {{ enviandoNotificacion ? 'Enviando…' : getSmsButtonLabel(item) }}
             </ion-button>
           </div>
+          <p class="sms-limite-hint" *ngIf="smsLimiteAlcanzado(item)">
+            SMS ya enviado (máximo 1 reenvío utilizado).
+          </p>
           <div class="vendedor-detail-ref-section" *ngIf="!esVentaDigitalPendiente(item)">
             <span class="vendedor-detail-ref-text">N°: {{ item.participacion.numeroParticipacion || '—' }} - N° Referencia: {{ item.participacion.numeroReferencia || '0000000000000000000' }}</span>
           </div>
@@ -208,7 +211,7 @@
                 <span class="vendedor-detail-value">{{ getSetLabel(item) }}</span>
               </div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.entidad || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ (item.participacion || item.participaciones?.[0])?.fechaSorteo || '—' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe por participación:</span><span class="vendedor-detail-value">€{{ ((item.participacion || item.participaciones?.[0])?.importeJugado ?? (item.participacion || item.participaciones?.[0])?.importeTotal) | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="getDonativoVentaDigitalRecibida(item) > 0"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ getDonativoVentaDigitalRecibida(item) | number:'1.2-2' }}</span></div>
@@ -238,9 +241,9 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialFechaSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe Jugado:</span><span class="vendedor-detail-value">€{{ (item.participacion.importeJugado ?? item.participacion.importeTotal) | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.participacion.donativo"><span class="vendedor-detail-label">Donativo:</span><span class="vendedor-detail-value">€{{ item.participacion.donativo | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
@@ -271,9 +274,9 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialFechaSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Importe total:</span><span class="vendedor-detail-value">€{{ item.participacion.importeTotal | number:'1.2-2' }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.emailDestinatario || item.destinatario"><span class="vendedor-detail-label">Enviado a:</span><span class="vendedor-detail-value">{{ item.emailDestinatario || item.destinatario }}</span></div>
             </div>
@@ -300,9 +303,9 @@
             </div>
             <div class="vendedor-detail-info">
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Entidad:</span><span class="vendedor-detail-value">{{ item.participacion.entidad || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.sorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialSorteo(item) }}</span></div>
               <div class="vendedor-detail-row"><span class="vendedor-detail-label">Numero:</span><span class="vendedor-detail-value">{{ item.participacion.numero || '—' }}</span></div>
-              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ item.participacion.fechaSorteo || '—' }}</span></div>
+              <div class="vendedor-detail-row"><span class="vendedor-detail-label">Fecha Sorteo:</span><span class="vendedor-detail-value">{{ getHistorialFechaSorteo(item) }}</span></div>
               <div class="vendedor-detail-row" *ngIf="item.emailRemitente || item.remitente"><span class="vendedor-detail-label">Enviado por:</span><span class="vendedor-detail-value">{{ item.emailRemitente || item.remitente }}</span></div>
             </div>
           </div>

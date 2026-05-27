@@ -305,7 +305,7 @@
         <ion-icon name="mail-outline"></ion-icon>
         <div>
           <h2 class="modal-title">Email del cliente</h2>
-          <p class="modal-subtitle">Introduce el email o genera un código de vinculación</p>
+          <p class="modal-subtitle">Introduce el email del cliente para enviarle las instrucciones</p>
         </div>
       </div>
       <ion-button fill="clear" class="close-button" (click)="cerrarModalEmail()">
@@ -322,7 +322,7 @@
       Continuar
     </ion-button>
     <ion-button class="codigo-solo-button" expand="block" fill="outline" (click)="continuarConSoloCodigo()">
-      Solo generar código
+      Continuar sin email
     </ion-button>
   </div>
 </div>
@@ -411,17 +411,45 @@
     <h2 class="modal-title-exito">Venta registrada con éxito</h2>
     <div class="modal-content-exito">
       <p>Puedes consultar el detalle en el historial de ventas o continuar con una nueva venta.</p>
-      <p *ngIf="ultimoCodigoVinculacion" class="codigo-vinculacion-exito">
-        Código para el comprador: <strong>{{ ultimoCodigoVinculacion }}</strong><br>
-        <span class="codigo-vinculacion-hint" *ngIf="!ultimaVentaSinEmail">Guárdalo por si el email no llega o está mal escrito.</span>
-        <span class="codigo-vinculacion-hint" *ngIf="ultimaVentaSinEmail">El comprador lo usará en la app para vincular la venta.</span>
+      <p *ngIf="ultimaVentaConEmail" class="codigo-vinculacion-exito">
+        Se ha enviado un correo al comprador con las instrucciones para reclamar sus participaciones en Partilot.
       </p>
+      <p *ngIf="ultimaVentaSinEmail && !notificacionEnviada" class="codigo-vinculacion-exito">
+        <ng-container *ngIf="notifyAutoEnabled">
+          Introduce el teléfono del comprador para enviarle el código y el enlace por {{ getNotifyChannelLabel() }} (no se mostrará en la app).
+        </ng-container>
+        <ng-container *ngIf="!notifyAutoEnabled">
+          Introduce el teléfono para abrir WhatsApp manualmente (sin código). Activa DIGITAL_SALE_SMS_ENABLED en el servidor para envío automático por SMS.
+        </ng-container>
+      </p>
+      <p *ngIf="ultimaVentaSinEmail && notificacionEnviada" class="codigo-vinculacion-exito whatsapp-ok">
+        Mensaje enviado al comprador correctamente.
+      </p>
+      <div *ngIf="ultimaVentaSinEmail && !notificacionEnviada" class="whatsapp-exito-block">
+        <ion-item class="input-item whatsapp-exito-input" lines="none">
+          <ion-label position="stacked">Teléfono del comprador</ion-label>
+          <ion-input
+            type="tel"
+            [(ngModel)]="telefonoCompradorWhatsApp"
+            placeholder="34600111222"
+            [disabled]="enviandoNotificacion">
+          </ion-input>
+        </ion-item>
+        <ion-button
+          class="btn-whatsapp-exito"
+          expand="block"
+          [disabled]="enviandoNotificacion || !telefonoCompradorWhatsApp.trim()"
+          (click)="enviarNotificacionComprador()">
+          <ion-icon [name]="buyerNotifyChannel === 'sms' ? 'chatbubble-outline' : 'logo-whatsapp'" slot="start"></ion-icon>
+          {{ getBotonMensajeCompradorLabel() }}
+        </ion-button>
+      </div>
     </div>
     <ion-button 
       class="aceptar-button" 
       expand="block"
       (click)="cerrarModalExito()">
-      Aceptar
+      {{ ultimaVentaSinEmail && !notificacionEnviada ? 'Continuar sin enviar' : 'Aceptar' }}
     </ion-button>
   </div>
 </div>

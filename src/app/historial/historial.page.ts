@@ -22,6 +22,9 @@ export class HistorialPage implements OnInit, OnDestroy {
   loadingHistorial = false;
   errorHistorial: string | null = null;
   itemExpandido: string | number | null = null; // ID del item expandido (string para API: 'd-1', 'r-1')
+  notifyAutoEnabled = false;
+  buyerNotifyChannel: 'sms' | 'manual' = 'manual';
+  enviandoNotificacion = false;
 
   constructor(
     private router: Router,
@@ -108,19 +111,21 @@ export class HistorialPage implements OnInit, OnDestroy {
         next: (res) => {
           this.loadingHistorial = false;
           if (res.success && Array.isArray(res.historial)) {
-            this.historial = this.mergeHistorialVendedor(
-              this.normalizarFormaPagoEnHistorial(res.historial)
-            ).sort((a: any, b: any) =>
-              new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+            this.applyBuyerNotifyConfig(res);
+            // Historial del vendedor solo desde servidor (misma cuenta en cualquier dispositivo).
+            this.historial = this.normalizarFormaPagoEnHistorial(res.historial).sort(
+              (a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
             );
             return;
           }
-          this.cargarHistorialDesdeLocalStorage();
+          this.errorHistorial = 'No se pudo cargar el historial desde el servidor.';
+          this.historial = [];
         },
         error: () => {
           this.loadingHistorial = false;
-          this.errorHistorial = 'No se pudo cargar el historial. Comprueba la conexión.';
-          this.cargarHistorialDesdeLocalStorage();
+          this.errorHistorial =
+            'No se pudo cargar el historial. Comprueba la conexión. El historial de ventas está en el servidor, no en este dispositivo.';
+          this.historial = [];
         }
       });
       return;
@@ -292,7 +297,14 @@ export class HistorialPage implements OnInit, OnDestroy {
   }
 
   esVentaDigitalPendiente(item: any): boolean {
-    return !!(item?.pendienteRegistro || item?.participacion?.pendienteRegistro);
+    if (item?.tipo !== 'venta-digital') {
+      return false;
+    }
+    return !!(
+      item?.pendienteRegistro ||
+      item?.participacion?.pendienteRegistro ||
+      item?.soloCodigo
+    );
   }
 
   /** Etiqueta «Digital» solo en participaciones digitales (venta digital, pool, recibidas). */
@@ -336,7 +348,46 @@ export class HistorialPage implements OnInit, OnDestroy {
     if (!this.esVentaDigitalPendiente(item)) {
       return false;
     }
-    return !!(item.participacion?.codigoVinculacion || item.codigoVinculacion);
+    if (this.notifyAutoEnabled && item.buyer_sms_can_send === false) {
+      return false;
+    }
+    return true;
+  }
+
+  smsLimiteAlcanzado(item: any): boolean {
+    return (
+      this.esVentaDigitalPendiente(item) &&
+      this.notifyAutoEnabled &&
+      item.buyer_sms_can_send === false
+    );
+  }
+
+  getSmsButtonLabel(item: any): string {
+    if (!this.notifyAutoEnabled) {
+      return 'Abrir WhatsApp';
+    }
+    const sent = Number(item?.buyer_sms_sent_count ?? 0);
+    return sent > 0 ? 'Reenviar mensaje' : 'Enviar mensaje';
+  }
+
+  /** Sorteo: API puede enviarlo en participacion o en la raíz del ítem. */
+  getHistorialSorteo(item: any): string {
+    const v =
+      item?.participacion?.sorteo ??
+      item?.sorteo ??
+      item?.participacion?.lottery_name ??
+      item?.lottery_name;
+    const s = v != null ? String(v).trim() : '';
+    return s !== '' && s !== '—' ? s : '—';
+  }
+
+  getHistorialFechaSorteo(item: any): string {
+    const v =
+      item?.participacion?.fechaSorteo ??
+      item?.fechaSorteo ??
+      item?.participacion?.fecha_sorteo;
+    const s = v != null ? String(v).trim() : '';
+    return s !== '' && s !== '—' ? s : '—';
   }
 
   getCantidadParticipacionesVenta(item: any): number {
@@ -357,8 +408,10 @@ export class HistorialPage implements OnInit, OnDestroy {
   private buildMensajeWhatsAppVenta(item: any): string {
     const qty = this.getCantidadParticipacionesVenta(item);
     const entidad = item.participacion?.entidad;
-    const sorteo = item.participacion?.sorteo;
-    const code = item.participacion?.codigoVinculacion || item.codigoVinculacion;
+    const sorteo = this.getHistorialSorteo(item);
+    const email = item.participacion?.clienteEmail;
+    const inviteUrl =
+      item.buyer_registration_url || item.participacion?.buyer_registration_url;
     const participacionesTexto =
       qty === 1 ? '1 participación digital' : `${qty} participaciones digitales`;
 
@@ -369,8 +422,20 @@ export class HistorialPage implements OnInit, OnDestroy {
     if (sorteo && sorteo !== '—') {
       msg += ` (${sorteo})`;
     }
-    msg += `.\n\nEl código para reclamarlas en la app Partilot es: ${code}`;
-    msg += '\n\nEn la app: Cartera → Vincular con código.';
+    msg += '.';
+
+    if (email) {
+      msg +=
+        `\n\nRevisa tu correo ${email}: recibirás las instrucciones para reclamar tus participaciones en la app Partilot.`;
+      msg += '\n\nEn la app: Cartera → Vincular con código.';
+    } else if (inviteUrl) {
+      msg +=
+        `\n\nPara completar el registro y reclamar tus participaciones, abre este enlace:\n${inviteUrl}`;
+    } else {
+      msg +=
+        '\n\nDescarga la app Partilot y sigue las instrucciones que recibirás para vincular tus participaciones.';
+    }
+
     return msg;
   }
 
@@ -400,18 +465,133 @@ export class HistorialPage implements OnInit, OnDestroy {
     }
   }
 
+  private resolvePendingId(item: any): number | null {
+    if (item?.pending_id != null) {
+      const id = Number(item.pending_id);
+      return Number.isFinite(id) && id > 0 ? id : null;
+    }
+    const raw = String(item?.id ?? '');
+    const match = raw.match(/^p-(\d+)$/i);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    return null;
+  }
+
+  private applyBuyerNotifyConfig(res: {
+    notify_auto_enabled?: boolean;
+    buyer_notify_channel?: string;
+    sms_enabled?: boolean;
+    whatsapp_enabled?: boolean;
+  }): void {
+    this.buyerNotifyChannel =
+      res.buyer_notify_channel === 'sms' || res.sms_enabled ? 'sms' : 'manual';
+    this.notifyAutoEnabled =
+      res.notify_auto_enabled ?? this.buyerNotifyChannel === 'sms';
+  }
+
+  getNotifyChannelLabel(): string {
+    return this.buyerNotifyChannel === 'sms' ? 'SMS' : 'WhatsApp';
+  }
+
+  getNotifyAlertHeader(item?: any): string {
+    if (!this.notifyAutoEnabled) {
+      return 'Enviar por WhatsApp';
+    }
+    return Number(item?.buyer_sms_sent_count ?? 0) > 0
+      ? 'Reenviar mensaje'
+      : 'Enviar mensaje al comprador';
+  }
+
+  getNotifyAlertMessage(): string {
+    if (this.notifyAutoEnabled) {
+      return 'Introduce el teléfono del comprador (ej. 34600111222). Se enviará por SMS con código y enlace; no se muestra en la app.';
+    }
+    return 'Introduce el teléfono del comprador. Se abrirá WhatsApp (wa.me) manualmente. Activa DIGITAL_SALE_SMS_ENABLED y httpSMS en el servidor para envío automático por SMS.';
+  }
+
+  getNotifyAlertButtonText(item?: any): string {
+    if (!this.notifyAutoEnabled) {
+      return 'Abrir WhatsApp';
+    }
+    return Number(item?.buyer_sms_sent_count ?? 0) > 0 ? 'Reenviar mensaje' : 'Enviar mensaje';
+  }
+
+  private actualizarContadorSmsTrasEnvio(
+    item: any,
+    res: { buyer_sms_sent_count?: number; buyer_sms_sends_remaining?: number }
+  ): void {
+    if (!item || res.buyer_sms_sent_count == null) {
+      return;
+    }
+    item.buyer_sms_sent_count = res.buyer_sms_sent_count;
+    item.buyer_sms_sends_remaining = res.buyer_sms_sends_remaining ?? 0;
+    item.buyer_sms_can_send = (res.buyer_sms_sends_remaining ?? 0) > 0;
+  }
+
+  private async enviarNotificacionTwilio(
+    pendingId: number,
+    telefonoRaw: string,
+    item?: any
+  ): Promise<void> {
+    const telefono = telefonoRaw.trim();
+    if (!telefono) {
+      await this.mostrarAlerta('Teléfono no válido', 'Introduce el teléfono del comprador.');
+      return;
+    }
+
+    this.enviandoNotificacion = true;
+    this.ventasService.sendPendingDigitalNotify(pendingId, telefono).subscribe({
+      next: async (res) => {
+        this.enviandoNotificacion = false;
+        if (res.success) {
+          const canal = 'SMS';
+          this.actualizarContadorSmsTrasEnvio(item, res);
+          const restantes = res.buyer_sms_sends_remaining ?? 0;
+          const extra =
+            restantes > 0
+              ? ` Puedes reenviar ${restantes} vez más desde el historial.`
+              : ' No quedan reenvíos disponibles para esta venta.';
+          await this.mostrarAlerta(
+            `${canal} enviado`,
+            (res.message || `El comprador recibirá el código y el enlace por ${canal}.`) + extra
+          );
+          return;
+        }
+        await this.mostrarAlerta('Error', res.message || 'No se pudo enviar el mensaje.');
+      },
+      error: async (err) => {
+        this.enviandoNotificacion = false;
+        const msg = err?.error?.message || 'Error de conexión al enviar el mensaje.';
+        await this.mostrarAlerta('Error', msg);
+      },
+    });
+  }
+
   async compartirVentaPorWhatsApp(item: any, event?: Event): Promise<void> {
     if (event) {
       event.stopPropagation();
     }
-    if (!this.puedeEnviarWhatsApp(item)) {
+    if (this.smsLimiteAlcanzado(item)) {
+      await this.mostrarAlerta(
+        'SMS no disponible',
+        'Solo se permite 1 reenvío por venta. El SMS ya se ha enviado el máximo de veces.'
+      );
+      return;
+    }
+    if (!this.puedeEnviarWhatsApp(item) || this.enviandoNotificacion) {
+      return;
+    }
+
+    const pendingId = this.resolvePendingId(item);
+    if (!pendingId) {
+      await this.mostrarAlerta('Error', 'No se puede enviar: venta pendiente no identificada.');
       return;
     }
 
     const alert = await this.alertController.create({
-      header: 'Enviar por WhatsApp',
-      message:
-        'Introduce el teléfono del comprador con prefijo internacional (ej. 34600111222).',
+      header: this.getNotifyAlertHeader(item),
+      message: this.getNotifyAlertMessage(),
       inputs: [
         {
           name: 'telefono',
@@ -422,17 +602,22 @@ export class HistorialPage implements OnInit, OnDestroy {
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         {
-          text: 'Abrir WhatsApp',
+          text: this.getNotifyAlertButtonText(item),
           handler: (data) => {
-            const telefono = this.normalizarTelefonoWhatsApp(data?.telefono ?? '');
-            if (!telefono) {
+            const telefono = data?.telefono ?? '';
+            if (this.notifyAutoEnabled) {
+              void this.enviarNotificacionTwilio(pendingId, telefono, item);
+              return true;
+            }
+            const normalized = this.normalizarTelefonoWhatsApp(telefono);
+            if (!normalized) {
               void this.mostrarAlerta(
                 'Teléfono no válido',
                 'Introduce un número con prefijo internacional (ej. 34 para España).'
               );
               return false;
             }
-            this.abrirWhatsApp(telefono, this.buildMensajeWhatsAppVenta(item));
+            this.abrirWhatsApp(normalized, this.buildMensajeWhatsAppVenta(item));
             return true;
           },
         },
@@ -509,47 +694,11 @@ export class HistorialPage implements OnInit, OnDestroy {
     const entidad = item.participacion?.entidad || item.entidad;
     if (item.tipo === 'venta-digital' && this.esVentaDigitalPendiente(item)) {
       const email = item.participacion?.clienteEmail;
-      const code = item.participacion?.codigoVinculacion || item.codigoVinculacion;
       const base = entidad ? `Venta digital ${entidad}` : 'Venta digital';
-      if (code) {
-        return email ? `${base} · ${email} · Cód. ${code}` : `${base} · Cód. ${code}`;
-      }
       return email ? `${base} · ${email}` : `${base} · Pendiente de registro`;
     }
     if (entidad) return `Participación ${entidad}`;
     return 'Participación';
-  }
-
-  /** Fusiona API con entradas locales de ventas digitales pendientes aún no reflejadas en servidor. */
-  private mergeHistorialVendedor(apiItems: any[]): any[] {
-    let local: any[] = [];
-    try {
-      local = JSON.parse(localStorage.getItem('historial') || '[]');
-    } catch {
-      local = [];
-    }
-    const pendingApiIds = new Set(
-      apiItems.filter((i) => i.pending_id != null).map((i) => i.pending_id)
-    );
-    const merged = [...apiItems];
-    for (const item of local) {
-      if (item.tipo !== 'venta-digital' || !item.participacion?.pendienteRegistro) {
-        continue;
-      }
-      if (item.pending_id != null && pendingApiIds.has(item.pending_id)) {
-        continue;
-      }
-      const dup = apiItems.some(
-        (a) =>
-          a.tipo === 'venta-digital' &&
-          a.participacion?.clienteEmail === item.participacion?.clienteEmail &&
-          Math.abs(new Date(a.fecha).getTime() - new Date(item.fecha).getTime()) < 120000
-      );
-      if (!dup) {
-        merged.push(item);
-      }
-    }
-    return merged;
   }
 
   /** Fecha y hora para la cabecera del listado: "02/09/25 - 16:45h" */
@@ -565,10 +714,26 @@ export class HistorialPage implements OnInit, OnDestroy {
 
   /** Asegura que cada item tenga formaPago (la API puede devolver payment_method) */
   private normalizarFormaPagoEnHistorial(historial: any[]): any[] {
-    return historial.map(item => ({
-      ...item,
-      formaPago: item.formaPago ?? item.payment_method ?? null
-    }));
+    return historial.map(item => {
+      const sanitized = { ...item };
+      delete sanitized.codigoVinculacion;
+      if (sanitized.participacion) {
+        sanitized.participacion = { ...sanitized.participacion };
+        delete sanitized.participacion.codigoVinculacion;
+        if (!sanitized.participacion.sorteo && sanitized.sorteo) {
+          sanitized.participacion.sorteo = sanitized.sorteo;
+        }
+        if (!sanitized.participacion.fechaSorteo && sanitized.fechaSorteo) {
+          sanitized.participacion.fechaSorteo = sanitized.fechaSorteo;
+        }
+      }
+      return {
+        ...sanitized,
+        formaPago: sanitized.formaPago ?? sanitized.payment_method ?? null,
+        sorteo: sanitized.sorteo ?? sanitized.participacion?.sorteo ?? null,
+        fechaSorteo: sanitized.fechaSorteo ?? sanitized.participacion?.fechaSorteo ?? null,
+      };
+    });
   }
 
   getFormaPagoTexto(forma: string | null | undefined): string {

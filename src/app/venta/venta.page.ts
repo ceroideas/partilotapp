@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { VentasService } from '../core/services/ventas.service';
 import { AuthService } from '../core/services/auth.service';
 import { AlertController } from '@ionic/angular';
+import { Capacitor } from '@capacitor/core';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -54,7 +55,15 @@ export class VentaPage implements OnInit {
   
   // Modal de éxito
   mostrarModalExito: boolean = false;
-  ultimoCodigoVinculacion: string | null = null;
+  ultimaVentaConEmail = false;
+  ultimaVentaSinEmail = false;
+  ultimaVentaPendingId: number | null = null;
+  ultimaVentaRegistrationUrl: string | null = null;
+  telefonoCompradorWhatsApp = '';
+  notifyAutoEnabled = false;
+  buyerNotifyChannel: 'sms' | 'manual' = 'manual';
+  enviandoNotificacion = false;
+  notificacionEnviada = false;
 
   // Modal email (para venta digital)
   mostrarModalEmail: boolean = false;
@@ -62,9 +71,8 @@ export class VentaPage implements OnInit {
   clienteEncontrado: { id: number; email: string } | null = null;
   /** Venta digital a email no registrado: cobro ahora, registro por correo después. */
   ventaPendienteRegistro = false;
-  /** Venta digital pendiente sin email: solo código de vinculación. */
+  /** Venta digital pendiente sin email del comprador. */
   ventaSoloCodigo = false;
-  ultimaVentaSinEmail = false;
 
   loading = false;
 
@@ -86,6 +94,9 @@ export class VentaPage implements OnInit {
   /** Carga inicial y al volver a la vista (cambio de rol/tab): refresca datos para no mostrar caché vieja. */
   ionViewWillEnter() {
     this.isVendedor = this.authService.isSeller();
+    if (this.isVendedor) {
+      this.loadBuyerNotifyConfig();
+    }
     if (!this.isVendedor) return;
     this.loading = false;
     this.entities = [];
@@ -562,9 +573,14 @@ export class VentaPage implements OnInit {
           this.loading = false;
           if (res.success) {
             const soloCodigo = this.ventaSoloCodigo;
-            this.guardarVentaDigitalEnHistorial(res, soloCodigo ? undefined : buyerEmail);
-            this.ultimoCodigoVinculacion = res.link_code ?? null;
+            this.ultimaVentaConEmail = !soloCodigo && !!buyerEmail;
             this.ultimaVentaSinEmail = soloCodigo;
+            this.ultimaVentaPendingId = soloCodigo ? (res.pending_id ?? null) : null;
+            this.ultimaVentaRegistrationUrl = soloCodigo
+              ? (res.buyer_registration_url ?? null)
+              : null;
+            this.telefonoCompradorWhatsApp = '';
+            this.notificacionEnviada = false;
             this.ventasService.notifyVentasChanged();
             this.cerrarModalResumen();
             this.mostrarModalExito = true;
@@ -613,7 +629,6 @@ export class VentaPage implements OnInit {
       next: async (res: any) => {
         this.loading = false;
         if (res.success) {
-          this.guardarVentaEnHistorial(res, desde, hasta);
           this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
@@ -658,15 +673,15 @@ export class VentaPage implements OnInit {
       fecha: new Date().toISOString(),
       formaPago: this.formaPago === 'omitir' ? null : this.formaPago,
       descripcion: this.ventaSoloCodigo
-        ? `Venta digital ${entidad} · Solo código`
+        ? `Venta digital ${entidad} · Sin email`
         : this.ventaPendienteRegistro
           ? `Venta digital ${entidad} · Pendiente de registro`
           : `Venta digital ${entidad}`,
-      pendienteRegistro: this.ventaPendienteRegistro,
+      pendienteRegistro: this.ventaPendienteRegistro || this.ventaSoloCodigo,
       soloCodigo: this.ventaSoloCodigo,
       quantity: this.numeroParticipaciones,
       valid_until: res.valid_until ?? null,
-      codigoVinculacion: res.link_code ?? null,
+      buyer_registration_url: res.buyer_registration_url ?? null,
       setLabel: this.getSetLabelParaHistorial(),
       participacion: {
         entidad,
@@ -676,11 +691,11 @@ export class VentaPage implements OnInit {
         importeJugado: this.precioPorParticipacion,
         importeTotal: this.importeTotal,
         clienteEmail: buyerEmail || this.clienteEncontrado?.email,
-        codigoVinculacion: res.link_code ?? null,
-        pendienteRegistro: this.ventaPendienteRegistro,
+        pendienteRegistro: this.ventaPendienteRegistro || this.ventaSoloCodigo,
         esDigital: true,
         setLabel: this.getSetLabelParaHistorial(),
         set_number: this.setSeleccionado?.set_number ?? null,
+        buyer_registration_url: res.buyer_registration_url ?? null,
       }
     });
     localStorage.setItem('historial', JSON.stringify(historial));
@@ -717,10 +732,140 @@ export class VentaPage implements OnInit {
     localStorage.setItem('historial', JSON.stringify(historial));
   }
 
+  private loadBuyerNotifyConfig(): void {
+    this.ventasService.getBuyerNotifyConfig().subscribe({
+      next: (res) => {
+        this.buyerNotifyChannel =
+          res.buyer_notify_channel === 'sms' || res.sms_enabled ? 'sms' : 'manual';
+        this.notifyAutoEnabled = !!res.notify_auto_enabled || this.buyerNotifyChannel === 'sms';
+      },
+      error: () => {
+        this.notifyAutoEnabled = false;
+        this.buyerNotifyChannel = 'manual';
+      },
+    });
+  }
+
+  getNotifyChannelLabel(): string {
+    return this.buyerNotifyChannel === 'sms' ? 'SMS' : 'WhatsApp';
+  }
+
+  private normalizarTelefonoWhatsApp(raw: string): string | null {
+    let digits = (raw || '').replace(/\D/g, '');
+    if (!digits) {
+      return null;
+    }
+    if (digits.startsWith('00')) {
+      digits = digits.slice(2);
+    }
+    if (digits.length === 9 && /^[6789]/.test(digits)) {
+      digits = `34${digits}`;
+    }
+    if (digits.length < 8 || digits.length > 15) {
+      return null;
+    }
+    return digits;
+  }
+
+  private buildMensajeWhatsAppSinCodigo(): string {
+    const qty = this.numeroParticipaciones;
+    const entidad = this.selectedEntity?.name || '—';
+    const sorteo =
+      this.selectedLottery?.name || this.selectedLottery?.lottery_type || '—';
+    const participacionesTexto =
+      qty === 1 ? '1 participación digital' : `${qty} participaciones digitales`;
+    let msg = `Hola. Te he vendido ${participacionesTexto} de ${entidad} (${sorteo}).`;
+    if (this.ultimaVentaRegistrationUrl) {
+      msg += `\n\nPara completar el registro y reclamar tus participaciones, abre este enlace:\n${this.ultimaVentaRegistrationUrl}`;
+    } else {
+      msg +=
+        '\n\nDescarga la app Partilot y sigue las instrucciones para vincular tus participaciones.';
+    }
+    return msg;
+  }
+
+  private abrirWhatsAppManual(telefono: string, mensaje: string): void {
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+    if (Capacitor.isNativePlatform()) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank');
+    }
+  }
+
+  getBotonMensajeCompradorLabel(): string {
+    if (this.enviandoNotificacion) {
+      return 'Enviando…';
+    }
+    if (!this.notifyAutoEnabled) {
+      return 'Abrir WhatsApp';
+    }
+    return this.notificacionEnviada ? 'Reenviar mensaje' : 'Enviar mensaje';
+  }
+
+  async enviarNotificacionComprador(): Promise<void> {
+    if (!this.ultimaVentaSinEmail || !this.ultimaVentaPendingId || this.enviandoNotificacion) {
+      return;
+    }
+
+    const telefonoRaw = this.telefonoCompradorWhatsApp.trim();
+    if (!telefonoRaw) {
+      await this.mostrarAlerta('Atención', 'Introduce el teléfono del comprador.');
+      return;
+    }
+
+    if (!this.notifyAutoEnabled) {
+      const normalized = this.normalizarTelefonoWhatsApp(telefonoRaw);
+      if (!normalized) {
+        await this.mostrarAlerta(
+          'Teléfono no válido',
+          'Introduce un número con prefijo internacional (ej. 34 para España).'
+        );
+        return;
+      }
+      this.abrirWhatsAppManual(normalized, this.buildMensajeWhatsAppSinCodigo());
+      return;
+    }
+
+    this.enviandoNotificacion = true;
+    this.ventasService
+      .sendPendingDigitalNotify(this.ultimaVentaPendingId, telefonoRaw)
+      .subscribe({
+        next: async (res) => {
+          this.enviandoNotificacion = false;
+          if (res.success) {
+            this.notificacionEnviada = true;
+            const canal = 'SMS';
+            const restantes = res.buyer_sms_sends_remaining ?? 0;
+            const extra =
+              restantes > 0
+                ? ` Puedes reenviar ${restantes} vez más desde el historial.`
+                : ' No quedan más reenvíos por SMS para esta venta.';
+            await this.mostrarAlerta(
+              `${canal} enviado`,
+              (res.message || `El comprador recibirá el código y el enlace por ${canal}.`) + extra
+            );
+            return;
+          }
+          await this.mostrarAlerta('Error', res.message || 'No se pudo enviar el mensaje.');
+        },
+        error: async (err) => {
+          this.enviandoNotificacion = false;
+          const msg = err?.error?.message || 'Error de conexión al enviar el mensaje.';
+          await this.mostrarAlerta('Error', msg);
+        },
+      });
+  }
+
   cerrarModalExito() {
     this.mostrarModalExito = false;
-    this.ultimoCodigoVinculacion = null;
+    this.ultimaVentaConEmail = false;
     this.ultimaVentaSinEmail = false;
+    this.ultimaVentaPendingId = null;
+    this.ultimaVentaRegistrationUrl = null;
+    this.telefonoCompradorWhatsApp = '';
+    this.notificacionEnviada = false;
+    this.enviandoNotificacion = false;
     this.participacionUnidad = '';
     this.rangoDesde = '';
     this.rangoHasta = '';

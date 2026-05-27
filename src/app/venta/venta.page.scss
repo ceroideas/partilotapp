@@ -827,6 +827,33 @@
     }
   }
   
+  .whatsapp-ok {
+    color: #198754;
+    font-weight: 500;
+  }
+
+  .whatsapp-exito-block {
+    margin-top: 16px;
+    text-align: left;
+
+    .whatsapp-exito-input {
+      --background: #f8f9fa;
+      --border-radius: 12px;
+      margin-bottom: 12px;
+    }
+  }
+
+  .btn-whatsapp-exito {
+    --background: #25d366;
+    --color: #ffffff;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
   .aceptar-button {
     --background: #F49200;
     --color: #ffffff;
