@@ -417,6 +417,17 @@
     }
   }
   
+  .disponibilidad-fisica {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 8px 4px 16px;
+    line-height: 1.4;
+
+    strong {
+      color: #212529;
+    }
+  }
+
   .vender-button {
     --background: #212529;
     --color: #ffffff;

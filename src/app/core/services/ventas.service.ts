@@ -64,11 +64,16 @@ export class VentasService {
   }
 
   /**
-   * Total de participaciones digitales disponibles (pool entidad + sorteo). Las digitales no se asignan.
+   * Participaciones digitales disponibles: por set (asignadas al vendedor) o pool entidad+sorteo.
    */
-  getTotalDigitalAvailable(entityId: number, lotteryId: number): Observable<any> {
+  getTotalDigitalAvailable(
+    params: { set_id: number } | { entity_id: number; lottery_id: number }
+  ): Observable<any> {
+    if ('set_id' in params) {
+      return this.http.get(`${this.apiUrl}/sellers/me/digital-available?set_id=${params.set_id}`);
+    }
     return this.http.get(
-      `${this.apiUrl}/sellers/me/digital-available?entity_id=${entityId}&lottery_id=${lotteryId}`
+      `${this.apiUrl}/sellers/me/digital-available?entity_id=${params.entity_id}&lottery_id=${params.lottery_id}`
     );
   }
 

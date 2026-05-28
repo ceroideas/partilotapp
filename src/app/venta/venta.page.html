@@ -180,28 +180,25 @@
 
       <!-- Participaciones Físicas -->
       <div class="participaciones-fisicas" *ngIf="tipoParticipacion === 'fisicas'">
-        <!-- Selector de Reserva/Set -->
-        <div class="selector-section" *ngIf="reserves.length > 0 || sets.length > 0">
-          <ion-label *ngIf="reserves.length > 1" class="input-label">Sorteo / Reserva</ion-label>
-          <ion-item *ngIf="reserves.length > 1" class="input-item">
-            <ion-select [(ngModel)]="reserveSeleccionado" (ionChange)="onReserveChange()" name="reserve" placeholder="Selecciona">
-              <ion-select-option *ngFor="let r of reserves" [value]="r">{{ r.lottery?.name || 'Reserva' }}</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <!-- Selector de Set - siempre mostrar si hay sets -->
-          <ion-label *ngIf="sets.length > 0" class="input-label small-range-label">Set</ion-label>
-          <ion-item *ngIf="sets.length > 0" class="input-item">
+        <div class="selector-section" *ngIf="sets.length > 0">
+          <ion-label class="input-label small-range-label">Set</ion-label>
+          <ion-item class="input-item">
             <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="set" placeholder="Selecciona set">
-              <ion-select-option *ngFor="let s of sets" [value]="s">{{ s.set_name || 'Set' }}</ion-select-option>
+              <ion-select-option *ngFor="let s of sets" [value]="s">
+                {{ getSetOptionLabel(s, 'fisicas') }}
+              </ion-select-option>
             </ion-select>
           </ion-item>
-          <!-- Mensaje si no hay sets -->
-          <div *ngIf="sets.length === 0 && reserves.length > 0" class="no-sets-message">
-            <ion-label class="input-label">No hay sets disponibles para esta reserva</ion-label>
-          </div>
+          <p class="disponibilidad-fisica" *ngIf="setSeleccionado">
+            Disponibles para vender: <strong>{{ disponibilidad }}</strong>
+            <span *ngIf="disponibilidad === 0"> — pide al gestor que te asigne participaciones en este set.</span>
+          </p>
+        </div>
+        <div *ngIf="sets.length === 0 && selectedLottery" class="no-sets-message">
+          <ion-label class="input-label">No hay sets físicos disponibles para este sorteo</ion-label>
         </div>
 
-        <div class="participacion-unidad">
+        <div class="participacion-unidad" *ngIf="setSeleccionado && disponibilidad > 0">
           <div class="unidad-row">
             <div class="group-heading group-heading-inline">
               <div class="group-heading-main">Participación</div>
@@ -216,7 +213,7 @@
           </div>
         </div>
 
-        <div class="participaciones-rango">
+        <div class="participaciones-rango" *ngIf="setSeleccionado && disponibilidad > 0">
           <div class="group-heading">
             <div class="group-heading-main">Participaciones</div>
             <div class="group-heading-sub">Por Rango</div>
@@ -244,15 +241,25 @@
         </div>
       </div>
 
-      <!-- Participaciones Digitales (pool entidad + sorteo; no se asigna set) -->
+      <!-- Participaciones Digitales (por set; sorteo ya elegido arriba) -->
       <div class="participaciones-digitales" *ngIf="tipoParticipacion === 'digitales'">
-        <!-- <div class="digital-pool-info" *ngIf="selectedEntity && selectedLottery">
-          <p class="disponibles-label">Disponibles (total entidad + sorteo): <strong>{{ totalDigitalAvailable }}</strong></p>
-        </div> -->
-        <div class="no-sets-message" *ngIf="totalDigitalAvailable === 0 && selectedLottery" style="text-align: center; margin-bottom: 12px; font-style: italic; color: #6c757d;">
-          <ion-label class="input-label">No hay participaciones digitales disponibles para este sorteo</ion-label>
+        <div class="selector-section" *ngIf="sets.length > 0">
+          <ion-label class="input-label small-range-label">Set</ion-label>
+          <ion-item class="input-item">
+            <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="setDigital" placeholder="Selecciona set">
+              <ion-select-option *ngFor="let s of sets" [value]="s">
+                {{ getSetOptionLabel(s, 'digitales') }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
         </div>
-        <div class="numero-participaciones-section" *ngIf="selectedEntity && selectedLottery">
+        <div *ngIf="sets.length === 0 && selectedLottery" class="no-sets-message">
+          <ion-label class="input-label">No hay sets digitales con diseño para este sorteo</ion-label>
+        </div>
+        <div class="no-sets-message" *ngIf="setSeleccionado && totalDigitalAvailable === 0" style="text-align: center; margin-bottom: 12px; font-style: italic; color: #6c757d;">
+          <ion-label class="input-label">No quedan participaciones disponibles en este set</ion-label>
+        </div>
+        <div class="numero-participaciones-section" *ngIf="setSeleccionado && totalDigitalAvailable > 0">
           <h3 class="counter-title">Número de Participaciones</h3>
           <div class="counter-controls">
             <ion-button 

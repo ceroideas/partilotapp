@@ -72,7 +72,20 @@ export class VentaManualPage implements OnInit {
 
   onReserveChange() {
     if (this.reserveSeleccionado?.sets) {
-      this.sets = this.reserveSeleccionado.sets;
+      const all = this.reserveSeleccionado.sets as any[];
+      if (this.tipoParticipacion === 'digitales') {
+        this.sets = all.filter((s) => {
+          const dig = Number(s.digital_participations ?? 0);
+          const phys = Number(s.physical_participations ?? 0);
+          return dig > 0 && phys === 0;
+        });
+      } else {
+        this.sets = all.filter((s) => {
+          const phys = Number(s.physical_participations ?? 0);
+          const dig = Number(s.digital_participations ?? 0);
+          return phys > 0 && dig === 0;
+        });
+      }
       this.setSeleccionado = this.sets.length === 1 ? this.sets[0] : null;
       this.numeroSorteo = this.reserveSeleccionado?.lottery?.name || '';
       if (this.setSeleccionado) {
@@ -117,6 +130,7 @@ export class VentaManualPage implements OnInit {
     this.rangoDesde = '';
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
+    this.onReserveChange();
     this.actualizarDisponibilidadDigital();
   }
 

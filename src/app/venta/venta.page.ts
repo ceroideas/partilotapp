@@ -41,9 +41,9 @@ export class VentaPage implements OnInit {
   rangoDesde: string = '';
   rangoHasta: string = '';
   
-  // Para participaciones digitales (pool entidad+sorteo; no hay selector de set)
+  // Para participaciones digitales (venta por set; no requiere asignación al vendedor)
   numeroParticipaciones: number = 1;
-  disponibilidad: number = 120;
+  disponibilidad: number = 0;
   totalDigitalAvailable: number = 0;
   precioPorParticipacion: number = 0;
   
@@ -185,9 +185,6 @@ export class VentaPage implements OnInit {
     this.showLotteriesList = false;
     this.showVentaView = true;
     this.loadReservesAndSets();
-    if (this.tipoParticipacion === 'digitales' && this.selectedEntity?.id && lottery?.id) {
-      this.loadTotalDigitalAvailable();
-    }
   }
   
   async loadReservesAndSets() {
@@ -209,8 +206,7 @@ export class VentaPage implements OnInit {
           if (matchingReserves.length > 0) {
             this.reserves = matchingReserves;
             this.reserveSeleccionado = matchingReserves[0];
-            // Combinar todos los sets de todas las reservas coincidentes
-            this.allSets = matchingReserves.flatMap((r: any) => r.sets || []);
+            this.rebuildAllSetsFromMatchingReserves(matchingReserves);
             this.applySetsFilter();
             console.log('Sets encontrados:', this.allSets, 'filtrados:', this.sets);
 
@@ -228,7 +224,7 @@ export class VentaPage implements OnInit {
                 console.log('Reserva encontrada por ID:', reserveById);
                 this.reserveSeleccionado = reserveById;
                 this.reserves = [reserveById];
-                this.allSets = reserveById.sets || [];
+                this.allSets = this.attachReserveToSets(reserveById.sets || [], reserveById);
                 this.applySetsFilter();
                 if (this.sets.length > 0) {
                   console.log('Set seleccionado desde reserve_id:', this.setSeleccionado);
@@ -309,75 +305,244 @@ export class VentaPage implements OnInit {
     this.rangoHasta = '';
     this.numeroParticipaciones = 1;
     this.setSeleccionado = null;
-    this.applySetsFilter();
-    if (this.tipoParticipacion === 'digitales' && this.selectedEntity?.id && this.selectedLottery?.id) {
-      this.loadTotalDigitalAvailable();
-    } else {
-      this.totalDigitalAvailable = 0;
+    if (this.reserves?.length) {
+      this.rebuildAllSetsFromMatchingReserves(this.reserves);
     }
+    this.applySetsFilter();
   }
 
-  loadTotalDigitalAvailable() {
-    if (!this.selectedEntity?.id || !this.selectedLottery?.id) return;
-    this.ventasService.getTotalDigitalAvailable(this.selectedEntity.id, this.selectedLottery.id).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.totalDigitalAvailable = res.total_digital_available ?? 0;
-          if (res.price_per_participation != null) {
-            this.precioPorParticipacion = res.price_per_participation;
-          }
-        } else {
-          this.totalDigitalAvailable = 0;
-        }
-      },
-      error: () => { this.totalDigitalAvailable = 0; }
-    });
-  }
-
-  /** Filtra sets por tipo físico o digital. Digitales: no se muestra set (pool entidad+sorteo); disponibilidad viene de loadTotalDigitalAvailable. */
+  /** Filtra sets por tipo físico o digital y actualiza disponibilidad. */
   applySetsFilter() {
     if (!this.allSets.length) {
       this.sets = [];
-      if (this.tipoParticipacion === 'digitales') {
-        this.setSeleccionado = null;
-      }
+      this.setSeleccionado = null;
+      this.totalDigitalAvailable = 0;
+      this.disponibilidad = 0;
       return;
     }
     if (this.tipoParticipacion === 'fisicas') {
-      this.sets = this.allSets.filter((s: any) => {
+      const physicalSets = this.allSets.filter((s: any) => {
         const phys = Number(s.physical_participations ?? 0);
         const dig = Number(s.digital_participations ?? 0);
         return phys > 0 && dig === 0;
       });
+      const seenIds = new Set<number>();
+      this.sets = physicalSets.filter((s: any) => {
+        const id = Number(s.id);
+        if (!id || seenIds.has(id)) {
+          return false;
+        }
+        seenIds.add(id);
+        return true;
+      });
       if (this.sets.length > 0) {
         this.setSeleccionado = this.sets[0];
-        this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
-        this.disponibilidad = 120;
+        this.actualizarDisponibilidadFisicaDesdeSet();
       } else {
         this.setSeleccionado = null;
         this.disponibilidad = 0;
       }
+      this.totalDigitalAvailable = 0;
     } else {
-      this.sets = [];
-      this.setSeleccionado = null;
-      this.disponibilidad = this.totalDigitalAvailable;
+      const digitalSets = this.allSets.filter((s: any) => {
+        const dig = Number(s.digital_participations ?? 0);
+        const phys = Number(s.physical_participations ?? 0);
+        return dig > 0 && phys === 0;
+      });
+      const seenIds = new Set<number>();
+      this.sets = digitalSets.filter((s: any) => {
+        const id = Number(s.id);
+        if (!id || seenIds.has(id)) {
+          return false;
+        }
+        seenIds.add(id);
+        return true;
+      });
+      if (this.sets.length > 0) {
+        this.setSeleccionado = this.sets[0];
+        this.actualizarDisponibilidadDigitalDesdeSet();
+      } else {
+        this.setSeleccionado = null;
+        this.totalDigitalAvailable = 0;
+        this.disponibilidad = 0;
+      }
     }
   }
 
+  actualizarDisponibilidadFisicaDesdeSet() {
+    if (!this.setSeleccionado) {
+      this.disponibilidad = 0;
+      return;
+    }
+    this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+    const available = Number(this.setSeleccionado.physical_available_to_seller ?? 0);
+    this.disponibilidad = available;
+    this.patchSetAvailability(this.setSeleccionado.id, {
+      physical_available_to_seller: available,
+    });
+  }
+
+  actualizarDisponibilidadDigitalDesdeSet() {
+    if (!this.setSeleccionado) {
+      this.totalDigitalAvailable = 0;
+      this.disponibilidad = 0;
+      return;
+    }
+    this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+    const local = Number(this.setSeleccionado.digital_available_to_seller ?? 0);
+    this.totalDigitalAvailable = local;
+    this.disponibilidad = local;
+    if (this.numeroParticipaciones > this.totalDigitalAvailable && this.totalDigitalAvailable > 0) {
+      this.numeroParticipaciones = this.totalDigitalAvailable;
+    } else if (this.totalDigitalAvailable === 0) {
+      this.numeroParticipaciones = 1;
+    }
+    const setId = this.setSeleccionado.id;
+    this.ventasService.getTotalDigitalAvailable({ set_id: setId }).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.totalDigitalAvailable = res.total_digital_available ?? local;
+          this.disponibilidad = this.totalDigitalAvailable;
+          this.patchSetAvailability(setId, {
+            digital_available_to_seller: this.totalDigitalAvailable,
+          });
+          if (res.price_per_participation != null) {
+            this.precioPorParticipacion = res.price_per_participation;
+          }
+          if (this.numeroParticipaciones > this.totalDigitalAvailable && this.totalDigitalAvailable > 0) {
+            this.numeroParticipaciones = this.totalDigitalAvailable;
+          }
+        }
+      },
+      error: () => {
+        this.totalDigitalAvailable = local;
+        this.disponibilidad = local;
+      },
+    });
+  }
+
+  /** Sincroniza contadores en allSets, sets y setSeleccionado (p. ej. etiqueta del desplegable). */
+  private patchSetAvailability(
+    setId: number,
+    patch: { physical_available_to_seller?: number; digital_available_to_seller?: number }
+  ): void {
+    const apply = (s: any) => {
+      if (Number(s?.id) === Number(setId)) {
+        Object.assign(s, patch);
+      }
+    };
+    this.allSets.forEach(apply);
+    this.sets.forEach(apply);
+    if (this.setSeleccionado && Number(this.setSeleccionado.id) === Number(setId)) {
+      Object.assign(this.setSeleccionado, patch);
+    }
+  }
+
+  private applySetsFilterPreservingSelection(preserveSetId?: number | null): void {
+    const id = preserveSetId ?? this.setSeleccionado?.id;
+    this.applySetsFilter();
+    if (!id) {
+      return;
+    }
+    const found = this.sets.find((s: any) => Number(s.id) === Number(id));
+    if (found) {
+      this.setSeleccionado = found;
+      if (this.tipoParticipacion === 'digitales') {
+        this.actualizarDisponibilidadDigitalDesdeSet();
+      } else {
+        this.actualizarDisponibilidadFisicaDesdeSet();
+      }
+    }
+  }
+
+  /** Recarga reservas/sets desde API tras una venta para actualizar disponibilidades. */
+  private refreshSetsAvailabilityAfterSale(): void {
+    if (!this.selectedLottery?.id || !this.selectedEntity?.id) {
+      return;
+    }
+    const preserveSetId = this.setSeleccionado?.id;
+    this.ventasService.getReserves().subscribe({
+      next: (res: any) => {
+        if (!res?.success || !res.reserves) {
+          return;
+        }
+        const matching = res.reserves.filter((r: any) => {
+          const entityId = r.entity_id || r.entity?.id;
+          const lotteryId = r.lottery_id || r.lottery?.id;
+          return entityId === this.selectedEntity.id && lotteryId === this.selectedLottery.id;
+        });
+        if (matching.length > 0) {
+          this.reserves = matching;
+          this.rebuildAllSetsFromMatchingReserves(matching);
+          this.applySetsFilterPreservingSelection(preserveSetId);
+        }
+      },
+    });
+  }
+
+  /** Todos los sets de las reservas del sorteo actual (digitales: sin filtrar por una sola reserva). */
+  private attachReserveToSets(sets: any[], reserve: any): any[] {
+    if (!reserve) {
+      return sets;
+    }
+    const reserveInfo = {
+      id: reserve.id,
+      reservation_numbers: reserve.reservation_numbers,
+      lottery: reserve.lottery,
+    };
+    return sets.map((set: any) => ({
+      ...set,
+      reserve: set.reserve ?? reserveInfo,
+    }));
+  }
+
+  private rebuildAllSetsFromMatchingReserves(matchingReserves: any[]) {
+    this.allSets = matchingReserves.reduce((acc: any[], r: any) => {
+      return acc.concat(this.attachReserveToSets(r.sets || [], r));
+    }, [] as any[]);
+  }
+
+  /** Números reservados del set (ej. "37428" o "37428 - 37429"). */
+  getReservedNumbersLabel(set: any): string {
+    if (!set?.reserve) {
+      return '';
+    }
+    const nums = set.reserve.reservation_numbers;
+    if (Array.isArray(nums)) {
+      return nums.filter((n) => n != null && String(n).trim() !== '').join(' - ');
+    }
+    return nums != null ? String(nums) : '';
+  }
+
+  getSetOptionLabel(set: any, tipo: 'fisicas' | 'digitales'): string {
+    const name = set?.set_name || 'Set';
+    const reserved = this.getReservedNumbersLabel(set);
+    const disp = tipo === 'fisicas'
+      ? (set?.physical_available_to_seller ?? 0)
+      : (set?.digital_available_to_seller ?? 0);
+    if (reserved) {
+      return `${name} · Nº ${reserved} (${disp} disp.)`;
+    }
+    return `${name} (${disp} disp.)`;
+  }
+
+  /** Obsoleto en UI: el sorteo ya está elegido; los sets vienen de todas las reservas. */
   onReserveChange() {
-    if (this.reserveSeleccionado?.sets) {
-      this.allSets = this.reserveSeleccionado.sets;
+    if (this.reserves?.length) {
+      this.rebuildAllSetsFromMatchingReserves(this.reserves);
       this.applySetsFilter();
-    } else {
-      this.allSets = [];
-      this.sets = [];
-      this.setSeleccionado = null;
     }
   }
 
   onSetChange() {
-    if (this.setSeleccionado) {
-      this.precioPorParticipacion = parseFloat(this.setSeleccionado.played_amount) || 0;
+    if (!this.setSeleccionado) {
+      return;
+    }
+    if (this.tipoParticipacion === 'digitales') {
+      this.numeroParticipaciones = 1;
+      this.actualizarDisponibilidadDigitalDesdeSet();
+    } else {
+      this.actualizarDisponibilidadFisicaDesdeSet();
     }
   }
 
@@ -406,8 +571,8 @@ export class VentaPage implements OnInit {
       const tieneRango = rangoDesdeStr.length > 0 && rangoHastaStr.length > 0;
       return tieneUnidad || tieneRango;
     }
-    // Digitales: entidad + sorteo + cantidad dentro del total disponible (pool; no hay set)
-    return !!this.selectedEntity?.id && !!this.selectedLottery?.id
+  // Digitales: set seleccionado + cantidad dentro de lo asignado al vendedor
+    return !!this.setSeleccionado?.id
       && this.numeroParticipaciones > 0
       && this.numeroParticipaciones <= this.totalDigitalAvailable;
   }
@@ -540,8 +705,15 @@ export class VentaPage implements OnInit {
     }
 
     if (this.tipoParticipacion === 'digitales') {
-      if (!this.selectedEntity?.id || !this.selectedLottery?.id) {
-        await this.mostrarAlerta('Error', 'Datos incompletos. Selecciona entidad y sorteo.');
+      if (!this.setSeleccionado?.id) {
+        await this.mostrarAlerta('Error', 'Selecciona el set digital del que quieres vender.');
+        return;
+      }
+      if (this.totalDigitalAvailable < 1) {
+        await this.mostrarAlerta(
+          'Sin stock',
+          'No hay participaciones digitales disponibles en este set.'
+        );
         return;
       }
       const buyerEmail = (this.clienteEncontrado?.email || this.emailCliente || '').trim().toLowerCase();
@@ -558,8 +730,7 @@ export class VentaPage implements OnInit {
       this.loading = true;
       const paymentMethod = this.formaPago === 'omitir' ? null : this.formaPago;
       const digitalBase = {
-        entity_id: this.selectedEntity.id,
-        lottery_id: this.selectedLottery.id,
+        set_id: this.setSeleccionado.id,
         quantity: this.numeroParticipaciones,
         payment_method: paymentMethod,
       };
@@ -588,7 +759,7 @@ export class VentaPage implements OnInit {
             this.emailCliente = '';
             this.ventaPendienteRegistro = false;
             this.ventaSoloCodigo = false;
-            this.loadTotalDigitalAvailable();
+            this.refreshSetsAvailabilityAfterSale();
           } else {
             await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
           }
@@ -632,6 +803,7 @@ export class VentaPage implements OnInit {
           this.ventasService.notifyVentasChanged();
           this.cerrarModalResumen();
           this.mostrarModalExito = true;
+          this.refreshSetsAvailabilityAfterSale();
         } else {
           await this.mostrarAlerta('Error', res.message || 'No se pudo registrar la venta.');
         }

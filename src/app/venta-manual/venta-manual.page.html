@@ -153,7 +153,17 @@
 
       <!-- Participaciones Digitales -->
       <div class="participaciones-digitales" *ngIf="tipoParticipacion === 'digitales'">
-        <div class="numero-participaciones-section">
+        <div class="selector-section" *ngIf="sets.length > 0">
+          <ion-item class="input-item">
+            <ion-label position="stacked">Set</ion-label>
+            <ion-select [(ngModel)]="setSeleccionado" (ionChange)="onSetChange()" name="setDigital" placeholder="Selecciona set">
+              <ion-select-option *ngFor="let s of sets" [value]="s">
+                {{ s.set_name || 'Set' }} ({{ s.digital_available_to_seller ?? 0 }} disp.)
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+        <div class="numero-participaciones-section" *ngIf="setSeleccionado">
           <h3 class="counter-title">Número de Participaciones</h3>
           <div class="counter-controls">
             <ion-button 

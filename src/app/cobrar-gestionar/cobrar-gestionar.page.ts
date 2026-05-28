@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertModalService } from '../core/services/alert-modal.service';
+import { AuthService } from '../core/services/auth.service';
 import { CarteraService } from '../core/services/cartera.service';
 import { environment } from '../../environments/environment';
 
@@ -48,6 +49,7 @@ export class CobrarGestionarPage implements OnInit {
   constructor(
     private router: Router,
     private alertModal: AlertModalService,
+    private authService: AuthService,
     private carteraService: CarteraService
   ) { }
 
@@ -157,7 +159,7 @@ export class CobrarGestionarPage implements OnInit {
       return;
     }
 
-    this.mostrarModalDatos = true;
+    this.abrirModalDatos();
   }
 
   async continuarDonacion() {
@@ -170,6 +172,43 @@ export class CobrarGestionarPage implements OnInit {
     this.importeDonacion = this.importeTotal * 0.5;
     this.importeCodigo = this.importeTotal * 0.5;
     this.mostrarModalConfigDonacion = true;
+  }
+
+  /** Abre el modal de datos personales precargando nombre, apellidos y NIF del usuario. */
+  private abrirModalDatos(): void {
+    this.cargarDatosPersonalesDesdeUsuario();
+    this.mostrarModalDatos = true;
+    this.authService.refreshToken().subscribe({
+      next: (res) => {
+        if (res.success && res.user) {
+          this.cargarDatosPersonalesDesdeUsuario();
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  /** Rellena campos vacíos con los datos del perfil (name, last_name, nif_cif). */
+  private cargarDatosPersonalesDesdeUsuario(): void {
+    const user = this.authService.getUser();
+    if (!user) {
+      return;
+    }
+
+    if (!this.datosPersonales.nombre?.trim()) {
+      this.datosPersonales.nombre = String(user.name || user.nombre || '').trim();
+    }
+
+    if (!this.datosPersonales.apellidos?.trim()) {
+      const apellidos = [user.last_name, user.last_name2, user.apellido]
+        .filter((v) => v != null && String(v).trim() !== '')
+        .map((v) => String(v).trim());
+      this.datosPersonales.apellidos = apellidos.join(' ').trim();
+    }
+
+    if (!this.datosPersonales.nif?.trim()) {
+      this.datosPersonales.nif = String(user.nif_cif || user.nif || '').trim();
+    }
   }
 
   cerrarModalDatos() {
@@ -400,7 +439,7 @@ export class CobrarGestionarPage implements OnInit {
     
     // Si se dona algo, pedir datos personales (opcionales)
     if (this.importeDonacion > 0) {
-      this.mostrarModalDatos = true;
+      this.abrirModalDatos();
       return;
     }
     
