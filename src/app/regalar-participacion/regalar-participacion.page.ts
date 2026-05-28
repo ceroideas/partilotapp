@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { CarteraService } from '../core/services/cartera.service';
+import { AlertModalService } from '../core/services/alert-modal.service';
 
 @Component({
   selector: 'app-regalar-participacion',
@@ -12,42 +14,41 @@ export class RegalarParticipacionPage implements OnInit {
 
   participaciones: any[] = [];
   participacionSeleccionada: number | null = null;
-  destinatarioNombre: string = '';
-  destinatarioEmail: string = '';
-  mensajePersonal: string = '';
+  destinatarioEmail = '';
+  mensajePersonal = '';
   loading = false;
-  loadingMessage = '';
 
   constructor(
     private alertController: AlertController,
-    private router: Router
+    private router: Router,
+    private carteraService: CarteraService,
+    private alertModal: AlertModalService
   ) { }
 
   ngOnInit() {
     this.cargarParticipaciones();
   }
 
-  cargarParticipaciones() {
-    // Cargar participaciones disponibles para regalar (estado: activa)
-    try {
-      const todasParticipaciones = JSON.parse(localStorage.getItem('participaciones') || '[]');
-      this.participaciones = todasParticipaciones.filter((p: any) => p.estado === 'activa');
-      
-      if (this.participaciones.length === 0) {
-        // Datos de ejemplo para desarrollo
-        this.participaciones = [
-          { id: 1, numero: '12345', fecha: '2024-01-15', numeros: '1, 5, 12, 23, 34', estado: 'activa' },
-          { id: 2, numero: '12346', fecha: '2024-01-16', numeros: '2, 8, 15, 28, 31', estado: 'activa' },
-        ];
-      }
-    } catch (error) {
-      console.error('Error cargando participaciones:', error);
-      this.participaciones = [];
-    }
+  ionViewWillEnter() {
+    this.cargarParticipaciones();
   }
 
-  recargarParticipaciones() {
-    this.cargarParticipaciones();
+  cargarParticipaciones() {
+    this.loading = true;
+    this.carteraService.getParticipations().subscribe({
+      next: (res) => {
+        this.loading = false;
+        this.participaciones = (res.participations || []).filter((p: any) => {
+          const e = p.estado || 'activa';
+          return !['cobrada', 'donada', 'caducada', 'regalada', 'pendiente_regalo'].includes(e)
+            && !p.received_from_email;
+        });
+      },
+      error: () => {
+        this.loading = false;
+        this.participaciones = [];
+      }
+    });
   }
 
   getParticipacion() {
@@ -57,7 +58,6 @@ export class RegalarParticipacionPage implements OnInit {
   puedeRegalar(): boolean {
     return !!(
       this.participacionSeleccionada &&
-      this.destinatarioNombre &&
       this.destinatarioEmail &&
       this.validarEmail(this.destinatarioEmail)
     );
@@ -74,60 +74,45 @@ export class RegalarParticipacionPage implements OnInit {
       return;
     }
 
-    this.loading = true;
-    this.loadingMessage = 'Enviando regalo...';
-
-    try {
-      // TODO: Integrar con servicio para enviar regalo
-      const regalo = {
-        participacionId: this.participacionSeleccionada,
-        destinatarioNombre: this.destinatarioNombre,
-        destinatarioEmail: this.destinatarioEmail,
-        mensajePersonal: this.mensajePersonal,
-        fecha: new Date().toISOString()
-      };
-
-      // Guardar registro del regalo
-      const regalos = JSON.parse(localStorage.getItem('regalos') || '[]');
-      regalos.push(regalo);
-      localStorage.setItem('regalos', JSON.stringify(regalos));
-
-      // Actualizar estado de participación
-      const todasParticipaciones = JSON.parse(localStorage.getItem('participaciones') || '[]');
-      const index = todasParticipaciones.findIndex((p: any) => p.id === this.participacionSeleccionada);
-      if (index !== -1) {
-        todasParticipaciones[index].estado = 'regalada';
-        localStorage.setItem('participaciones', JSON.stringify(todasParticipaciones));
-      }
-
-      this.loading = false;
-
-      const alert = await this.alertController.create({
-        header: '¡Regalo enviado!',
-        message: `La participación ha sido enviada a ${this.destinatarioNombre}`,
-        buttons: [
-          {
-            text: 'OK',
-            handler: () => {
-              this.router.navigate(['/cartera']);
-            }
-          }
-        ]
-      });
-      await alert.present();
-    } catch (error) {
-      this.loading = false;
-      await this.mostrarAlerta('Error', 'No se pudo enviar el regalo. Intenta nuevamente.');
-    }
-  }
-
-  async mostrarAlerta(header: string, message: string) {
+    const email = this.destinatarioEmail.trim();
     const alert = await this.alertController.create({
-      header,
-      message,
-      buttons: ['OK']
+      header: 'Confirmar regalo',
+      message: `¿Enviar la participación a ${email}? Asegúrate de que el correo es correcto: no podrás deshacerlo.`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Regalar',
+          handler: () => {
+            this.enviarRegalo(email);
+          }
+        }
+      ]
     });
     await alert.present();
   }
 
+  private enviarRegalo(email: string) {
+    if (!this.participacionSeleccionada) return;
+    this.loading = true;
+    this.carteraService.gift(this.participacionSeleccionada, email, this.mensajePersonal).subscribe({
+      next: async (res) => {
+        this.loading = false;
+        this.carteraService.notifyParticipacionesChanged();
+        await this.alertModal.show(
+          'Regalo enviado',
+          res.message || `Participación enviada a ${res.gifted_to_email || email}.`
+        );
+        this.router.navigate(['/tabs/tab1']);
+      },
+      error: async (err) => {
+        this.loading = false;
+        await this.mostrarAlerta('Error', err?.error?.message || 'No se pudo enviar el regalo.');
+      }
+    });
+  }
+
+  async mostrarAlerta(header: string, message: string) {
+    const alert = await this.alertController.create({ header, message, buttons: ['OK'] });
+    await alert.present();
+  }
 }

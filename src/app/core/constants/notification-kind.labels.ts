@@ -8,6 +8,7 @@ export const NOTIFICATION_KIND_LABELS: Record<string, string> = {
   push_directo_panel: 'Mensaje directo',
   // API / jobs
   regalo_participacion: 'Regalo',
+  regalo_rechazado: 'Regalo rechazado',
   cobro_registrado: 'Cobro',
   invitacion_vendedor: 'Invitación vendedor',
   asignacion_participaciones: 'Asignación',
@@ -34,6 +35,7 @@ export function normalizeNotificationTipoForUi(kind: string): string {
   const map: Record<string, string> = {
     cobro_registrado: 'cobro',
     regalo_participacion: 'regalo',
+    regalo_rechazado: 'regalo',
     resultados_sorteo: 'sorteo',
   };
   return map[kind] ?? kind;

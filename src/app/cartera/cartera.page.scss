@@ -256,6 +256,11 @@
       background-color: #CCE5FF;
       color: #004085;
     }
+
+    &.pendiente-regalo {
+      background-color: #FFF3CD;
+      color: #856404;
+    }
   }
 
   .status-badge-row {
@@ -345,6 +350,19 @@
     color: #212529;
     font-weight: 500;
   }
+}
+
+.gift-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.modal-regalo-textarea {
+  margin-top: 8px;
+  --background: #f8f9fa;
+  border-radius: 12px;
 }
 
 .regalar-button {

@@ -20,44 +20,41 @@
 <ion-content [fullscreen]="true" class="regalar-content">
   <div class="loading-section" *ngIf="loading">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>{{ loadingMessage }}</p>
+    <p>Cargando...</p>
   </div>
   <div class="regalar-container" *ngIf="!loading">
-    <!-- Información -->
     <div class="info-card figma-card">
       <h2>Regala una participación</h2>
-      <p>Selecciona una participación de tu cartera para regalar a un contacto</p>
+      <p>Selecciona una participación de tu cartera para regalar a un contacto por email.</p>
     </div>
 
-    <!-- Selección de participación -->
-    <div class="seleccion-section figma-card">
+    <div class="seleccion-section figma-card" *ngIf="participaciones.length > 0">
       <h3>Selecciona la participación</h3>
       <ion-list>
         <ion-radio-group [(ngModel)]="participacionSeleccionada">
           <ion-item *ngFor="let participacion of participaciones">
             <ion-radio slot="start" [value]="participacion.id"></ion-radio>
             <ion-label>
-              <h3>Participación #{{ participacion.numero }}</h3>
-              <p>{{ participacion.fecha }} - {{ participacion.numeros }}</p>
+              <h3>{{ participacion.entidad || 'Participación' }}</h3>
+              <p>{{ participacion.sorteo || '—' }} · {{ participacion.numeroParticipacion || participacion.numeroReferencia }}</p>
             </ion-label>
           </ion-item>
         </ion-radio-group>
       </ion-list>
-      <ion-button fill="clear" (click)="recargarParticipaciones()">
+      <ion-button fill="clear" (click)="cargarParticipaciones()">
         <ion-icon name="refresh" slot="start"></ion-icon>
         Actualizar lista
       </ion-button>
     </div>
 
-    <!-- Información del destinatario -->
+    <div class="info-card figma-card" *ngIf="participaciones.length === 0">
+      <p>No tienes participaciones disponibles para regalar.</p>
+    </div>
+
     <div class="destinatario-section figma-card" *ngIf="participacionSeleccionada">
-      <h3>Información del destinatario</h3>
+      <h3>Destinatario</h3>
       <ion-item class="figma-input-item">
-        <ion-label position="stacked">Nombre completo</ion-label>
-        <ion-input [(ngModel)]="destinatarioNombre" placeholder="Nombre del destinatario"></ion-input>
-      </ion-item>
-      <ion-item class="figma-input-item">
-        <ion-label position="stacked">Correo electrónico</ion-label>
+        <ion-label position="stacked">Correo electrónico *</ion-label>
         <ion-input type="email" [(ngModel)]="destinatarioEmail" placeholder="correo@ejemplo.com"></ion-input>
       </ion-item>
       <ion-item class="figma-input-item">
@@ -66,19 +63,16 @@
       </ion-item>
     </div>
 
-    <!-- Vista previa del regalo -->
-    <div class="preview-section figma-card" *ngIf="participacionSeleccionada && destinatarioNombre && destinatarioEmail">
+    <div class="preview-section figma-card" *ngIf="participacionSeleccionada && destinatarioEmail">
       <h3>Vista previa</h3>
       <div class="preview-card">
-        <p><strong>Para:</strong> {{ destinatarioNombre }}</p>
-        <p><strong>Email:</strong> {{ destinatarioEmail }}</p>
-        <p><strong>Participación:</strong> #{{ getParticipacion()?.numero }}</p>
+        <p><strong>Para:</strong> {{ destinatarioEmail }}</p>
+        <p><strong>Participación:</strong> {{ getParticipacion()?.numeroParticipacion || getParticipacion()?.numeroReferencia }}</p>
         <p *ngIf="mensajePersonal"><strong>Mensaje:</strong> {{ mensajePersonal }}</p>
       </div>
     </div>
 
-    <!-- Botones de acción -->
-    <div class="actions-section">
+    <div class="actions-section" *ngIf="participacionSeleccionada">
       <ion-button 
         class="figma-button" 
         expand="block" 

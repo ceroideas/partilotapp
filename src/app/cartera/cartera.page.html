@@ -94,7 +94,7 @@
         class="participacion-card" 
         *ngFor="let participacion of participaciones">
         
-        <div class="participacion-item" [class.regalada]="participacion.estado === 'regalada'" (click)="toggleDetalle(participacion)">
+        <div class="participacion-item" [class.regalada]="esAtenuada(participacion)" (click)="toggleDetalle(participacion)">
           <div class="participacion-image">
             <img 
               *ngIf="participacion.snapshot_path"
@@ -138,6 +138,9 @@
                 <span 
                   class="status-badge regalada"
                   *ngIf="participacion.estado === 'regalada'">Regalada</span>
+                <span 
+                  class="status-badge pendiente-regalo"
+                  *ngIf="participacion.estado === 'pendiente_regalo'">Regalo pendiente</span>
               </div>
             </div>
             <ion-icon 
@@ -181,9 +184,26 @@
               <span class="detalle-label">Enviado a:</span>
               <span class="detalle-value">{{ participacion.gifted_to_email }}</span>
             </div>
-            <div class="detalle-row" *ngIf="participacion.received_from_email">
-              <span class="detalle-label">Recibida de:</span>
-              <span class="detalle-value">{{ participacion.received_from_email }}</span>
+            <div class="detalle-row" *ngIf="participacion.gifted_at">
+              <span class="detalle-label">Fecha regalo:</span>
+              <span class="detalle-value">{{ formatGiftDate(participacion.gifted_at) }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="participacion.received_from_name || participacion.received_from_email">
+              <span class="detalle-label">Regalada por:</span>
+              <span class="detalle-value">{{ participacion.received_from_name || participacion.received_from_email }}</span>
+            </div>
+            <div class="detalle-row" *ngIf="participacion.gift_message">
+              <span class="detalle-label">Mensaje:</span>
+              <span class="detalle-value">{{ participacion.gift_message }}</span>
+            </div>
+            <div class="gift-actions" *ngIf="puedeAceptarRegalo(participacion)">
+              <ion-button class="regalar-button" expand="block" (click)="aceptarRegalo(participacion, $event)">
+                <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                Aceptar regalo
+              </ion-button>
+              <ion-button fill="outline" expand="block" color="medium" (click)="rechazarRegalo(participacion, $event)">
+                Rechazar
+              </ion-button>
             </div>
             <ion-button
               *ngIf="puedeRegalar(participacion)"
@@ -226,6 +246,12 @@
         [(ngModel)]="emailDestinatario" 
         placeholder="Email"
         (keyup.enter)="enviarRegalo()"></ion-input>
+    </ion-item>
+    <ion-item lines="none" class="ion-no-padding modal-regalo-textarea">
+      <ion-textarea
+        [(ngModel)]="mensajeRegalo"
+        rows="3"
+        placeholder="Mensaje opcional para el destinatario"></ion-textarea>
     </ion-item>
     <ion-button 
       class="regalar-button-modal" 

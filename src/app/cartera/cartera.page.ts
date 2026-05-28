@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { CarteraService } from '../core/services/cartera.service';
 import { AuthService } from '../core/services/auth.service';
@@ -20,6 +21,7 @@ export class CarteraPage implements OnInit, OnDestroy {
   loading = false;
   participacionParaRegalar: any = null;
   emailDestinatario = '';
+  mensajeRegalo = '';
   mostrarModalExito = false;
   mensajeExitoRegalo = '';
   emailRegaladoA = '';
@@ -32,7 +34,8 @@ export class CarteraPage implements OnInit, OnDestroy {
     private router: Router,
     private carteraService: CarteraService,
     public authService: AuthService,
-    private alertModal: AlertModalService
+    private alertModal: AlertModalService,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -55,6 +58,7 @@ export class CarteraPage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     this.detectarRol();
     this.loadParticipaciones();
+    this.checkPendingGiftsAlert();
   }
 
   detectarRol() {
@@ -189,17 +193,91 @@ export class CarteraPage implements OnInit, OnDestroy {
       donada: 'Donada',
       caducada: 'Caducada',
       regalada: 'Regalada',
+      pendiente_regalo: 'Regalo pendiente',
       recibida: 'Recibida',
       activa: ''
     };
     return map[estado] || '';
   }
 
+  esAtenuada(participacion: any): boolean {
+    const e = participacion?.estado || 'activa';
+    return e === 'regalada' || e === 'pendiente_regalo';
+  }
+
+  puedeAceptarRegalo(participacion: any): boolean {
+    return participacion?.estado === 'pendiente_regalo' && !!participacion?.gift_id;
+  }
+
+  formatGiftDate(iso?: string): string {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('es-ES');
+    } catch {
+      return '—';
+    }
+  }
+
+  async checkPendingGiftsAlert() {
+    if (!this.authService.isLoggedIn() || this.rolActual === 'vendedor') return;
+    this.carteraService.getPendingGifts().subscribe({
+      next: async (res) => {
+        if (!res.success || !res.count) return;
+        const first = res.gifts?.[0];
+        const from = first?.from_name || first?.from_email || 'Alguien';
+        await this.alertModal.show(
+          'Participación regalada',
+          `${from} te ha regalado una participación. Revísala en tu cartera y acéptala si quieres recibirla.`
+        );
+      }
+    });
+  }
+
+  async aceptarRegalo(participacion: any, event?: Event) {
+    event?.stopPropagation();
+    if (!participacion?.gift_id) return;
+    const ok = await this.confirmDialog(
+      'Aceptar regalo',
+      'Al aceptar, la participación pasará a tu cartera de forma definitiva y no podrá reclamarse.'
+    );
+    if (!ok) return;
+    this.carteraService.acceptGift(participacion.gift_id).subscribe({
+      next: async (res) => {
+        this.carteraService.notifyParticipacionesChanged();
+        this.loadParticipaciones();
+        await this.alertModal.show('Regalo aceptado', res.message || 'La participación ya es tuya.');
+      },
+      error: async (err) => {
+        await this.alertModal.show('Error', err?.error?.message || 'No se pudo aceptar el regalo.');
+      }
+    });
+  }
+
+  async rechazarRegalo(participacion: any, event?: Event) {
+    event?.stopPropagation();
+    if (!participacion?.gift_id) return;
+    const ok = await this.confirmDialog(
+      'Rechazar regalo',
+      '¿Seguro? La participación volverá al usuario que te la envió.'
+    );
+    if (!ok) return;
+    this.carteraService.rejectGift(participacion.gift_id).subscribe({
+      next: async (res) => {
+        this.carteraService.notifyParticipacionesChanged();
+        this.loadParticipaciones();
+        await this.alertModal.show('Regalo rechazado', res.message || 'Has rechazado el regalo.');
+      },
+      error: async (err) => {
+        await this.alertModal.show('Error', err?.error?.message || 'No se pudo rechazar el regalo.');
+      }
+    });
+  }
+
   puedeRegalar(participacion: any): boolean {
     if (!participacion) return false;
     const e = participacion.estado || 'activa';
-    if (e === 'cobrada' || e === 'donada' || e === 'caducada' || e === 'regalada') return false;
-    if (participacion.received_from_email) return false;
+    if (e === 'cobrada' || e === 'donada' || e === 'caducada' || e === 'regalada' || e === 'pendiente_regalo') return false;
+    if (participacion.received_from_email || participacion.gift_status === 'accepted') return false;
     return true;
   }
 
@@ -207,17 +285,24 @@ export class CarteraPage implements OnInit, OnDestroy {
     event?.stopPropagation();
     this.participacionParaRegalar = participacion;
     this.emailDestinatario = '';
+    this.mensajeRegalo = '';
   }
 
   cerrarModalRegalo() {
     this.participacionParaRegalar = null;
     this.emailDestinatario = '';
+    this.mensajeRegalo = '';
   }
 
-  enviarRegalo() {
+  async enviarRegalo() {
     if (!this.participacionParaRegalar || !this.emailDestinatario.trim()) return;
     const email = this.emailDestinatario.trim();
-    this.carteraService.gift(this.participacionParaRegalar.id, email).subscribe({
+    const ok = await this.confirmDialog(
+      'Confirmar regalo',
+      `¿Enviar la participación a ${email}? Asegúrate de que el correo es correcto: no podrás deshacerlo.`
+    );
+    if (!ok) return;
+    this.carteraService.gift(this.participacionParaRegalar.id, email, this.mensajeRegalo).subscribe({
       next: (res: any) => {
         this.cerrarModalRegalo();
         this.mensajeExitoRegalo = `La participación perteneciente a ${this.participacionParaRegalar?.entidad || 'la entidad'} ha sido enviada correctamente a ${res.gifted_to_email || email}.`;
@@ -244,5 +329,19 @@ export class CarteraPage implements OnInit, OnDestroy {
       const parent = event.target.closest('.participacion-image');
       if (parent) parent.classList.add('image-error');
     }
+  }
+
+  private async confirmDialog(header: string, message: string): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const alert = await this.alertController.create({
+        header,
+        message,
+        buttons: [
+          { text: 'Cancelar', role: 'cancel', handler: () => resolve(false) },
+          { text: 'Aceptar', handler: () => resolve(true) },
+        ],
+      });
+      await alert.present();
+    });
   }
 }

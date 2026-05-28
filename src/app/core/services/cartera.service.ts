@@ -59,11 +59,24 @@ export class CarteraService {
   }
 
   /** Regalar participación a otro usuario por email */
-  gift(participationId: number, email: string): Observable<any> {
+  gift(participationId: number, email: string, message?: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/wallet/participations/gift`, {
       participation_id: participationId,
-      email
+      email,
+      message: message?.trim() || undefined,
     });
+  }
+
+  getPendingGifts(): Observable<{ success: boolean; count: number; gifts: any[] }> {
+    return this.http.get<{ success: boolean; count: number; gifts: any[] }>(`${this.apiUrl}/wallet/gifts/pending`);
+  }
+
+  acceptGift(giftId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/wallet/gifts/${giftId}/accept`, {});
+  }
+
+  rejectGift(giftId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/wallet/gifts/${giftId}/reject`, {});
   }
 
   /** Historial del usuario: digitalizaciones, regalos (cobros pendiente) */

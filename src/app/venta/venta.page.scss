@@ -845,23 +845,37 @@
 
   .btn-whatsapp-exito {
     --background: #25d366;
+    --background-activated: #1ebe57;
+    --background-hover: #20c75e;
     --color: #ffffff;
-    --border-radius: 12px;
+    --border-radius: 9999px;
     height: 48px;
     font-weight: 600;
     text-transform: none;
     font-size: 16px;
     margin-bottom: 8px;
+
+    &::part(native) {
+      border-radius: 9999px;
+    }
+
+    ion-icon {
+      font-size: 22px;
+    }
   }
 
   .aceptar-button {
     --background: #F49200;
     --color: #ffffff;
-    --border-radius: 12px;
+    --border-radius: 9999px;
     height: 48px;
     font-weight: 600;
     text-transform: none;
     font-size: 16px;
+
+    &::part(native) {
+      border-radius: 9999px;
+    }
   }
 }
 
