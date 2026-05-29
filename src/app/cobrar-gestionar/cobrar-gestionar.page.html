@@ -263,7 +263,7 @@
         </div>
       </div>
 
-      <div class="slider-container">
+      <div class="slider-container" *ngIf="codigoRecargaDisponible; else soloDonacion">
         <ion-range
           [(ngModel)]="porcentajeDonacion"
           min="0"
@@ -277,6 +277,11 @@
           <span>€{{ importeCodigo | number:'1.2-2' }}</span>
         </div>
       </div>
+      <ng-template #soloDonacion>
+        <div class="alert-info-donacion">
+          <p class="mb-0">Esta administración no tiene API de códigos de recarga configurada. El importe total se donará a la entidad.</p>
+        </div>
+      </ng-template>
 
       <div class="distribucion-boxes">
         <div class="distribucion-box donacion-box">
@@ -287,7 +292,7 @@
           </div>
         </div>
 
-        <div class="distribucion-box codigo-box">
+        <div class="distribucion-box codigo-box" *ngIf="codigoRecargaDisponible">
           <p class="box-label">Generación <br> código</p>
           <p class="box-percentage">{{ 100 - porcentajeDonacion }}%</p>
           <div class="box-amount-container">
@@ -301,7 +306,7 @@
           class="donar-generar-button" 
           expand="block"
           (click)="procesarDonacion()">
-          Donar y Generar
+          {{ codigoRecargaDisponible ? 'Donar y Generar' : 'Donar' }}
         </ion-button>
       </div>
     </div>

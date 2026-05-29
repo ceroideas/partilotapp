@@ -41,6 +41,7 @@ export class CobrarGestionarPage implements OnInit {
   importeDonacion: number = 0;
   importeCodigo: number = 0;
   porcentajeDonacion: number = 50;
+  codigoRecargaDisponible = true;
   
   tipoMensaje: 'cobro' | 'donacion' | 'codigo' = 'cobro';
   codigoRecarga: string = '';
@@ -153,6 +154,33 @@ export class CobrarGestionarPage implements OnInit {
       }, 0);
   }
 
+  /** True si la administración de las participaciones seleccionadas puede generar códigos prepago. */
+  puedeGenerarCodigoRecarga(): boolean {
+    const ids = Array.from(this.participacionesSeleccionadas);
+    if (ids.length === 0) {
+      return false;
+    }
+
+    return ids.every((id) => {
+      const p = this.participaciones.find((x) => x.id === id);
+      return p?.can_generate_recharge_code === true;
+    });
+  }
+
+  private aplicarDistribucionDonacion(): void {
+    this.codigoRecargaDisponible = this.puedeGenerarCodigoRecarga();
+    if (this.codigoRecargaDisponible) {
+      this.porcentajeDonacion = 50;
+      this.importeDonacion = Math.round(this.importeTotal * 0.5 * 100) / 100;
+      this.importeCodigo = Math.round((this.importeTotal - this.importeDonacion) * 100) / 100;
+      return;
+    }
+
+    this.porcentajeDonacion = 100;
+    this.importeDonacion = this.importeTotal;
+    this.importeCodigo = 0;
+  }
+
   async continuarCobro() {
     if (this.participacionesSeleccionadas.size === 0) {
       await this.alertModal.show('Selección requerida', 'Por favor, selecciona al menos una participación para cobrar.');
@@ -168,9 +196,8 @@ export class CobrarGestionarPage implements OnInit {
       return;
     }
 
-    // Configurar importes iniciales (50% cada uno)
-    this.importeDonacion = this.importeTotal * 0.5;
-    this.importeCodigo = this.importeTotal * 0.5;
+    // Configurar importes según API de códigos de la administración
+    this.aplicarDistribucionDonacion();
     this.mostrarModalConfigDonacion = true;
   }
 
@@ -420,6 +447,13 @@ export class CobrarGestionarPage implements OnInit {
   }
 
   actualizarPorcentajes(event: any) {
+    if (!this.codigoRecargaDisponible) {
+      this.porcentajeDonacion = 100;
+      this.importeDonacion = this.importeTotal;
+      this.importeCodigo = 0;
+      return;
+    }
+
     const porcentaje = event.detail.value;
     this.porcentajeDonacion = porcentaje;
     // Calcular importe de donación redondeado a 2 decimales
