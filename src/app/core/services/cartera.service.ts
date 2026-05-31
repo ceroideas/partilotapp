@@ -97,8 +97,8 @@ export class CarteraService {
     nif: string;
     iban: string;
     importe_total: number;
-  }): Observable<{ success: boolean; message?: string; collected_count?: number }> {
-    return this.http.post<{ success: boolean; message?: string; collected_count?: number }>(`${this.apiUrl}/wallet/cobro`, data);
+  }): Observable<{ success: boolean; message?: string; collected_count?: number; pending_verification?: boolean }> {
+    return this.http.post<{ success: boolean; message?: string; collected_count?: number; pending_verification?: boolean }>(`${this.apiUrl}/wallet/cobro`, data);
   }
 
   /** Registrar donación (participation_ids, importe_donacion, importe_codigo, datos personales opcionales) */

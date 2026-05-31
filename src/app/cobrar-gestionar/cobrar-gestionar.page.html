@@ -322,17 +322,17 @@
       </div>
       
       <h2 class="modal-title success-title">
-        <span *ngIf="tipoMensaje === 'cobro'">Pago Registrado con éxito</span>
+        <span *ngIf="tipoMensaje === 'cobro'">Revisa tu email</span>
         <span *ngIf="tipoMensaje === 'donacion'">Donación Registrada con éxito</span>
         <span *ngIf="tipoMensaje === 'codigo'">Código recarga generado con éxito</span>
       </h2>
       
       <div class="modal-content success-content">
         <p *ngIf="tipoMensaje === 'cobro'">
-          La entidad o entidades que emitieron <strong>tu participación</strong> se encargarán de realizar el pago. Normalmente lo recibirás en tu cuenta en un plazo de <strong>2 a 3 días hábiles</strong>.
+          Te hemos enviado un email con un enlace para <strong>confirmar tu solicitud de cobro</strong>. Hasta que no confirmes, la entidad no gestionará el pago.
         </p>
         <p *ngIf="tipoMensaje === 'cobro'" class="success-note">
-          Ten en cuenta que, en algunos casos, puede haber <strong>pequeñas demoras</strong> por festivos o tiempos de procesamiento bancario.
+          Si no lo recibes en unos minutos, revisa la carpeta de spam. El enlace expira en 48 horas.
         </p>
 
         <p *ngIf="tipoMensaje === 'donacion'">

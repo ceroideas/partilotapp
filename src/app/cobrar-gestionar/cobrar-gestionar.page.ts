@@ -427,15 +427,13 @@ export class CobrarGestionarPage implements OnInit {
       iban: ibanLimpio,
       importe_total: this.importeTotal
     }).subscribe({
-      next: () => {
+      next: (res) => {
         // Cerrar el modal de IBAN
         this.mostrarModalCuenta = false;
         this.ibanFormateado = '';
         this.tipoMensaje = 'cobro';
         this.resetSeleccion();
-        // Recargar participaciones para reflejar el nuevo estado "cobrada"
         this.loadParticipaciones();
-        // Notificar a la cartera principal para que recargue
         this.carteraService.notifyParticipacionesChanged();
         this.mostrarMensajeExito = true;
       },
