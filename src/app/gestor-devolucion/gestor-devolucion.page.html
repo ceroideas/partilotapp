@@ -200,7 +200,7 @@
           <ion-icon name="information-circle-outline" class="disponibles-devolver-icon"></ion-icon>
           <div class="disponibles-devolver-titles">
             <h3 class="disponibles-devolver-title">Participaciones disponibles para devolver</h3>
-            <p class="disponibles-devolver-subtitle">{{ selectedSeller ? 'Como vendedor en esta reserva' : 'Como entidad en esta reserva' }}</p>
+            <p class="disponibles-devolver-subtitle">{{ selectedSeller ? 'Solo físicas asignadas al vendedor' : 'Físicas seleccionables; digitales en pool de la entidad' }}</p>
           </div>
         </div>
         <div class="disponibles-devolver-content" *ngIf="loadingAvailable">
@@ -208,11 +208,14 @@
           <span>Cargando...</span>
         </div>
         <div class="disponibles-devolver-content" *ngIf="!loadingAvailable && availableToReturn !== null">
-          <span class="disponibles-devolver-total">{{ availableToReturn }}</span>
+          <span class="disponibles-devolver-total">{{ selectedSeller ? availableToReturnFisicas : availableToReturn }}</span>
           <span class="disponibles-devolver-label"> total</span>
-          <span class="disponibles-devolver-desglose">({{ availableToReturnFisicas }} físicas, {{ availableToReturnDigitales }} digitales)</span>
+          <span class="disponibles-devolver-desglose" *ngIf="!selectedSeller">({{ availableToReturnFisicas }} físicas, {{ availableToReturnDigitales }} digitales)</span>
         </div>
-        <p class="disponibles-devolver-nota">No se pueden devolver las vendidas, donadas ni cobradas.</p>
+        <p class="disponibles-devolver-nota">No se pueden devolver las ya vendidas.</p>
+        <p class="disponibles-devolver-info" *ngIf="!selectedSeller && !loadingAvailable">
+          Las digitales no se asignan a vendedores (pool de la entidad). Al confirmar, las digitales no vendidas de la reserva se devuelven automáticamente; las vendidas entran en la liquidación. Aquí solo eliges las físicas.
+        </p>
       </div>
 
       <div class="scanner-header">

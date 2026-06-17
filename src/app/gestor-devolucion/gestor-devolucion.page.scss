@@ -503,6 +503,15 @@
     font-size: 12px;
     color: var(--ion-color-medium);
   }
+  .disponibles-devolver-info {
+    margin: 10px 0 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ion-color-primary-shade, #3171e0);
+    background: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
 }
 
 /* Encabezado externo del bloque escáner (como gestor-asignación) */
